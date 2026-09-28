@@ -48,6 +48,7 @@ export function mountHome(options: {
     if (note) copy.append(note);
   }
   options.dropHost.replaceChildren(drop.el);
+  mountTargetSwitch();
   const demo = document.querySelector<HTMLElement>('#hero-demo');
   if (demo && demo.childElementCount === 0) mountDemo(demo);
   options.panel.replaceChildren(
@@ -83,6 +84,51 @@ export function mountHome(options: {
     },
     offer,
   };
+}
+
+function mountTargetSwitch(): void {
+  const tabPhoto = document.querySelector<HTMLButtonElement>('#tab-target-photo');
+  const tabPdf = document.querySelector<HTMLButtonElement>('#tab-target-pdf');
+  const chipsPhoto = document.querySelector<HTMLElement>('#chips-photo');
+  const chipsPdf = document.querySelector<HTMLElement>('#chips-pdf');
+  if (!tabPhoto || !tabPdf || !chipsPhoto || !chipsPdf) return;
+
+  const setTargetType = (type: 'photo' | 'pdf') => {
+    const isPhoto = type === 'photo';
+    tabPhoto.classList.toggle('is-active', isPhoto);
+    tabPhoto.setAttribute('aria-selected', isPhoto ? 'true' : 'false');
+    chipsPhoto.hidden = !isPhoto;
+
+    tabPdf.classList.toggle('is-active', !isPhoto);
+    tabPdf.setAttribute('aria-selected', !isPhoto ? 'true' : 'false');
+    chipsPdf.hidden = isPhoto;
+
+    try {
+      localStorage.setItem('weesize-target-type', type);
+    } catch {}
+  };
+
+  tabPhoto.addEventListener('click', () => setTargetType('photo'));
+  tabPdf.addEventListener('click', () => setTargetType('pdf'));
+
+  tabPhoto.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+      tabPdf.focus();
+      setTargetType('pdf');
+    }
+  });
+  tabPdf.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+      tabPhoto.focus();
+      setTargetType('photo');
+    }
+  });
+
+  let saved = 'photo';
+  try {
+    saved = localStorage.getItem('weesize-target-type') || 'photo';
+  } catch {}
+  setTargetType(saved === 'pdf' ? 'pdf' : 'photo');
 }
 
 function mountDemo(host: HTMLElement): void {

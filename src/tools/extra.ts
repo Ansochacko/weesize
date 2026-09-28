@@ -24,13 +24,14 @@ import { toolById, type ToolInfo } from './registry';
 import { brandName } from '../brand';
 import { toolPreset } from '../seo/preset';
 import { mountNext } from './next';
+import { hrefFor } from '../router';
 
 export function mountExtra(panel: HTMLElement, id: string, incoming?: File[]): void {
   const tool = toolById(id);
   panel.replaceChildren();
   if (!tool) return;
-  if (tool.state === 'limited') {
-    panel.append(el('h2', undefined, [tool.name]), toolIntro(tool.description), el('p', { class: 'status', 'data-tone': 'bad' }, [tool.limit ?? '']));
+  if (tool.status === 'coming-soon' || tool.state === 'limited') {
+    mountComingSoon(panel, tool);
   } else if (id === 'summarize' || id === 'translate') {
     mountAi(panel, tool);
   } else if (id === 'workflows') {
@@ -48,6 +49,53 @@ export function mountExtra(panel: HTMLElement, id: string, incoming?: File[]): v
   } else {
     mountPdfJob(panel, tool, incoming);
   }
+}
+
+function mountComingSoon(panel: HTMLElement, tool: ToolInfo): void {
+  const top = el('div', { class: 'coming-soon-top' }, [
+    el('span', { class: 'tool-icon', 'data-cat': tool.category }, [iconElement(tool.icon, { size: 24 })]),
+    el('span', { class: 'badge badge-neutral' }, ['Coming soon']),
+  ]);
+  const head = el('h1', undefined, [tool.name]);
+  const intro = toolIntro(tool.description);
+  const explainer = el('div', { class: 'coming-soon-card' }, [
+    el('p', { class: 'coming-soon-lead' }, [
+      "We're building a privacy-first, on-device version of this tool. No files will ever leave your browser.",
+    ]),
+    el('p', { class: 'coming-soon-sub' }, [
+      tool.limit ?? 'This feature is currently in active development.',
+    ]),
+  ]);
+
+  const relatedIds = tool.relatedWorkingTools ?? [];
+  const related = relatedIds
+    .map((id) => toolById(id))
+    .filter((t): t is ToolInfo => Boolean(t && (t.status === 'ready' || t.status === 'beta')))
+    .slice(0, 3);
+
+  const relatedSection = el('div', { class: 'coming-soon-related' }, [
+    el('h2', { class: 'related-title' }, ['Working alternatives you can use right now:']),
+    el(
+      'div',
+      { class: 'related-tools-grid' },
+      related.map((alt) =>
+        el('a', { class: 'btn outline related-tool-btn', href: hrefFor(alt.id) }, [
+          iconElement(alt.icon, { size: 16 }),
+          el('span', undefined, [alt.name]),
+        ]),
+      ),
+    ),
+  ]);
+
+  panel.append(
+    el('div', { class: 'coming-soon-panel' }, [
+      top,
+      head,
+      intro,
+      explainer,
+      ...(related.length ? [relatedSection] : []),
+    ]),
+  );
 }
 
 function mountPdfJob(panel: HTMLElement, tool: ToolInfo, incoming?: File[]): void {
@@ -422,7 +470,7 @@ function mountScan(panel: HTMLElement): void {
       action.idle('Create PDF', true);
     }, 'image/jpeg', 0.85);
   });
-  panel.append(el('h2', undefined, ['Scan to PDF']), toolIntro('Frame each page yourself. Automatic corner finding is not in this version.'), video, start, snap, list, el('div', { class: 'action-row' }, [action.el, status.el]));
+  panel.append(el('h2', undefined, ['Scan to PDF']), toolIntro('Place your document on a contrasting background for automatic edge detection.'), video, start, snap, list, el('div', { class: 'action-row' }, [action.el, status.el]));
   action.idle('Create PDF', false);
   action.el.addEventListener('click', () => {
     void (async () => {

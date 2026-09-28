@@ -140,6 +140,94 @@ const CUSTOM_SIZE_FAQS: Record<string, Faq[]> = {
       a: 'Yes. Weesize is built with responsive client-side WebAssembly that works smoothly in mobile Safari, Chrome, and Firefox on iOS and Android devices.',
     },
   ],
+  'compress-image-to-20kb': [
+    {
+      q: 'How do I compress an image to under 20 KB?',
+      a: 'Choose or drag your image into Weesize. The tool automatically sets the target size to 20 KB, adjusts the pixel dimensions, and applies balanced compression locally in your browser.',
+    },
+    {
+      q: 'What image formats can be compressed to 20 KB?',
+      a: 'Weesize supports JPEG, PNG, WebP, and AVIF. For a 20 KB target, JPEG and WebP produce the cleanest results for photos and avatars.',
+    },
+    {
+      q: 'Will compressing to 20 KB blur faces or text?',
+      a: 'At 20 KB, pixel dimensions are reduced to fit the tight file budget. For passport headshots and avatars, faces remain clear and recognizable. Highly detailed text or fine line drawings are better suited for 50 KB or 100 KB.',
+    },
+    {
+      q: 'Are my photos uploaded to a cloud server to shrink them?',
+      a: 'No. Everything runs in your browser using canvas and WebAssembly. Your photos never leave your device.',
+    },
+    {
+      q: 'Can I compress images to 20 KB without an internet connection?',
+      a: 'Yes. Once the page is loaded, the image compressor works completely offline, with zero network requests.',
+    },
+  ],
+  'compress-image-to-50kb': [
+    {
+      q: 'How can I reduce a photo to under 50 KB for an online application form?',
+      a: 'Many job, exam, and government portals cap ID photos at 50 KB. Drop your photo here; Weesize optimizes dimensions and compression to bring the file under 50 KB while preserving facial clarity.',
+    },
+    {
+      q: 'Which image format is best for a 50 KB file size limit?',
+      a: 'JPEG is the most widely accepted format for portals and applications. If your source is PNG, Weesize can export as JPEG to maximize quality within 50 KB.',
+    },
+    {
+      q: 'Does compressing to 50 KB remove camera EXIF or GPS data?',
+      a: 'Yes. When Weesize re-encodes the photo, privacy-sensitive metadata such as GPS coordinates, camera model, and capture timestamps are stripped.',
+    },
+    {
+      q: 'Can I compress multiple photos to 50 KB?',
+      a: 'Yes, you can drop or select multiple images in succession. Each photo is compressed quickly on your device.',
+    },
+    {
+      q: 'Is there any cost, sign-up, or watermark on 50 KB images?',
+      a: 'None. Weesize is 100% free with no watermark, no account required, and no limits.',
+    },
+  ],
+  'compress-image-to-100kb': [
+    {
+      q: 'How do I compress an image to 100 KB without noticeable loss in quality?',
+      a: 'Drop your image into the compressor. At 100 KB, photographic details, colors, and textures remain sharp. Weesize balances downscaling and encoding quality right on your device.',
+    },
+    {
+      q: 'Why is 100 KB a recommended size for web photos?',
+      a: 'A 100 KB image loads almost instantly even on mobile networks while providing sufficient resolution for column photos, product images, and article headers.',
+    },
+    {
+      q: 'Can a large 5 MB or 10 MB smartphone photo shrink to 100 KB?',
+      a: 'Yes. Modern smartphones take photos with 12 to 48 megapixels that take up 5 MB to 15 MB. Weesize safely scales the image dimensions to web resolutions, achieving a 95%+ size reduction to reach 100 KB.',
+    },
+    {
+      q: 'Does Weesize store or log my photos?',
+      a: 'Never. All compression runs client-side inside your browser sandbox. No photo is ever sent to or stored on any server.',
+    },
+    {
+      q: 'Will this tool work on mobile phones?',
+      a: 'Yes. The tool runs smoothly on iPhone, iPad, Android phones, tablets, and desktop computers directly in any modern browser.',
+    },
+  ],
+  'compress-image-to-200kb': [
+    {
+      q: 'When should I choose a 200 KB image compression target?',
+      a: 'Use 200 KB when you need crisp, high-resolution visuals for full-width banners, portfolio galleries, or email attachments where detail matters.',
+    },
+    {
+      q: 'How does Weesize compress images to 200 KB locally?',
+      a: 'Weesize uses client-side WebAssembly and HTML5 canvas APIs to decode, scale, and re-encode the image in local browser memory without uploading a single byte.',
+    },
+    {
+      q: 'Can I compress screenshots to 200 KB and keep text sharp?',
+      a: 'Yes. At 200 KB, screenshots of interfaces and documents retain sharp typography and crisp UI elements.',
+    },
+    {
+      q: 'What if my image is already smaller than 200 KB?',
+      a: 'If your file is already under 200 KB, Weesize preserves your original file without unnecessary recompression.',
+    },
+    {
+      q: 'Are there any file size limits or daily quotas?',
+      a: 'There are no file size limits and no daily usage quotas. You can compress as many images as you need.',
+    },
+  ],
 };
 
 export const pdfSizeSeeds: Seed[] = PDF_SIZE_SLUGS.map((slug) => {
@@ -312,8 +400,26 @@ const IMAGE: Record<string, { h1: string; kb?: number; mime?: Seed['presetMime']
 export const imageSizeSeeds: Seed[] = IMAGE_SIZE_SLUGS.map((slug) => {
   const copy = IMAGE[slug];
   if (!copy) throw new Error(slug);
-  const customTitle = slug === 'compress-image-to-50kb' ? 'Compress Image to 50 KB – Free, No Upload | Weesize' : undefined;
-  const customDesc = slug === 'compress-image-to-50kb' ? 'Resize photos to under 50 KB for online applications and forms. JPG, PNG, WebP. Free, instant, processed on your device.' : `${copy.h1} in the browser. No upload. You get the size the picture can actually reach on this device.`;
+  const customTitle =
+    slug === 'compress-image-to-20kb'
+      ? 'Compress Image to 20 KB – Free, No Upload | Weesize'
+      : slug === 'compress-image-to-50kb'
+        ? 'Compress Image to 50 KB – Free, No Upload | Weesize'
+        : slug === 'compress-image-to-100kb'
+          ? 'Compress Image to 100 KB – Free, No Upload | Weesize'
+          : slug === 'compress-image-to-200kb'
+            ? 'Compress Image to 200 KB – Free, No Upload | Weesize'
+            : undefined;
+  const customDesc =
+    slug === 'compress-image-to-20kb'
+      ? 'Compress photos and pictures to under 20 KB for online applications and profile avatars. Free, private, processed on your device.'
+      : slug === 'compress-image-to-50kb'
+        ? 'Resize photos to under 50 KB for online applications and forms. JPG, PNG, WebP. Free, instant, processed on your device.'
+        : slug === 'compress-image-to-100kb'
+          ? 'Compress images to under 100 KB with sharp clarity. Free, unlimited, and 100% private: runs in your browser with no upload.'
+          : slug === 'compress-image-to-200kb'
+            ? 'Reduce image size to 200 KB for websites and email attachments. Free, high quality, and 100% private with no upload.'
+            : `${copy.h1} in the browser. No upload. You get the size the picture can actually reach on this device.`;
   return {
     path: slug,
     kind: 'size',
@@ -337,11 +443,12 @@ export const imageSizeSeeds: Seed[] = IMAGE_SIZE_SLUGS.map((slug) => {
       `Skip ${copy.h1} when you still need the camera original for print or for an edit you have not done.`,
       `Open the ${copy.h1} download beside the original. Ringing edges mean you should use a larger target.`,
     ),
+    faqs: CUSTOM_SIZE_FAQS[slug],
     related: ['compress-image', 'jpg-to-pdf', 'compress-pdf', 'png-to-jpg', 'jpg-to-webp', 'webp-to-jpg'],
     neighbors: ['compress-image', ...neighbors(slug, IMAGE_SIZE_SLUGS)],
     guides: ['guides/best-image-format-for-the-web', 'guides/shrink-photos-for-applications', 'guides/compress-images-for-email'],
     intent: 'transactional',
-    priority: slug.includes('100kb') ? 1 : 2,
+    priority: slug.includes('100kb') || slug.includes('50kb') || slug.includes('20kb') || slug.includes('200kb') ? 1 : 2,
     keywords: [copy.keyword],
   };
 });

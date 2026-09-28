@@ -21,7 +21,7 @@ describe('product name', () => {
     expect(brand.name).toBe('Weesize');
     expect(brand.domain).toBe('weesize.com');
     expect(brand.tagline).toBe('Get any file to the size you need. Privately.');
-    expect(brand.description).toBe('Weesize shrinks PDFs and photos to the exact size you need, right in your browser. Files are never uploaded.');
+    expect(brand.description).toBe('Weesize is a free, open-source tool that compresses PDFs and photos to an exact file size in your browser, without uploading files.');
   });
 
   it('does not keep the previous names in source', () => {

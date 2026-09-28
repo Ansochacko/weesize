@@ -34,9 +34,9 @@ describe('free and open product', () => {
     expect(ready.some((tool) => tool.id === 'word')).toBe(true);
   });
 
-  it('exposes empty optional support and repo URLs by default', () => {
+  it('exposes optional support and repo URLs', () => {
     expect(brand.supportUrl).toBe('');
-    expect(brand.repoUrl).toBe('');
+    expect(brand.repoUrl).toBe('https://github.com/Ansochacko/weesize');
     expect('pro' in brand).toBe(false);
   });
 

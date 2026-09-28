@@ -7,7 +7,7 @@ export const brand = {
   name: 'Weesize',
   domain: 'weesize.com',
   tagline: 'Get any file to the size you need. Privately.',
-  description: 'Weesize shrinks PDFs and photos to the exact size you need, right in your browser. Files are never uploaded.',
+  description: 'Weesize is a free, open-source tool that compresses PDFs and photos to an exact file size in your browser, without uploading files.',
   colors: {
     accent: '#2340C9',
     accentDeep: '#1A2FA6',
@@ -22,8 +22,10 @@ export const brand = {
     page: '#FFFFFF',
   },
   social: {
-    x: '',
     github: 'https://github.com/Ansochacko/weesize',
+    instagram: 'https://www.instagram.com/weesize',
+    facebook: 'https://www.facebook.com/weesize',
+    x: '',
     mastodon: '',
   },
   /** Paste the Search Console and Bing tokens here. Empty values emit no tag and make no request. */
@@ -33,6 +35,8 @@ export const brand = {
   },
   /** Public repository URL. Empty until the repo is published. Shown as an open-source link. */
   repoUrl: 'https://github.com/Ansochacko/weesize',
+  instagramUrl: 'https://www.instagram.com/weesize',
+  facebookUrl: 'https://www.facebook.com/weesize',
   /**
    * Optional support page (GitHub Sponsors, Ko-fi, etc.). Empty by default.
    * When set, the footer shows a quiet text link that opens in a new tab.
@@ -59,4 +63,12 @@ export function brandRepoUrl(): string {
 
 export function brandSupportUrl(): string {
   return brand.supportUrl;
+}
+
+export function brandInstagramUrl(): string {
+  return brand.instagramUrl;
+}
+
+export function brandFacebookUrl(): string {
+  return brand.facebookUrl;
 }

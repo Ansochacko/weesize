@@ -15,7 +15,7 @@ const tools: Seed[] = [...toolSeeds, ...toolSeedsB, ...toolSeedsC].map((seed) =>
 export const englishPages: SeoPage[] = [...frameSeeds, ...tools, ...pdfSizeSeeds, ...imageSizeSeeds, ...privacySeeds, ...deviceSeeds, ...usecaseSeeds, ...convertSeeds, ...compareSeeds, ...guideSeeds].map(toPage);
 
 const sitemap = englishPages.find((page) => page.path === 'sitemap');
-if (sitemap) sitemap.related = englishPages.filter((page) => page.path && page.path !== 'sitemap').map((page) => page.path);
+if (sitemap) sitemap.related = englishPages.filter((page) => page.path && page.path !== 'sitemap' && !page.noindex).map((page) => page.path);
 
 export { AWAITING_OFFICIAL_SOURCES, GUIDES };
 

@@ -1,5 +1,14 @@
 import { brand, brandName } from '../src/brand';
 import { pageTitle, UPDATED, type Faq, type SeoPage } from '../src/seo/document';
+import { toolById } from '../src/tools/registry';
+import { targetFromPath } from '../src/seo/routes';
+
+function isSoonSlug(slug: string): boolean {
+  if (!slug) return false;
+  const target = targetFromPath(`/${slug}`);
+  const tool = target?.toolId ? toolById(target.toolId) : toolById(slug);
+  return tool?.status === 'coming-soon';
+}
 
 export interface Seed {
   path: string;
@@ -35,13 +44,15 @@ export function faqs(subject: string, facts: [string, string, string, string, st
 }
 
 export function toPage(seed: Seed): SeoPage {
+  const tool = seed.toolId ? toolById(seed.toolId) : undefined;
+  const isSoon = tool?.status === 'coming-soon';
   return {
     id: seed.path || 'home',
     path: seed.path,
     lang: 'en',
     htmlLang: 'en',
     reviewed: true,
-    noindex: false,
+    noindex: isSoon,
     kind: seed.kind,
     keyword: seed.keyword,
     title: seed.title ?? pageTitle(seed.h1),
@@ -53,8 +64,8 @@ export function toPage(seed: Seed): SeoPage {
     steps: seed.steps,
     points: seed.points,
     faqs: seed.faqs ?? faqs(seed.h1, seed.facts),
-    related: seed.related,
-    neighbors: seed.neighbors ?? [],
+    related: seed.related.filter((item) => !isSoonSlug(item)),
+    neighbors: (seed.neighbors ?? []).filter((item) => !isSoonSlug(item)),
     guides: seed.guides ?? [],
     updated: UPDATED,
     intent: seed.intent,

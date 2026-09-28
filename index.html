@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="color-scheme" content="light dark" />
     <meta name="theme-color" content="#F5F6F8" />
-    <meta name="description" content="Weesize shrinks PDFs and photos to the exact size you need, right in your browser. Files are never uploaded." />
+    <meta name="description" content="Weesize is a free, open-source tool that compresses PDFs and photos to an exact file size in your browser, without uploading files." />
     <meta
       http-equiv="Content-Security-Policy"
       content="default-src 'self'; connect-src 'self'; worker-src 'self' blob:; img-src 'self' blob: data:; style-src 'self' 'unsafe-inline'; font-src 'self'; script-src 'self' 'wasm-unsafe-eval'"
@@ -14,14 +14,14 @@
     <meta name="google-site-verification" content="googleacb79945c73fd494" />
     <link rel="canonical" id="seo-canonical" href="#/" />
     <meta property="og:title" content="Get any file to the size you need — Weesize" />
-    <meta property="og:description" content="Weesize shrinks PDFs and photos to the exact size you need, right in your browser. Files are never uploaded." />
+    <meta property="og:description" content="Weesize is a free, open-source tool that compresses PDFs and photos to an exact file size in your browser, without uploading files." />
     <meta property="og:image" content="https://weesize.com/brand/og-image.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta property="og:image:type" content="image/png" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Get any file to the size you need — Weesize" />
-    <meta name="twitter:description" content="Weesize shrinks PDFs and photos to the exact size you need, right in your browser. Files are never uploaded." />
+    <meta name="twitter:description" content="Weesize is a free, open-source tool that compresses PDFs and photos to an exact file size in your browser, without uploading files." />
     <meta name="twitter:image" content="https://weesize.com/brand/og-image.png" />
     <script src="/theme-init.js"></script>
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
@@ -55,14 +55,14 @@
       <div class="shell-main">
         <header class="topbar">
           <div class="topbar-inner">
-            <a class="wordmark" href="#/"></a>
+            <a class="wordmark" href="#/" aria-label="Weesize home"></a>
             <nav class="top-nav" aria-label="Site">
               <div class="nav-item-dropdown" id="tools-nav-wrap">
                 <a href="#/tools" class="nav-link" id="nav-tools-link" aria-haspopup="true" aria-expanded="false">Tools <span class="nav-arrow" aria-hidden="true">▾</span></a>
                 <div class="mega-menu" id="tools-mega-menu" hidden>
                   <div class="mega-grid" id="mega-grid"></div>
                   <div class="mega-foot">
-                    <a href="#/tools" class="mega-all-link">View all 30+ tools →</a>
+                    <a href="#/tools" class="mega-all-link">View all 30 tools →</a>
                   </div>
                 </div>
               </div>
@@ -106,14 +106,29 @@
                     </div>
                     <div class="hero-panel precision-card">
                       <div id="smart-drop"></div>
-                      <p class="target-label">Target size</p>
-                      <div class="size-chips">
-                        <a class="chip" href="#/compress-pdf-to-100kb">100 KB</a>
-                        <a class="chip is-on" href="#/compress-pdf-to-200kb">200 KB</a>
-                        <a class="chip" href="#/compress-pdf-to-500kb">500 KB</a>
-                        <a class="chip" href="#/compress-pdf-to-1mb">1 MB</a>
-                        <a class="chip" href="#/compress-pdf-to-2mb">2 MB</a>
-                        <a class="chip" href="#/compress-pdf">Custom</a>
+                      <div class="target-size-header">
+                        <span class="target-label" id="target-size-label">Target size</span>
+                        <div class="target-switch" role="tablist" aria-labelledby="target-size-label">
+                          <button type="button" role="tab" class="target-tab is-active" id="tab-target-photo" aria-selected="true" aria-controls="chips-photo" data-type="photo">Photo</button>
+                          <button type="button" role="tab" class="target-tab" id="tab-target-pdf" aria-selected="false" aria-controls="chips-pdf" data-type="pdf">PDF</button>
+                        </div>
+                      </div>
+                      <div class="size-chips-wrap">
+                        <div class="size-chips" id="chips-photo" role="tabpanel" aria-labelledby="tab-target-photo">
+                          <a class="chip" href="#/compress-image-to-20kb">20 KB</a>
+                          <a class="chip is-on" href="#/compress-image-to-50kb">50 KB</a>
+                          <a class="chip" href="#/compress-image-to-100kb">100 KB</a>
+                          <a class="chip" href="#/compress-image-to-200kb">200 KB</a>
+                          <a class="chip" href="#/compress-image">Custom</a>
+                        </div>
+                        <div class="size-chips" id="chips-pdf" role="tabpanel" aria-labelledby="tab-target-pdf" hidden>
+                          <a class="chip" href="#/compress-pdf-to-100kb">100 KB</a>
+                          <a class="chip is-on" href="#/compress-pdf-to-200kb">200 KB</a>
+                          <a class="chip" href="#/compress-pdf-to-500kb">500 KB</a>
+                          <a class="chip" href="#/compress-pdf-to-1mb">1 MB</a>
+                          <a class="chip" href="#/compress-pdf-to-2mb">2 MB</a>
+                          <a class="chip" href="#/compress-pdf">Custom</a>
+                        </div>
                       </div>
                       <div id="hero-demo"></div>
                     </div>
@@ -141,7 +156,7 @@
                   <h2>Popular tools</h2>
                   <div id="popular"></div>
                   <div class="popular-more-wrap">
-                    <a href="#/tools" class="popular-more-link">View all 30+ tools →</a>
+                    <a href="#/tools" class="popular-more-link">View all 30 tools →</a>
                   </div>
                   <details class="all-tools" id="all-tools">
                     <summary>All tools</summary>
@@ -215,7 +230,7 @@
               <div class="foot-brand-block">
                 <p class="foot-brand-name"><strong>Weesize</strong></p>
                 <p class="foot-tag">Get any file to the size you need. Privately.</p>
-                <p id="foot-extra" class="foot-extra" hidden></p>
+                <p id="foot-extra" class="foot-extra"><a href="https://github.com/Ansochacko/weesize" target="_blank" rel="noopener">GitHub</a> · <a href="https://www.instagram.com/weesize" target="_blank" rel="noopener">Instagram</a></p>
               </div>
               <nav class="foot-nav" aria-label="Footer tools">
                 <h2>Tools</h2>
@@ -237,6 +252,8 @@
                 <a href="#/guides">Guides</a>
                 <a href="#/brand">Brand</a>
                 <a href="#/press">Press</a>
+                <a href="https://github.com/Ansochacko/weesize" target="_blank" rel="noopener">GitHub</a>
+                <a href="https://www.instagram.com/weesize" target="_blank" rel="noopener">Instagram</a>
               </nav>
               <nav class="foot-nav" aria-label="Legal">
                 <h2>Legal</h2>
@@ -246,7 +263,7 @@
             </div>
             <div class="wrap foot-bar">
               <p>© 2026 Weesize. Processed on your device.</p>
-              <p>English. Other languages are drafts and are not indexed.</p>
+              <p>English</p>
             </div>
           </footer>
         </div>

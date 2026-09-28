@@ -3,7 +3,16 @@ import { iconElement } from '../lib/icons';
 import { loadPrefs, savePrefs } from '../lib/prefs';
 import { hrefFor, navigate } from '../router';
 import { parseCommand, planLines, setPendingCommand } from '../lib/commands';
-import { CATEGORIES, searchTools, TOOLS, popularTools, type ToolInfo } from '../tools/registry';
+import {
+  CATEGORIES,
+  searchTools,
+  TOOLS,
+  popularTools,
+  toolsIn,
+  comingSoonTools,
+  activeToolsCount,
+  type ToolInfo,
+} from '../tools/registry';
 
 let recent: string[] = [];
 let filterToolsFromSearch = (_query: string): void => undefined;
@@ -17,44 +26,57 @@ export function noteRecent(id: string): void {
   void savePrefs({ recent });
 }
 
-export function toolCard(tool: ToolInfo): HTMLAnchorElement {
+export function toolCard(tool: ToolInfo, isComingSoon = false): HTMLElement {
   const mark = el('span', { class: 'tool-icon', 'data-cat': tool.category }, [iconElement(tool.icon, { size: 18 })]);
   const top = el('span', { class: 'tool-top' }, [mark]);
-  const badge = tool.badges?.[0] ?? (tool.state === 'limited' ? 'Limited' : null);
-  if (badge) {
-    const tone = tool.state === 'limited' ? 'warn' : badge.toLowerCase().includes('chrome') ? 'info' : 'ok';
-    top.append(el('span', { class: `badge badge-${tone}` }, [badge]));
-  } else if (tool.category === 'optimize' || tool.category === 'security') {
-    top.append(el('span', { class: 'badge badge-ok' }, ['On device']));
+  const isSoon = isComingSoon || tool.status === 'coming-soon';
+  if (isSoon) {
+    top.append(el('span', { class: 'badge badge-neutral' }, ['Coming soon']));
+  } else if (tool.status === 'beta' || tool.badges?.includes('Beta')) {
+    top.append(el('span', { class: 'badge badge-ok' }, ['Beta']));
   }
   const body = el('span', { class: 'tool-copy' }, [
     el('span', { class: 'tool-name' }, [tool.name]),
     el('span', { class: 'tool-desc' }, [tool.description]),
   ]);
-  const metaLeft = CATEGORIES.find((item) => item.id === tool.category)?.label ?? 'Tool';
-  const metaRight = tool.state === 'limited' ? 'Not in this version' : 'Client-side';
-  const meta = el('span', { class: 'tool-meta' }, [
-    el('span', undefined, [metaLeft]),
-    el('span', undefined, [metaRight]),
-  ]);
-  return el('a', { class: 'tool-card', href: hrefFor(tool.id), 'data-tool': tool.id, 'data-cat': tool.category }, [
+
+  if (isSoon) {
+    return el('div', {
+      class: 'tool-card tool-card-muted',
+      'data-tool': tool.id,
+      'data-cat': tool.category,
+      'aria-label': `${tool.name} – Coming soon`,
+    }, [top, body]);
+  }
+
+  return el('a', {
+    class: 'tool-card',
+    href: hrefFor(tool.id),
+    'data-tool': tool.id,
+    'data-cat': tool.category,
+    'aria-label': `${tool.name} – ${tool.description}`,
+  }, [
     top,
     body,
-    meta,
   ]);
 }
 
 export function mountCatalog(popularHost: HTMLElement, catalogHost: HTMLElement, sidebar: HTMLElement, toolsHost: HTMLElement): void {
   if (!popularHost.querySelector('.tool-card')) {
-    popularHost.append(el('p', { class: 'micro' }, ['Popular']));
     const popular = el('div', { class: 'tool-grid' });
     for (const tool of popularTools().slice(0, 8)) popular.append(toolCard(tool));
     popularHost.append(el('div', { class: 'tool-grid-wrap' }, [popular]));
   }
 
+  // Update dynamic tools counts everywhere
+  const totalCount = activeToolsCount();
+  document.querySelectorAll('.popular-more-link, .mega-all-link').forEach((link) => {
+    link.textContent = `View all ${totalCount} tools →`;
+  });
+
   const fill = (host: HTMLElement) => {
     CATEGORIES.forEach((category, index) => {
-      const tools = TOOLS.filter((tool) => tool.category === category.id);
+      const tools = toolsIn(category.id);
       if (!tools.length) return;
       const grid = el('div', { class: 'tool-grid' });
       for (const tool of tools) grid.append(toolCard(tool));
@@ -69,6 +91,21 @@ export function mountCatalog(popularHost: HTMLElement, catalogHost: HTMLElement,
         ]),
       );
     });
+
+    const soon = comingSoonTools();
+    if (soon.length) {
+      const soonGrid = el('div', { class: 'tool-grid tool-grid-soon' });
+      for (const tool of soon) soonGrid.append(toolCard(tool, true));
+      host.append(
+        el('section', { class: 'tool-section tool-section-soon' }, [
+          el('header', { class: 'tool-section-head' }, [
+            el('h2', undefined, ['Coming soon']),
+            el('span', { class: 'tool-section-tag' }, ['in development']),
+          ]),
+          el('div', { class: 'tool-grid-wrap' }, [soonGrid]),
+        ]),
+      );
+    }
   };
   if (!catalogHost.querySelector('.tool-section')) fill(catalogHost);
 
@@ -78,7 +115,7 @@ export function mountCatalog(popularHost: HTMLElement, catalogHost: HTMLElement,
       const popularGrid = popularHost.querySelector('.tool-grid');
       if (popularGrid) {
         popularGrid.replaceChildren();
-        const source = category === 'all' ? popularTools().slice(0, 8) : TOOLS.filter((tool) => tool.category === category);
+        const source = category === 'all' ? popularTools().slice(0, 8) : toolsIn(category as any);
         for (const tool of source) popularGrid.append(toolCard(tool));
       }
       for (const section of catalogHost.querySelectorAll<HTMLElement>('.tool-section')) {
@@ -100,88 +137,95 @@ export function mountCatalog(popularHost: HTMLElement, catalogHost: HTMLElement,
       });
       return button;
     };
-    homeFilters.append(homeChip('all', `All tools (${TOOLS.length})`));
+    homeFilters.append(homeChip('all', 'All'));
     for (const category of CATEGORIES) {
-      const count = TOOLS.filter((tool) => tool.category === category.id).length;
-      homeFilters.append(homeChip(category.id, `${category.label} (${count})`));
+      if (toolsIn(category.id).length > 0) homeFilters.append(homeChip(category.id, category.label));
     }
-    const firstHomeChip = homeFilters.querySelector('.chip');
-    firstHomeChip?.classList.add('is-on');
-    firstHomeChip?.setAttribute('aria-selected', 'true');
   }
 
-  const crumbs = el('nav', { class: 'crumbs', 'aria-label': 'Breadcrumb' }, [
-    el('a', { href: '#/' }, ['Home']),
-    el('span', { 'aria-hidden': 'true' }, [' / ']),
-    el('span', { 'aria-current': 'page' }, ['All tools']),
-  ]);
-  const all = el('div', { class: 'tools-head' }, [
-    crumbs,
-    el('h1', undefined, ['All tools']),
-    el('p', { class: 'section-lede' }, ['Compress, convert, organize and edit PDFs and images on your device. Zero upload.']),
-  ]);
-  const chips = el('div', { class: 'tabs-underline', role: 'tablist', 'aria-label': 'Tool categories' });
-  const results = el('div');
-  toolsHost.replaceChildren(all, chips, results);
-  let toolsQuery = new URLSearchParams(window.location.search).get('q') ?? '';
+  // Tools page view (/tools)
+  if (toolsHost.childElementCount === 0) {
+    const head = el('div', { class: 'tools-page-head' }, [
+      el('h1', undefined, ['All tools']),
+      el('p', { class: 'lede' }, ['Every tool runs on your device. Nothing is uploaded or stored.']),
+    ]);
+    const chips = el('div', { class: 'tools-page-chips', role: 'tablist', 'aria-label': 'Filter tools by category' });
+    const results = el('div', { class: 'tools-page-results' });
+    toolsHost.append(head, chips, results);
 
-  const paintTools = (category: string, query: string) => {
-    results.replaceChildren();
-    if (category === 'all' && !query) {
-      for (const cat of CATEGORIES) {
-        const matched = TOOLS.filter((tool) => tool.category === cat.id);
-        if (!matched.length) continue;
-        const section = el('section', { class: 'tool-category-section' }, [
-          el('header', { class: 'tool-category-head' }, [
-            el('h3', undefined, [cat.label]),
-          ]),
-          el('div', { class: 'tool-grid-wrap' }, [
-            el('div', { class: 'tool-grid' }, matched.map(toolCard)),
-          ]),
-        ]);
-        results.append(section);
+    let toolsQuery = '';
+    const paintTools = (category: string, query: string) => {
+      results.replaceChildren();
+      if (category === 'all' && !query) {
+        for (const cat of CATEGORIES) {
+          const matched = toolsIn(cat.id);
+          if (!matched.length) continue;
+          const section = el('section', { class: 'tool-category-section' }, [
+            el('header', { class: 'tool-category-head' }, [
+              el('h2', undefined, [cat.label]),
+            ]),
+            el('div', { class: 'tool-grid-wrap' }, [
+              el('div', { class: 'tool-grid' }, matched.map((t) => toolCard(t))),
+            ]),
+          ]);
+          results.append(section);
+        }
+        const soon = comingSoonTools();
+        if (soon.length) {
+          const soonSection = el('section', { class: 'tool-category-section tool-section-soon' }, [
+            el('header', { class: 'tool-category-head' }, [
+              el('h2', undefined, ['Coming soon']),
+            ]),
+            el('div', { class: 'tool-grid-wrap' }, [
+              el('div', { class: 'tool-grid tool-grid-soon' }, soon.map((t) => toolCard(t, true))),
+            ]),
+          ]);
+          results.append(soonSection);
+        }
+      } else {
+        const matched = searchTools(query).filter((tool) => category === 'all' || tool.category === category);
+        const grid = el('div', { class: 'tool-grid' });
+        for (const tool of matched) grid.append(toolCard(tool));
+        if (!matched.length) grid.append(el('p', undefined, ['No tool matches that search.']));
+        results.append(el('div', { class: 'tool-grid-wrap' }, [grid]));
       }
-    } else {
-      const matched = searchTools(query).filter((tool) => category === 'all' || tool.category === category);
-      const grid = el('div', { class: 'tool-grid' });
-      for (const tool of matched) grid.append(toolCard(tool));
-      if (!matched.length) grid.append(el('p', undefined, ['No tool matches that search.']));
-      results.append(el('div', { class: 'tool-grid-wrap' }, [grid]));
+    };
+
+    const chip = (id: string, label: string) => {
+      const button = el('button', { class: 'tab-underline', type: 'button', role: 'tab', 'aria-selected': id === 'all' ? 'true' : 'false', 'data-cat': id }, [label]);
+      button.addEventListener('click', () => {
+        for (const node of chips.querySelectorAll('.tab-underline')) {
+          node.classList.remove('is-active');
+          node.setAttribute('aria-selected', 'false');
+        }
+        button.classList.add('is-active');
+        button.setAttribute('aria-selected', 'true');
+        paintTools(id, toolsQuery);
+      });
+      return button;
+    };
+    chips.append(chip('all', `All tools (${activeToolsCount()})`));
+    for (const category of CATEGORIES) {
+      const count = toolsIn(category.id).length;
+      if (count > 0) chips.append(chip(category.id, `${category.label} (${count})`));
     }
-  };
-
-  const chip = (id: string, label: string) => {
-    const button = el('button', { class: 'tab-underline', type: 'button', role: 'tab', 'aria-selected': id === 'all' ? 'true' : 'false', 'data-cat': id }, [label]);
-    button.addEventListener('click', () => {
-      for (const node of chips.querySelectorAll('.tab-underline')) {
-        node.classList.remove('is-active');
-        node.setAttribute('aria-selected', 'false');
-      }
-      button.classList.add('is-active');
-      button.setAttribute('aria-selected', 'true');
-      paintTools(id, toolsQuery);
-    });
-    return button;
-  };
-  chips.append(chip('all', `All tools (${TOOLS.length})`));
-  for (const category of CATEGORIES) {
-    const count = TOOLS.filter((tool) => tool.category === category.id).length;
-    chips.append(chip(category.id, `${category.label} (${count})`));
+    const firstChip = chips.querySelector('.tab-underline');
+    firstChip?.classList.add('is-active');
+    firstChip?.setAttribute('aria-selected', 'true');
+    paintTools('all', toolsQuery);
+    filterToolsFromSearch = (query: string) => {
+      toolsQuery = query;
+      const on = chips.querySelector<HTMLButtonElement>('.tab-underline.is-active');
+      paintTools(on?.dataset.cat ?? 'all', query);
+    };
   }
-  const firstChip = chips.querySelector('.tab-underline');
-  firstChip?.classList.add('is-active');
-  firstChip?.setAttribute('aria-selected', 'true');
-  paintTools('all', toolsQuery);
-  filterToolsFromSearch = (query: string) => {
-    toolsQuery = query;
-    const on = chips.querySelector<HTMLButtonElement>('.tab-underline.is-active');
-    paintTools(on?.dataset.cat ?? 'all', query);
-  };
 
+  // Mega Menu Navigation
   const megaGrid = document.querySelector<HTMLElement>('#mega-grid');
   if (megaGrid && megaGrid.childElementCount === 0) {
     for (const cat of CATEGORIES) {
-      const tools = TOOLS.filter((tool) => tool.category === cat.id);
+      const tools = toolsIn(cat.id);
+      if (!tools.length) continue;
       const col = el('div', { class: 'mega-col' }, [
         el('h4', { class: 'mega-col-title' }, [cat.label]),
       ]);
@@ -232,9 +276,10 @@ export function mountCatalog(popularHost: HTMLElement, catalogHost: HTMLElement,
     });
   }
 
+  // Sidebar
   sidebar.replaceChildren();
   for (const category of CATEGORIES) {
-    const tools = TOOLS.filter((tool) => tool.category === category.id);
+    const tools = toolsIn(category.id);
     if (!tools.length) continue;
     const group = el('div', { class: 'side-group' });
     group.append(el('p', { class: 'side-label' }, [category.label]));
@@ -274,69 +319,71 @@ export function mountPalette(dialog: HTMLElement, input: HTMLInputElement, list:
     const hits = searchTools(input.value);
     const ordered = query
       ? hits
-      : [...hits].sort((a, b) => recent.indexOf(a.id) - recent.indexOf(b.id) || 0);
-    const shown = (query ? ordered : [...ordered.filter((tool) => recent.includes(tool.id)), ...ordered.filter((tool) => !recent.includes(tool.id))]).slice(0, 8);
+      : [
+          ...recent.map((id) => TOOLS.find((tool) => tool.id === id)).filter((tool): tool is ToolInfo => Boolean(tool && tool.status !== 'coming-soon')),
+          ...hits.filter((tool) => !recent.includes(tool.id)),
+        ];
     list.replaceChildren();
-    const steps = parseCommand(input.value);
-    if (steps) {
-      const plan = el('div', { class: 'palette-plan' });
-      for (const line of planLines(steps)) plan.append(el('p', undefined, [line]));
-      plan.append(el('p', undefined, ['Nothing runs until you press Run.']));
-      const run = el('button', { class: 'btn primary', type: 'button', 'data-action': 'confirm-command' }, ['Run']);
-      const edit = el('button', { class: 'btn quiet', type: 'button' }, ['Edit']);
-      run.addEventListener('click', () => {
-        setPendingCommand(steps);
-        close();
-        navigate('commands');
-      });
-      edit.addEventListener('click', () => input.focus());
-      plan.append(run, edit);
-      list.append(plan);
+    if (query) {
+      const parsed = parseCommand(query);
+      if (parsed) {
+        const plan = el('div', { class: 'palette-plan' });
+        const summaryText = parsed.map((step) => step.label).join(' → ');
+        plan.append(el('p', { class: 'plan-head' }, ['Command recipe: ', el('strong', undefined, [summaryText])]));
+        const lines = planLines(parsed);
+        for (const line of lines) plan.append(el('p', { class: 'plan-step' }, [line]));
+        const run = el('button', { class: 'btn primary plan-run', type: 'button' }, ['Set up this command →']);
+        run.addEventListener('click', () => {
+          setPendingCommand(parsed);
+          close();
+          navigate('commands');
+        });
+        plan.append(run);
+        list.append(plan);
+      }
     }
-    for (const [index, tool] of shown.entries()) {
-      const link = el('a', { href: hrefFor(tool.id), 'aria-selected': index === 0 ? 'true' : 'false' }, [
+    for (const tool of ordered) {
+      const row = el('button', { class: 'palette-item', type: 'button', 'data-tool': tool.id }, [
         iconElement(tool.icon, { size: 16 }),
         el('span', { class: 'palette-copy' }, [el('span', undefined, [tool.name]), el('span', { class: 'tool-desc' }, [tool.description])]),
+        ...(tool.status === 'beta' ? [el('span', { class: 'badge badge-ok' }, ['Beta'])] : []),
       ]);
-      link.addEventListener('click', close);
-      list.append(link);
+      row.addEventListener('click', () => {
+        close();
+        navigate(tool.id);
+      });
+      list.append(row);
     }
+    if (!ordered.length) list.append(el('p', { class: 'palette-empty' }, ['No tools match that search.']));
   };
-  function open(): void {
+
+  const close = () => {
+    dialog.hidden = true;
+    input.value = '';
+    document.querySelector('#command-open')?.setAttribute('aria-expanded', 'false');
+  };
+
+  const open = () => {
     dialog.hidden = false;
-    document.getElementById('command-open')?.setAttribute('aria-expanded', 'true');
+    document.querySelector('#command-open')?.setAttribute('aria-expanded', 'true');
     input.value = '';
     paint();
-    const tools = document.getElementById('view-tools');
-    if (tools && !tools.hidden) applyToolsSearch('');
     input.focus();
-  }
-  function close(): void {
-    dialog.hidden = true;
-    document.getElementById('command-open')?.setAttribute('aria-expanded', 'false');
-  }
-  input.form?.addEventListener('submit', (event) => event.preventDefault());
-  input.addEventListener('keydown', (event) => {
-    const rows = [...list.querySelectorAll<HTMLAnchorElement>('a')];
-    const current = rows.findIndex((row) => row.getAttribute('aria-selected') === 'true');
-    if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
-      event.preventDefault();
-      const next = event.key === 'ArrowDown' ? Math.min(rows.length - 1, current + 1) : Math.max(0, current - 1);
-      rows.forEach((row, index) => row.setAttribute('aria-selected', index === next ? 'true' : 'false'));
-      rows[next]?.scrollIntoView({ block: 'nearest' });
-    }
-    if (event.key === 'Enter' && current >= 0) {
-      event.preventDefault();
-      rows[current]?.click();
-    }
-  });
-  input.addEventListener('input', () => {
-    paint();
-    if (document.getElementById('view-tools') && !document.getElementById('view-tools')?.hidden) applyToolsSearch(input.value);
-  });
+  };
+
+  input.addEventListener('input', paint);
   dialog.addEventListener('click', (event) => {
     if (event.target === dialog) close();
   });
+  window.addEventListener('keydown', (event) => {
+    if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
+      event.preventDefault();
+      if (dialog.hidden) open();
+      else close();
+    }
+    if (event.key === 'Escape' && !dialog.hidden) close();
+  });
+
   return { open, close };
 }
 

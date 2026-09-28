@@ -69,6 +69,7 @@ const word = `<path class="wee" d="${wee.d}"/><path class="size" d="${sizeWord.d
 function lockup(markSvg: string, id: string): string {
   const width = mark + gap + advance;
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width.toFixed(2)} ${mark}" role="img" aria-label="${brandName()}">
+  <title>${brandName()}</title>
   <g class="lockup-symbol">${inner(markSvg)}</g>
   <g class="lockup-word" transform="translate(${(mark + gap).toFixed(2)} ${baseline.toFixed(2)})" fill="currentColor">${word}</g>
 </svg>`.replaceAll('wg-file', `wg-${id}`).replaceAll('wm-file', `wm-${id}`);

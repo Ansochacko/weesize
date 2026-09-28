@@ -113,23 +113,44 @@ export function jsonLd(page: SeoPage, crumbs: Array<{ name: string; path: string
     },
   ];
   if (page.kind === 'home') {
+    const sameAs: string[] = [
+      brand.repoUrl,
+      brand.social.instagram,
+      brand.social.facebook,
+    ].filter(Boolean);
+
     graph.push({
       '@type': 'Organization',
       name: brandName(),
       url: brandOrigin(),
       logo: `${brandOrigin()}/brand/mark-color.svg`,
-      sameAs: brand.repoUrl ? [brand.repoUrl] : [],
-      description: brand.tagline,
+      description: brand.description,
+      sameAs,
+    });
+    graph.push({
+      '@type': 'WebSite',
+      name: brandName(),
+      url: brandOrigin(),
+      logo: `${brandOrigin()}/brand/mark-color.svg`,
+      description: brand.description,
+      sameAs,
     });
   }
   if (page.path === 'about') {
+    const sameAs: string[] = [
+      brand.repoUrl,
+      brand.social.instagram,
+      brand.social.facebook,
+    ].filter(Boolean);
+
     graph.push({
       '@type': 'SoftwareSourceCode',
       name: brandName(),
-      codeRepository: brand.repoUrl || 'https://github.com/weesize/weesize',
+      codeRepository: brand.repoUrl || 'https://github.com/Ansochacko/weesize',
       programmingLanguage: 'TypeScript',
       runtimePlatform: 'Web Browser',
       description: brand.description,
+      sameAs,
     });
   }
   if (page.toolId) {
@@ -285,6 +306,8 @@ export function landingRest(page: SeoPage, linkLabel: (path: string) => string):
     ? `<div class="guide-layout"><article class="guide-article">${guideContent}</article>${toc}</div>`
     : page.path === 'privacy'
     ? `<div class="try-box"><strong>Privacy summary:</strong> Your files never leave your device. Weesize processes everything locally using client-side JavaScript and WebAssembly with zero analytics or cloud telemetry.</div><section><h2>1. Local device processing</h2>${paragraphs}</section><section><h2>2. Verification & sources</h2>${sources}<ul>${points}</ul></section><section><h2>3. Frequently asked questions</h2>${faqs}</section>`
+    : page.path === 'about'
+    ? `<section class="about-section"><h2>About ${escapeHtml(brandName())}</h2>${paragraphs}<div class="social-links-row" style="margin: 24px 0; display: flex; gap: 12px; flex-wrap: wrap;"><a class="btn outline" href="${escapeHtml(brand.repoUrl)}" target="_blank" rel="noopener">GitHub: Ansochacko/weesize</a><a class="btn outline" href="${escapeHtml(brand.social.instagram)}" target="_blank" rel="noopener">Instagram: @weesize</a></div><h2>Key Principles</h2><ul>${points}</ul><h2>Frequently asked questions</h2>${faqs}</section>`
     : page.kind === 'compare'
     ? `<section class="compare-section"><h2>Direct comparison: ${escapeHtml(page.h1)}</h2><p class="lede">See how ${escapeHtml(brandName())} compares on privacy, speed, limits, and file handling.</p>${compareTableHtml(page)}<div class="try-box"><h3>Try the private alternative</h3><p>Compress, merge, and organize PDFs right in your browser with zero file upload.</p><p><a class="btn primary" href="/compress-pdf">Try Compress PDF →</a> <a class="btn quiet" href="/tools">Explore all tools</a></p></div><h2>Architecture & Privacy Analysis</h2>${paragraphs}<h2>Key Architectural Points</h2><ul>${points}</ul><h2>Frequently asked questions</h2>${faqs}</section>`
     : `<p class="how-row">${page.steps.map((step, index) => `<span><strong>${index + 1}</strong> ${escapeHtml(step)}</span>`).join('')}</p>${about}${faq}`;

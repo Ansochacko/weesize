@@ -82,11 +82,35 @@ describe('seo pages', () => {
       expect(graph.some((node) => node['@type'] === 'BreadcrumbList')).toBe(true);
       if (page.kind === 'home') {
         const org = graph.find((node) => node['@type'] === 'Organization');
-        expect(org?.name).toBe(brand.name);
-        expect(String(org?.logo)).toContain('mark-color.svg');
-        expect(Array.isArray(org?.sameAs)).toBe(true);
+        expect(org?.name).toBe('Weesize');
+        expect(org?.url).toBe('https://weesize.com');
+        expect(String(org?.logo)).toBe('https://weesize.com/brand/mark-color.svg');
+        expect(org?.description).toBe('Weesize is a free, open-source tool that compresses PDFs and photos to an exact file size in your browser, without uploading files.');
+        expect(org?.sameAs).toEqual([
+          'https://github.com/Ansochacko/weesize',
+          'https://www.instagram.com/weesize',
+          'https://www.facebook.com/weesize',
+        ]);
+
+        const site = graph.find((node) => node['@type'] === 'WebSite');
+        expect(site?.name).toBe('Weesize');
+        expect(site?.url).toBe('https://weesize.com');
+        expect(String(site?.logo)).toBe('https://weesize.com/brand/mark-color.svg');
+        expect(site?.description).toBe('Weesize is a free, open-source tool that compresses PDFs and photos to an exact file size in your browser, without uploading files.');
+        expect(site?.sameAs).toEqual([
+          'https://github.com/Ansochacko/weesize',
+          'https://www.instagram.com/weesize',
+          'https://www.facebook.com/weesize',
+        ]);
       }
       if (page.path === 'about') {
+        const paragraphs = page.essay.split(/\n+/).filter(Boolean);
+        expect(paragraphs[0]).toBe('Weesize is a free, open-source tool that compresses PDFs and photos to an exact file size in your browser, without uploading files.');
+        expect(paragraphs[1]).toContain('students and job applicants resizing photos, signatures and PDFs for online forms');
+        expect(paragraphs[1]).toContain('private file compression');
+        expect(page.essay).toContain('https://github.com/Ansochacko/weesize');
+        expect(page.essay).toContain('https://www.instagram.com/weesize');
+
         const code = graph.find((node) => node['@type'] === 'SoftwareSourceCode');
         expect(code?.name).toBe(brand.name);
         expect(code?.programmingLanguage).toBe('TypeScript');

@@ -401,8 +401,14 @@ export const frameSeeds: Seed[] = [
     kind: 'legal',
     h1: `About ${brandName()}`,
     keyword: `about ${brandName().toLowerCase()}`,
-    description: `About ${brandName()}: free, open-source, browser-only PDF & image toolkit. No upload. Files never leave your device.`,
-    essay: `${brandName()} is a free, open-source, browser-only PDF and image toolkit. We built it because uploading sensitive contracts, tax forms, or personal identity scans to third-party web servers is an unnecessary privacy risk. All processing (compression, merging, splitting, converting, and watermarking) is performed directly inside your browser using modern WebAssembly and JavaScript engines. No files are ever uploaded to any server. Once the web application loads, you can turn off Wi-Fi or disconnect from the internet completely and continue using all features offline. The codebase is transparent and open source.`,
+    description: brand.description,
+    essay: `Weesize is a free, open-source tool that compresses PDFs and photos to an exact file size in your browser, without uploading files.
+
+Weesize is built for students and job applicants resizing photos, signatures and PDFs for online forms, as well as anyone who wants private file compression without uploading files to remote servers.
+
+All processing runs directly in your browser using modern WebAssembly and JavaScript engines. Once the web application loads, you can turn off Wi-Fi or disconnect from the internet completely and continue using all features offline.
+
+Connect with our project on GitHub (https://github.com/Ansochacko/weesize) and Instagram (https://www.instagram.com/weesize).`,
     steps: [
       'Load the application in any modern desktop or mobile browser.',
       'Select any PDF or image tool to process your files locally.',
@@ -410,7 +416,7 @@ export const frameSeeds: Seed[] = [
     ],
     points: [
       '100% on-device processing via browser WebAssembly and Web APIs.',
-      'Open source repository transparently documented and verifiable.',
+      'Open source repository on GitHub and updates on Instagram.',
       'Zero server uploads, zero sign-ups, zero tracking scripts, and zero ads.',
     ],
     facts: localFacts(

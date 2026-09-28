@@ -519,8 +519,16 @@ new MutationObserver(paintStatusIcon).observe(proofChip, { attributes: true, att
       open.href = brand.repoUrl;
       open.target = '_blank';
       open.rel = 'noopener';
-      open.textContent = 'Open source';
+      open.textContent = 'GitHub';
       links.push(open);
+    }
+    if (brand.social.instagram) {
+      const insta = document.createElement('a');
+      insta.href = brand.social.instagram;
+      insta.target = '_blank';
+      insta.rel = 'noopener';
+      insta.textContent = 'Instagram';
+      links.push(insta);
     }
     if (brand.supportUrl) {
       const support = document.createElement('a');
@@ -532,7 +540,13 @@ new MutationObserver(paintStatusIcon).observe(proofChip, { attributes: true, att
     }
     if (links.length) {
       host.hidden = false;
-      host.replaceChildren(...links);
+      host.replaceChildren();
+      links.forEach((link, idx) => {
+        if (idx > 0) {
+          host.appendChild(document.createTextNode(' · '));
+        }
+        host.appendChild(link);
+      });
     }
   }
 }
