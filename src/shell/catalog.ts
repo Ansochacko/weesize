@@ -61,8 +61,8 @@ export function toolCard(tool: ToolInfo, isComingSoon = false): HTMLElement {
   ]);
 }
 
-export function mountCatalog(popularHost: HTMLElement, catalogHost: HTMLElement, sidebar: HTMLElement, toolsHost: HTMLElement): void {
-  if (!popularHost.querySelector('.tool-card')) {
+export function mountCatalog(popularHost: HTMLElement | null, catalogHost: HTMLElement | null, sidebar: HTMLElement, toolsHost: HTMLElement): void {
+  if (popularHost && !popularHost.querySelector('.tool-card')) {
     const popular = el('div', { class: 'tool-grid' });
     for (const tool of popularTools().slice(0, 8)) popular.append(toolCard(tool));
     popularHost.append(el('div', { class: 'tool-grid-wrap' }, [popular]));
@@ -107,10 +107,10 @@ export function mountCatalog(popularHost: HTMLElement, catalogHost: HTMLElement,
       );
     }
   };
-  if (!catalogHost.querySelector('.tool-section')) fill(catalogHost);
+  if (catalogHost && !catalogHost.querySelector('.tool-section')) fill(catalogHost);
 
   const homeFilters = document.querySelector('#home-filters');
-  if (homeFilters && homeFilters.childElementCount === 0) {
+  if (homeFilters && homeFilters.childElementCount === 0 && popularHost && catalogHost) {
     const applyHome = (category: string) => {
       const popularGrid = popularHost.querySelector('.tool-grid');
       if (popularGrid) {

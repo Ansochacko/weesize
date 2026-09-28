@@ -156,7 +156,7 @@ export const toolSeedsB: Seed[] = [
       'Compress image',
       'JPEG and WebP quality can drop. PNG gets smaller by resizing. The new file does not keep camera location data.',
       'Do not compress a picture you still need at full size for print. Keep the original and send the smaller copy.',
-      'Read the status line for the size you got, then look at the subject. A melted caption means the target was too low.',
+      'Check the final size and preview the image. If small text or fine details look blurry, choose a slightly larger target size.',
     ),
     related: ['jpg-to-pdf', 'compress-pdf', 'png-to-jpg', 'jpg-to-webp', 'webp-to-jpg', 'reduce-photo-size'],
     neighbors: [],

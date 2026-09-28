@@ -107,9 +107,11 @@ function paint(pagePath: string): string {
   const robotsTag = page.noindex ? '<meta name="robots" content="noindex, follow">\n' : '';
   const altXDefault = page.noindex ? '' : `<link rel="alternate" hreflang="x-default" href="${brandOrigin()}/${page.path}" />`;
   html = html.replace('</head>', `${robotsTag}${preload}${verify}${links}${altXDefault}${json}</head>`);
+  const shell = catalogShell();
   html = html.replace(/<a class="wordmark"[^>]*>[\s\S]*?<\/a>/, `<a class="wordmark" href="/" aria-label="${escapeHtml(brandName())} home">${lockupHorizontal}</a>`);
   if (page.path) {
-    html = html.replace('id="view-home"', 'id="view-home" hidden');
+    // Tool and landing pages must contain only their own content, never the home page sections
+    html = html.replace(/<section class="view wrap" id="view-home">[\s\S]*?<\/section>\s*(?=<section class="view wrap" id="view-tools")/i, '<section class="view wrap" id="view-home" hidden></section>\n              ');
     html = html.replace('id="workspace" hidden', 'id="workspace"');
     html = html.replace(/<h1>Private PDF tools<\/h1>/, '<p class="lede">Private PDF tools</p>');
     html = html.replace('<div id="landing-head" hidden>', `<div id="landing-head" data-path="${escapeHtml(page.path)}">`);
@@ -117,8 +119,13 @@ function paint(pagePath: string): string {
     const panel = page.toolId && ['compress', 'merge', 'split', 'organize', 'images'].includes(page.toolId) ? page.toolId : page.toolId ? 'extra' : '';
     if (panel) html = html.replace(`id="panel-${panel}" tabindex="0" hidden`, `id="panel-${panel}" tabindex="0"`);
     else html = html.replace('<div class="sheet">', '<div class="sheet" hidden>');
+    if (page.path === 'tools') {
+      html = html.replace('<section class="view wrap" id="view-tools" hidden></section>', `<section class="view wrap" id="view-tools">${shell.catalog}</section>`);
+    }
   } else {
     html = html.replace('<div id="home-seo"></div>', `<div id="home-seo">${rest}</div>`);
+    html = html.replace('<div id="popular"></div>', `<div id="popular">${shell.popular}</div>`);
+    html = html.replace('<div id="catalog"></div>', `<div id="catalog">${shell.catalog}</div>`);
   }
   const soonTool = page.toolId ? toolById(page.toolId) : undefined;
   if (soonTool && soonTool.status === 'coming-soon') {
@@ -130,9 +137,6 @@ function paint(pagePath: string): string {
     html = html.replace(/(<div id="landing-rest"[^>]*>)(<\/div>)/, `$1${rest}$2`);
   }
   html = html.replace(/<footer class="foot" id="site-footer">[\s\S]*?<\/footer>/, `<footer class="foot" id="site-footer">${footer()}</footer>`);
-  const shell = catalogShell();
-  html = html.replace('<div id="popular"></div>', `<div id="popular">${shell.popular}</div>`);
-  html = html.replace('<div id="catalog"></div>', `<div id="catalog">${shell.catalog}</div>`);
   html = html.replaceAll(/View all \d+\+? tools/g, `View all ${activeToolsCount()} tools`);
   return html;
 }

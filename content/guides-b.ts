@@ -12,7 +12,7 @@ export const GUIDES_B: GuideSeed[] = [
     facts: [
       'This advice does not upload the application photo.',
       'The pixels are re-encoded. The camera original should stay in your library.',
-      'A melted stamp will be rejected. A slightly larger readable file is the one to ask about if the cap is tight.',
+      'An illegible stamp or photo will be rejected. Always verify that seals, dates, and faces stay sharp.',
       'Open the compressed photo at the size the form will show, not only as a thumbnail.',
       'You can shrink offline after the page loads, then reconnect only to submit the form yourself.',
     ],

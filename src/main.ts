@@ -54,9 +54,6 @@ const statusPop = document.querySelector<HTMLElement>('#status-pop');
 const shellScroll = document.querySelector<HTMLElement>('#shell-scroll');
 
 if (
-  !dropHost ||
-  !suggestHost ||
-  !homePanel ||
   !proof ||
   !proofText ||
   !themeButton ||
@@ -66,8 +63,6 @@ if (
   !viewTools ||
   !workspace ||
   !sidebar ||
-  !popularHost ||
-  !catalogHost ||
   !palette ||
   !paletteInput ||
   !paletteList ||
@@ -101,15 +96,20 @@ let activeRoute: Route = 'home';
 let stagedFiles: File[] | null = null;
 let dragDepth = 0;
 
-const home = mountHome({
-  dropHost,
-  suggestHost,
-  panel: homePanel,
-  onPick(route, files) {
-    stagedFiles = files;
-    navigate(route);
-  },
-});
+const home = (dropHost && suggestHost && homePanel)
+  ? mountHome({
+      dropHost,
+      suggestHost,
+      panel: homePanel,
+      onPick(route, files) {
+        stagedFiles = files;
+        navigate(route);
+      },
+    })
+  : {
+      setHot: (_hot: boolean) => {},
+      offer: (_files: File[]) => {},
+    };
 
 const loaders: Record<ToolRoute, () => Promise<ToolApi>> = {
   compress: async () => (await import('./tools/compress')).mountCompress(panelFor('compress')),
@@ -185,6 +185,10 @@ function show(route: Route): void {
 }
 
 async function open(route: Route): Promise<void> {
+  if (route === 'home' && !dropHost) {
+    window.location.href = '/';
+    return;
+  }
   const target = route === 'home' ? null : targetFromPath(`/${route}`);
   const query = readUrlOptions(window.location.search);
   const imageTool = target?.toolId === 'compress-images';
@@ -303,7 +307,7 @@ document.querySelector('#trust-icon-2')?.replaceChildren(iconElement('compress-p
 document.querySelector('#trust-icon-3')?.replaceChildren(iconElement('shield', { size: 18 }));
 const wordmark = document.querySelector('.wordmark');
 if (wordmark) {
-  wordmark.setAttribute('aria-label', brandName());
+  wordmark.setAttribute('aria-label', `${brandName()} home`);
   wordmark.innerHTML = lockupHorizontal;
 }
 paintStatusIcon();
@@ -373,7 +377,7 @@ document.addEventListener('drop', (event) => {
   active?.setDragging(false);
   const transfer = event.dataTransfer;
   if (!transfer) return;
-  const inHero = event.target instanceof Node && dropHost.contains(event.target);
+  const inHero = Boolean(dropHost && event.target instanceof Node && dropHost.contains(event.target));
   void filesFromDataTransfer(transfer).then((files) => {
     if (!files.length) return;
     if (activeRoute === 'home' || inHero) home.offer(files);

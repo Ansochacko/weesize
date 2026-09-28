@@ -14,6 +14,7 @@ export interface Seed {
   path: string;
   kind: SeoPage['kind'];
   h1: string;
+  subtitle?: string | undefined;
   keyword: string;
   title?: string | undefined;
   description: string;
@@ -43,6 +44,58 @@ export function faqs(subject: string, facts: [string, string, string, string, st
   ];
 }
 
+function computeSubtitle(seed: Seed): string {
+  if (seed.subtitle) return seed.subtitle;
+  if (seed.kind === 'size') {
+    if (seed.presetKb) {
+      const kbStr = seed.presetKb >= 1024 && seed.presetKb % 1024 === 0 
+        ? `${seed.presetKb / 1024} MB` 
+        : `${seed.presetKb} KB`;
+      if (seed.toolId === 'compress-images' || seed.path.includes('image') || seed.path.includes('jpg')) {
+        return `Shrink photos and pictures to under ${kbStr}. Free, private, and nothing is uploaded.`;
+      }
+      return `Compress PDF files to under ${kbStr} right in your browser. Free, private, and no upload.`;
+    }
+    return `Resize your files to the exact size you need. Free, private, and runs in your browser.`;
+  }
+  if (seed.kind === 'tool') {
+    if (seed.path === 'compress-image') {
+      return 'Shrink photos to the exact size you need, like 20 KB or 50 KB. Free, nothing is uploaded.';
+    }
+    if (seed.path === 'compress-pdf') {
+      return 'Compress PDFs to an exact target size or strength. Free, private, and runs in your browser.';
+    }
+    if (seed.path === 'merge-pdf') {
+      return 'Combine multiple PDF documents into one in seconds. Free, private, and nothing is uploaded.';
+    }
+    if (seed.path === 'split-pdf') {
+      return 'Extract pages or split PDF files into separate documents. Free, private, and runs on your device.';
+    }
+    if (seed.path === 'organize-pdf' || seed.path === 'organize-pages') {
+      return 'Rearrange, rotate, and delete PDF pages visually. Free, private, and nothing is uploaded.';
+    }
+    if (seed.path === 'id-photo') {
+      return 'Create passport, visa, and ID photos to exact dimensions and file size. Free and runs on your device.';
+    }
+    if (seed.path === 'signature' || seed.path === 'signature-resizer') {
+      return 'Clean background to white, darken ink, and resize signatures for online forms. Free, instant, and private.';
+    }
+    if (seed.path === 'jpg-to-pdf') {
+      return 'Convert JPG, JPEG, and PNG images into a clean PDF document. Free, fast, and no upload.';
+    }
+    if (seed.path === 'pdf-to-jpg') {
+      return 'Convert PDF pages into high-quality JPG photos. Free, fast, and 100% private.';
+    }
+  }
+  if (seed.description) {
+    const firstSentence = seed.description.split('.')[0]?.trim() ?? '';
+    if (firstSentence.length > 15 && firstSentence.length < 120) {
+      return `${firstSentence}. Free, private, and processed on your device.`;
+    }
+  }
+  return brand.tagline;
+}
+
 export function toPage(seed: Seed): SeoPage {
   const tool = seed.toolId ? toolById(seed.toolId) : undefined;
   const isSoon = tool?.status === 'coming-soon';
@@ -58,9 +111,9 @@ export function toPage(seed: Seed): SeoPage {
     title: seed.title ?? pageTitle(seed.h1),
     description: seed.description,
     h1: seed.h1,
-    subtitle: brand.tagline,
+    subtitle: computeSubtitle(seed),
     toolId: seed.toolId ?? null,
-    essay: `${seed.essay}\n\n${seed.h1} stays on this device. The download is the copy you keep, and ${brandName()} does not store a second one. Close the tab when you are finished and the bytes are gone.`,
+    essay: `${seed.essay}\n\n${seed.h1} is processed entirely on your device. Your original file remains untouched, and nothing is ever uploaded to a server or saved in the cloud.`,
     steps: seed.steps,
     points: seed.points,
     faqs: seed.faqs ?? faqs(seed.h1, seed.facts),
@@ -79,27 +132,27 @@ export function toPage(seed: Seed): SeoPage {
 
 export function how(task: string): [string, string, string] {
   return [
-    `Open this page and add the file. ${task} starts in the browser you already have open.`,
-    'Run the tool. If this version cannot do the job honestly, it says so instead of inventing a result.',
-    'Download the file that was built on this device. Closing the tab drops the bytes.',
+    `Select or drop your file to start ${task}. Everything runs directly in your browser.`,
+    `Choose your target size or options. ${task} processes the file instantly on your device.`,
+    'Download your finished file. Nothing is ever uploaded to a server.',
   ];
 }
 
 export function why(specific: string): [string, string, string] {
   return [
     `No upload: ${specific}`,
-    'Speed: the file does not travel to a server and back, so the wait is only the work itself.',
-    'Quality: the original is kept when the new file would be worse or is not actually smaller.',
+    'Speed: processing happens instantly on your device with no upload or download delays.',
+    'Quality: you can check your file before saving, and the original remains unchanged.',
   ];
 }
 
 export function localFacts(name: string, change: string, wrong: string, check: string): [string, string, string, string, string] {
   return [
-    `${name} reads the file in this tab. There is no upload step and no account.`,
+    `${name} processes your file locally in this browser tab. There is no upload step and no account required.`,
     change,
     wrong,
     check,
-    `Load this page, then turn Wi-Fi off and run ${name} again. A finished result is the proof that the file was not sent anywhere.`,
+    `You can turn off Wi-Fi after loading this page and ${name} still works completely offline.`,
   ];
 }
 
