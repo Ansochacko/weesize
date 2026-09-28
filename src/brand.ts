@@ -28,7 +28,7 @@ export const brand = {
   },
   /** Paste the Search Console and Bing tokens here. Empty values emit no tag and make no request. */
   verification: {
-    google: '',
+    google: 'googleacb79945c73fd494',
     bing: '',
   },
   /** Public repository URL. Empty until the repo is published. Shown as an open-source link. */
