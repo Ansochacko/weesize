@@ -23,7 +23,7 @@ export const brand = {
   },
   social: {
     x: '',
-    github: '',
+    github: 'https://github.com/Ansochacko/weesize',
     mastodon: '',
   },
   /** Paste the Search Console and Bing tokens here. Empty values emit no tag and make no request. */
@@ -32,7 +32,7 @@ export const brand = {
     bing: '',
   },
   /** Public repository URL. Empty until the repo is published. Shown as an open-source link. */
-  repoUrl: '',
+  repoUrl: 'https://github.com/Ansochacko/weesize',
   /**
    * Optional support page (GitHub Sponsors, Ko-fi, etc.). Empty by default.
    * When set, the footer shows a quiet text link that opens in a new tab.

@@ -54,7 +54,7 @@ function paint(pagePath: string): string {
   if (!page) return template;
   const head = landingHead(page, breadcrumb(page, labels));
   const rest = landingRest(page, (path) => labels.get(path) ?? path);
-  const image = `${brandOrigin()}/og/${(page.path || 'home').replaceAll('/', '-')}.svg`;
+  const image = `${brandOrigin()}/brand/og-image.png`;
   let html = template.replaceAll('href="#/', 'href="/').replace('href="#/"', 'href="/"').replace('href="#/"', 'href="/"');
   html = html.replace(/<html lang="[^"]*">/, `<html lang="${page.htmlLang}">`);
   html = html.replace(/<title>[\s\S]*?<\/title>/, `<title>${escapeHtml(page.title)}</title>`);

@@ -10,6 +10,7 @@
   "scripts": {
     "dev": "vite",
     "build": "node --experimental-strip-types scripts/build-icons.ts && node --experimental-strip-types scripts/build-brand.ts && tsc --noEmit && vite build && node --experimental-strip-types --import ./scripts/register-ts.mjs scripts/prerender.ts",
+    "build:og": "node scripts/build-og-image.mjs",
     "indexnow": "node --experimental-strip-types scripts/indexnow.ts",
     "preview": "vite preview",
     "test": "vitest run",
