@@ -1,0 +1,170 @@
+:root,
+[data-theme='light'],
+:root[data-theme='dark'] [data-theme='light'] {
+  color-scheme: light;
+  --page: #F6F7F9;
+  --paper: #FFFFFF;
+  --paper-2: #F1F3F6;
+  --ink: #111827;
+  --ink-2: #4B5563;
+  --ink-3: #6B7280;
+  --rule: #E2E5EA;
+  --rule-2: #CBD1D9;
+  --navy: #13284F;
+  --primary: #1F4FB8;
+  --primary-dk: #173E92;
+  --primary-lt: #E8EEFA;
+  --success: #1B6E45;
+  --success-lt: #E6F2EC;
+  --warning: #A15C07;
+  --danger: #B42318;
+
+  /* Aliases for consistent backwards-compatibility across templates */
+  --bg: var(--page);
+  --bg-raised: var(--paper-2);
+  --surface: var(--paper);
+  --surface-2: var(--paper-2);
+  --border: var(--rule);
+  --border-2: var(--rule-2);
+  --text: var(--ink);
+  --text-2: var(--ink-2);
+  --text-3: var(--ink-3);
+  --accent: var(--primary);
+  --accent-hi: var(--primary-dk);
+  --accent-btn: var(--primary);
+  --accent-glow: transparent;
+  --safe: var(--success);
+  --safe-text: var(--success);
+  --safe-soft: var(--success-lt);
+  --warning-text: var(--warning);
+  --limit: var(--warning);
+  --fit: var(--success);
+  --on-accent: #ffffff;
+  --accent-soft: var(--primary-lt);
+  --graphite: var(--ink-2);
+  --ballpoint: var(--primary);
+  --on-ballpoint: #ffffff;
+  --desk: var(--page);
+  --page-edge: var(--rule);
+
+  --font: 'IBM Plex Sans', system-ui, -apple-system, sans-serif;
+  --serif: 'IBM Plex Serif', Georgia, serif;
+  --display: 'IBM Plex Serif', Georgia, serif;
+  --mono: 'IBM Plex Mono', monospace;
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --dur: 150ms;
+  --text-xs: 12px;
+  --text-sm: 13px;
+  --text-md: 14px;
+  --text-lg: 16px;
+  --text-xl: 20px;
+  --text-2xl: 28px;
+  --page-max: 1200px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --shadow-card-hover: 0 1px 2px rgba(17, 24, 39, 0.06), 0 2px 8px rgba(17, 24, 39, 0.06);
+  --shadow-dialog: 0 8px 24px rgba(17, 24, 39, 0.12);
+}
+
+:root[data-theme='dark'],
+[data-theme='dark'],
+:root[data-theme='light'] [data-theme='dark'] {
+  color-scheme: dark;
+  --page: #0F1216;
+  --paper: #161A20;
+  --paper-2: #1C2129;
+  --ink: #E8EAED;
+  --ink-2: #AAB1BC;
+  --ink-3: #858D99;
+  --rule: #2A3039;
+  --rule-2: #38404B;
+  --navy: #0B1426;
+  --primary: #7FA2F0;
+  --primary-dk: #9DB7F4;
+  --primary-lt: #1B2740;
+  --success: #5CC98E;
+  --success-lt: #15291F;
+  --warning: #E3A33B;
+  --danger: #F07167;
+
+  --bg: var(--page);
+  --bg-raised: var(--paper-2);
+  --surface: var(--paper);
+  --surface-2: var(--paper-2);
+  --border: var(--rule);
+  --border-2: var(--rule-2);
+  --text: var(--ink);
+  --text-2: var(--ink-2);
+  --text-3: var(--ink-3);
+  --accent: var(--primary);
+  --accent-hi: var(--primary-dk);
+  --accent-btn: var(--primary);
+  --accent-glow: transparent;
+  --safe: var(--success);
+  --safe-text: var(--success);
+  --safe-soft: var(--success-lt);
+  --warning-text: var(--warning);
+  --limit: var(--warning);
+  --fit: var(--success);
+  --on-accent: #0F1216;
+  --accent-soft: var(--primary-lt);
+  --graphite: var(--ink-2);
+  --ballpoint: var(--primary);
+  --on-ballpoint: #0F1216;
+  --desk: var(--page);
+  --page-edge: var(--rule);
+  --shadow-card-hover: 0 1px 2px rgba(0, 0, 0, 0.3), 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-dialog: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    color-scheme: dark;
+    --page: #0F1216;
+    --paper: #161A20;
+    --paper-2: #1C2129;
+    --ink: #E8EAED;
+    --ink-2: #AAB1BC;
+    --ink-3: #858D99;
+    --rule: #2A3039;
+    --rule-2: #38404B;
+    --navy: #0B1426;
+    --primary: #7FA2F0;
+    --primary-dk: #9DB7F4;
+    --primary-lt: #1B2740;
+    --success: #5CC98E;
+    --success-lt: #15291F;
+    --warning: #E3A33B;
+    --danger: #F07167;
+
+    --bg: var(--page);
+    --bg-raised: var(--paper-2);
+    --surface: var(--paper);
+    --surface-2: var(--paper-2);
+    --border: var(--rule);
+    --border-2: var(--rule-2);
+    --text: var(--ink);
+    --text-2: var(--ink-2);
+    --text-3: var(--ink-3);
+    --accent: var(--primary);
+    --accent-hi: var(--primary-dk);
+    --accent-btn: var(--primary);
+    --accent-glow: transparent;
+    --safe: var(--success);
+    --safe-text: var(--success);
+    --safe-soft: var(--success-lt);
+    --warning-text: var(--warning);
+    --limit: var(--warning);
+    --fit: var(--success);
+    --on-accent: #0F1216;
+    --accent-soft: var(--primary-lt);
+    --graphite: var(--ink-2);
+    --ballpoint: var(--primary);
+    --on-ballpoint: #0F1216;
+    --desk: var(--page);
+    --page-edge: var(--rule);
+    --shadow-card-hover: 0 1px 2px rgba(0, 0, 0, 0.3), 0 2px 8px rgba(0, 0, 0, 0.3);
+    --shadow-dialog: 0 8px 24px rgba(0, 0, 0, 0.4);
+  }
+}

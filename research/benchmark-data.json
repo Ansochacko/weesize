@@ -1,0 +1,22 @@
+{
+  "weesizeCompress": {
+    "timeTotalMs": 1592,
+    "timeProcessingMs": 1186,
+    "clicks": 2
+  },
+  "weesizeMerge": {
+    "timeTotalMs": 2254,
+    "timeProcessingMs": 1922,
+    "clicks": 2
+  },
+  "weesizeJpgToPdf": {
+    "timeTotalMs": 711,
+    "timeProcessingMs": 362,
+    "clicks": 2
+  },
+  "iloveCompress": {
+    "timeTotalMs": 2331,
+    "timeProcessingMs": 2069,
+    "clicks": 2
+  }
+}

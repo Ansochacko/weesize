@@ -1,0 +1,102 @@
+[
+  {
+    "name": "Home",
+    "weesize": {
+      "requests": 34,
+      "weightKb": 4593,
+      "externalRequests": 0,
+      "domContentLoadedMs": 293,
+      "loadMs": 411,
+      "lcpMs": 396,
+      "cls": 0.0013
+    },
+    "ilove": {
+      "requests": 41,
+      "weightKb": 1691,
+      "externalRequests": 2,
+      "externalHostsSample": [
+        "www.googletagmanager.com",
+        "region1.google-analytics.com"
+      ],
+      "domContentLoadedMs": 276,
+      "loadMs": 811,
+      "lcpMs": 604,
+      "cls": 0
+    }
+  },
+  {
+    "name": "Compress PDF",
+    "weesize": {
+      "requests": 34,
+      "weightKb": 4597,
+      "externalRequests": 0,
+      "domContentLoadedMs": 339,
+      "loadMs": 405,
+      "lcpMs": 444,
+      "cls": 0.0039
+    },
+    "ilove": {
+      "requests": 23,
+      "weightKb": 2380,
+      "externalRequests": 2,
+      "externalHostsSample": [
+        "www.googletagmanager.com",
+        "region1.google-analytics.com"
+      ],
+      "domContentLoadedMs": 212,
+      "loadMs": 788,
+      "lcpMs": 712,
+      "cls": 0
+    }
+  },
+  {
+    "name": "Merge PDF",
+    "weesize": {
+      "requests": 34,
+      "weightKb": 4596,
+      "externalRequests": 0,
+      "domContentLoadedMs": 358,
+      "loadMs": 420,
+      "lcpMs": 540,
+      "cls": 0.0013
+    },
+    "ilove": {
+      "requests": 23,
+      "weightKb": 2379,
+      "externalRequests": 2,
+      "externalHostsSample": [
+        "www.googletagmanager.com",
+        "region1.google-analytics.com"
+      ],
+      "domContentLoadedMs": 591,
+      "loadMs": 869,
+      "lcpMs": 604,
+      "cls": 0
+    }
+  },
+  {
+    "name": "JPG to PDF",
+    "weesize": {
+      "requests": 34,
+      "weightKb": 4596,
+      "externalRequests": 0,
+      "domContentLoadedMs": 264,
+      "loadMs": 323,
+      "lcpMs": 344,
+      "cls": 0.0013
+    },
+    "ilove": {
+      "requests": 23,
+      "weightKb": 2401,
+      "externalRequests": 2,
+      "externalHostsSample": [
+        "www.googletagmanager.com",
+        "region1.google-analytics.com"
+      ],
+      "domContentLoadedMs": 564,
+      "loadMs": 802,
+      "lcpMs": 576,
+      "cls": 0
+    }
+  }
+]

@@ -1,0 +1,9 @@
+name,url,type,angle,contact
+"AlternativeTo (iLovePDF page)","https://alternativeto.net/software/ilovepdf/","Directory / Alternative listing","Suggest Weesize as free, open-source, client-side alternative with zero server uploads.","Public submission form at alternativeto.net"
+"AlternativeTo (Smallpdf page)","https://alternativeto.net/software/smallpdf/","Directory / Alternative listing","List as truly unlimited free PDF tool without 2-file/day limits.","Public submission form at alternativeto.net"
+"PrivacyGuides Community","https://discuss.privacyguides.net/","Privacy Community","Present client-side in-browser PDF processing architecture; zero network requests proof.","Forum discussion post / Tool recommendation"
+"Hacker News (Show HN)","https://news.ycombinator.com/show","Developer / Tech Hub","Show HN: Weesize – Zero-upload PDF engine running entirely on WebAssembly in browser.","Public Show HN submission"
+"Reddit r/privacy","https://reddit.com/r/privacy","Community Resource","Share breakdown of how online PDF tools send private data to servers vs client-side wasm.","Community post / educational guide"
+"Reddit r/freesoftware","https://reddit.com/r/freesoftware","Open Source Community","Free, ad-free, account-free web PDF tools.","Community post"
+"University IT & Student Resource Hubs (e.g. UC Berkeley, Oxford, MIT student wikis)","https://calcentral.berkeley.edu/","Academic Resource","Recommend Weesize to students for thesis/paper compression under portal limits without uploading thesis drafts to commercial servers.","Student council / IT helpdesk suggestion"
+"GitHub Awesome Lists (Awesome Privacy / Awesome WebAssembly)","https://github.com/pluja/awesome-privacy","GitHub Curation","Add Weesize under Web-based Privacy Tools & PDF Tools.","Pull Request on GitHub"

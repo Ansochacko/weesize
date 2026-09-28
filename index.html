@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#F5F6F8" />
+    <meta name="description" content="Weesize shrinks PDFs and photos to the exact size you need, right in your browser. Files are never uploaded." />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; connect-src 'self'; worker-src 'self' blob:; img-src 'self' blob: data:; style-src 'self' 'unsafe-inline'; font-src 'self'; script-src 'self' 'wasm-unsafe-eval'"
+    />
+    <title>Get any file to the size you need — Weesize</title>
+    <link rel="canonical" id="seo-canonical" href="#/" />
+    <meta property="og:title" content="Get any file to the size you need — Weesize" />
+    <meta property="og:description" content="Weesize shrinks PDFs and photos to the exact size you need, right in your browser. Files are never uploaded." />
+    <meta property="og:image" content="/brand/mark-color.svg" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Get any file to the size you need — Weesize" />
+    <meta name="twitter:description" content="Weesize shrinks PDFs and photos to the exact size you need, right in your browser. Files are never uploaded." />
+    <meta name="twitter:image" content="/brand/mark-color.svg" />
+    <script src="/theme-init.js"></script>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+    <style>
+      html, body { height: 100%; }
+      body {
+        margin: 0;
+        background: #F6F7F9;
+        color: #111827;
+        font-family: "IBM Plex Sans", system-ui, -apple-system, sans-serif;
+        overflow: hidden;
+      }
+      @media (prefers-color-scheme: dark) {
+        html:not([data-theme='light']) body { background: #0F1216; color: #E8EAED; }
+      }
+      html[data-theme='dark'] body { background: #0F1216; color: #E8EAED; }
+      html[data-theme='light'] body { background: #F6F7F9; color: #111827; }
+      .topbar { height: 72px; display: flex; align-items: center; }
+      .hero h1 { font-family: "IBM Plex Serif", Georgia, serif; font-size: 40px; line-height: 48px; font-weight: 600; letter-spacing: -0.01em; }
+      @media (max-width: 800px) {
+        .hero h1 { font-size: 30px; line-height: 38px; }
+      }
+    </style>
+  </head>
+  <body>
+    <a class="skip" href="#workspace">Skip to tools</a>
+    <div class="shell">
+      <nav class="sidebar" id="sidebar" aria-label="Sidebar tools"></nav>
+      <div class="shell-main">
+        <header class="topbar">
+          <div class="topbar-inner">
+            <a class="wordmark" href="#/"></a>
+            <nav class="top-nav" aria-label="Site">
+              <div class="nav-item-dropdown" id="tools-nav-wrap">
+                <a href="#/tools" class="nav-link" id="nav-tools-link" aria-haspopup="true" aria-expanded="false">Tools <span class="nav-arrow" aria-hidden="true">▾</span></a>
+                <div class="mega-menu" id="tools-mega-menu" hidden>
+                  <div class="mega-grid" id="mega-grid"></div>
+                  <div class="mega-foot">
+                    <a href="#/tools" class="mega-all-link">View all 30+ tools →</a>
+                  </div>
+                </div>
+              </div>
+              <a href="#/get-it-accepted" class="nav-link">Presets</a>
+              <a href="#/guides" class="nav-link">Guides</a>
+              <a href="#/about" class="nav-link">About</a>
+            </nav>
+            <div class="top-actions">
+              <button type="button" class="search-btn" id="command-open" aria-label="Search tools" aria-expanded="false" aria-controls="palette">
+                <span class="search-label">Search tools…</span>
+                <kbd>⌘K</kbd>
+              </button>
+              <button type="button" class="status-chip" id="proof" data-state="loading" aria-label="Privacy status: Processed on your device">
+                <span class="status-dot" id="proof-icon" aria-hidden="true"></span>
+                <span id="proof-text">Processed on your device</span>
+              </button>
+              <button type="button" class="icon-btn" id="theme-toggle" aria-label="Switch theme" data-tip="Switch theme"></button>
+              <button type="button" class="icon-btn" id="nav-open" aria-label="Tools menu" data-tip="Tools"></button>
+            </div>
+          </div>
+        </header>
+        <div class="shell-scroll" id="shell-scroll">
+          <div class="popover" id="status-pop" hidden>
+            <p>Your files are processed in this browser and never uploaded. Try it: turn off Wi‑Fi and keep working.</p>
+            <a href="#/privacy">Privacy</a>
+          </div>
+          <div class="app">
+            <main id="top">
+              <section class="view wrap" id="view-home">
+                <div class="hero">
+                  <div class="hero-grid">
+                    <div class="hero-copy">
+                      <p class="eyebrow"><span id="hero-lock"></span> Free · Open source · No upload</p>
+                      <h1>Get any file to the exact size you need.</h1>
+                      <p class="lede">Compress, convert and sign PDFs and photos in your browser. Your files are never uploaded.</p>
+                      <div class="hero-actions">
+                        <a class="btn primary" href="#/compress-pdf">Compress a PDF</a>
+                        <a class="btn quiet" href="#/compress-image">Compress an image</a>
+                      </div>
+                      <div id="suggestions"></div>
+                    </div>
+                    <div class="hero-panel precision-card">
+                      <div id="smart-drop"></div>
+                      <p class="target-label">Target size</p>
+                      <div class="size-chips">
+                        <a class="chip" href="#/compress-pdf-to-100kb">100 KB</a>
+                        <a class="chip is-on" href="#/compress-pdf-to-200kb">200 KB</a>
+                        <a class="chip" href="#/compress-pdf-to-500kb">500 KB</a>
+                        <a class="chip" href="#/compress-pdf-to-1mb">1 MB</a>
+                        <a class="chip" href="#/compress-pdf-to-2mb">2 MB</a>
+                        <a class="chip" href="#/compress-pdf">Custom</a>
+                      </div>
+                      <div id="hero-demo"></div>
+                    </div>
+                  </div>
+                </div>
+
+                <section class="trust-strip" aria-label="Trust facts">
+                  <div class="trust-grid">
+                    <div class="trust-item">
+                      <span id="trust-icon-1"></span>
+                      <span>Never uploaded: processed on your device</span>
+                    </div>
+                    <div class="trust-item">
+                      <span id="trust-icon-2"></span>
+                      <span>Exact size: pick the limit you need</span>
+                    </div>
+                    <div class="trust-item">
+                      <span id="trust-icon-3"></span>
+                      <span>Free and open source: no sign-up, no limits</span>
+                    </div>
+                  </div>
+                </section>
+
+                <section class="home-tools" id="home-tools">
+                  <h2>Popular tools</h2>
+                  <div id="popular"></div>
+                  <div class="popular-more-wrap">
+                    <a href="#/tools" class="popular-more-link">View all 30+ tools →</a>
+                  </div>
+                  <details class="all-tools" id="all-tools">
+                    <summary>All tools</summary>
+                    <div id="catalog"></div>
+                  </details>
+                </section>
+
+                <section class="why" aria-labelledby="how-title">
+                  <h2 id="how-title">How it works</h2>
+                  <div class="how-row">
+                    <div class="how-step">
+                      <span class="how-num">1</span>
+                      <h3>Choose a file</h3>
+                      <p>Select or drop a PDF or photo into the workspace.</p>
+                    </div>
+                    <div class="how-step">
+                      <span class="how-num">2</span>
+                      <h3>Set your target</h3>
+                      <p>Pick an exact size limit or strength goal.</p>
+                    </div>
+                    <div class="how-step">
+                      <span class="how-num">3</span>
+                      <h3>Download</h3>
+                      <p>Get your file instantly without leaving your browser.</p>
+                    </div>
+                  </div>
+                </section>
+
+                <section class="why" aria-labelledby="faq-title">
+                  <h2 id="faq-title">Questions</h2>
+                  <div class="faq-list">
+                    <details class="faq-item">
+                      <summary>Are my files sent to any server? <span class="faq-chevron" aria-hidden="true">▾</span></summary>
+                      <div class="faq-body">No. Weesize processes documents entirely inside your browser using JavaScript and WebAssembly. Your files never leave your device.</div>
+                    </details>
+                    <details class="faq-item">
+                      <summary>Is Weesize really completely free? <span class="faq-chevron" aria-hidden="true">▾</span></summary>
+                      <div class="faq-body">Yes. Weesize is free, open source, and has zero limits, subscriptions, watermarks, or accounts required.</div>
+                    </details>
+                    <details class="faq-item">
+                      <summary>How does exact-size compression work? <span class="faq-chevron" aria-hidden="true">▾</span></summary>
+                      <div class="faq-body">Our client-side engine iteratively optimizes image streams and metadata targets until the file reaches your requested KB size without degrading legibility.</div>
+                    </details>
+                    <details class="faq-item">
+                      <summary>Does it work offline? <span class="faq-chevron" aria-hidden="true">▾</span></summary>
+                      <div class="faq-body">Yes. Once the page is loaded, you can turn off Wi-Fi or disconnect from the internet and continue compressing and editing files.</div>
+                    </details>
+                  </div>
+                </section>
+                <div id="home-seo"></div>
+              </section>
+              <section class="view wrap" id="view-tools" hidden></section>
+              <section class="workspace wrap" id="workspace" hidden>
+                <div id="landing-head" hidden></div>
+                <div class="sheet">
+                  <div class="panel" id="panel-home" tabindex="0" hidden></div>
+                  <div class="panel" id="panel-compress" tabindex="0" hidden></div>
+                  <div class="panel" id="panel-merge" tabindex="0" hidden></div>
+                  <div class="panel" id="panel-split" tabindex="0" hidden></div>
+                  <div class="panel" id="panel-organize" tabindex="0" hidden></div>
+                  <div class="panel" id="panel-images" tabindex="0" hidden></div>
+                  <div class="panel" id="panel-extra" tabindex="0" hidden></div>
+                  <div class="panel" id="panel-settings" tabindex="0" hidden></div>
+                </div>
+                <div id="landing-rest" hidden></div>
+              </section>
+            </main>
+          </div>
+          <footer class="foot" id="site-footer">
+            <div class="wrap foot-inner">
+              <div class="foot-brand-block">
+                <p class="foot-brand-name"><strong>Weesize</strong></p>
+                <p class="foot-tag">Get any file to the size you need. Privately.</p>
+                <p id="foot-extra" class="foot-extra" hidden></p>
+              </div>
+              <nav class="foot-nav" aria-label="Footer tools">
+                <h2>Tools</h2>
+                <a href="#/compress-pdf">Compress PDF</a>
+                <a href="#/merge-pdf">Merge PDF</a>
+                <a href="#/split-pdf">Split PDF</a>
+                <a href="#/tools">All tools</a>
+              </nav>
+              <nav class="foot-nav" aria-label="Convert">
+                <h2>Convert</h2>
+                <a href="#/jpg-to-pdf">JPG to PDF</a>
+                <a href="#/png-to-pdf">PNG to PDF</a>
+                <a href="#/pdf-to-jpg">PDF to JPG</a>
+                <a href="#/heic-to-jpg">HEIC to JPG</a>
+              </nav>
+              <nav class="foot-nav" aria-label="Company">
+                <h2>Company</h2>
+                <a href="#/about">About</a>
+                <a href="#/guides">Guides</a>
+                <a href="#/brand">Brand</a>
+                <a href="#/press">Press</a>
+              </nav>
+              <nav class="foot-nav" aria-label="Legal">
+                <h2>Legal</h2>
+                <a href="#/privacy">Privacy</a>
+                <a href="#/sitemap">Sitemap</a>
+              </nav>
+            </div>
+            <div class="wrap foot-bar">
+              <p>© 2026 Weesize. Processed on your device.</p>
+              <p>English. Other languages are drafts and are not indexed.</p>
+            </div>
+          </footer>
+        </div>
+      </div>
+    </div>
+    <div class="palette" id="palette" hidden>
+      <div class="palette-card" role="dialog" aria-modal="true" aria-label="Search tools">
+        <form role="search">
+          <input id="palette-input" type="search" placeholder="Search tools" aria-label="Search tools" />
+        </form>
+        <div id="palette-list"></div>
+      </div>
+    </div>
+    <noscript>
+      <p class="noscript">This app runs in this browser and needs JavaScript on this device. It still does not upload files.</p>
+    </noscript>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

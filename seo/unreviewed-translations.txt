@@ -1,0 +1,24 @@
+es (Español) reviewed: false
+pt-br (Português (Brasil)) reviewed: false
+fr (Français) reviewed: false
+de (Deutsch) reviewed: false
+it (Italiano) reviewed: false
+id (Bahasa Indonesia) reviewed: false
+hi (हिन्दी) reviewed: false
+ja (日本語) reviewed: false
+ko (한국어) reviewed: false
+tr (Türkçe) reviewed: false
+ru (Русский) reviewed: false
+pl (Polski) reviewed: false
+nl (Nederlands) reviewed: false
+vi (Tiếng Việt) reviewed: false
+fi (Suomi) reviewed: false
+sv (Svenska) reviewed: false
+
+Awaiting official sources:
+Gmail attachment size — no megabyte figure is published until the official help page is re-checked
+Outlook attachment size
+WhatsApp document size
+Job-application portal limits
+Generic online-form limits
+Passport, visa, university, exam, and government form size or format rules

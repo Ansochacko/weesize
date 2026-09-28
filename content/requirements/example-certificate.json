@@ -1,0 +1,30 @@
+{
+  "id": "example-certificate",
+  "country": "Exampleland",
+  "organization": "Example university",
+  "portal": "Example portal",
+  "documentType": "certificate",
+  "requirements": {
+    "formats": ["application/pdf"],
+    "minBytes": null,
+    "maxBytes": null,
+    "minWidth": null,
+    "maxWidth": null,
+    "minHeight": null,
+    "maxHeight": null,
+    "widthMm": null,
+    "heightMm": null,
+    "minDpi": null,
+    "colorMode": null,
+    "background": null,
+    "allowBackgroundEdit": null,
+    "headSizePercent": null,
+    "maxPages": null,
+    "notes": "PLACEHOLDER — not an official requirement. No university published these numbers."
+  },
+  "sourceUrl": "https://example.invalid/not-an-official-source",
+  "lastVerified": "",
+  "verifiedBy": "",
+  "status": "draft",
+  "placeholder": true
+}

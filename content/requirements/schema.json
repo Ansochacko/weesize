@@ -1,0 +1,18 @@
+{
+  "$comment": "Upload-requirement records. Only status verified, with a real https source, a lastVerified date, a verifiedBy name, and no placeholder flag, may appear in the app or the sitemap.",
+  "type": "object",
+  "required": ["id", "country", "organization", "portal", "documentType", "requirements", "sourceUrl", "lastVerified", "verifiedBy", "status", "placeholder"],
+  "properties": {
+    "id": { "type": "string" },
+    "country": { "type": "string" },
+    "organization": { "type": "string" },
+    "portal": { "type": "string" },
+    "documentType": { "type": "string" },
+    "requirements": { "type": "object" },
+    "sourceUrl": { "type": "string" },
+    "lastVerified": { "type": "string" },
+    "verifiedBy": { "type": "string" },
+    "status": { "enum": ["draft", "verified", "outdated"] },
+    "placeholder": { "type": "boolean" }
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "id": "example-photo",
+  "country": "Exampleland",
+  "organization": "Example passport office",
+  "portal": "Example portal",
+  "documentType": "photo",
+  "requirements": {
+    "formats": ["image/jpeg"],
+    "minBytes": null,
+    "maxBytes": null,
+    "minWidth": null,
+    "maxWidth": null,
+    "minHeight": null,
+    "maxHeight": null,
+    "widthMm": null,
+    "heightMm": null,
+    "minDpi": null,
+    "colorMode": null,
+    "background": null,
+    "allowBackgroundEdit": null,
+    "headSizePercent": null,
+    "maxPages": null,
+    "notes": "PLACEHOLDER — not an official requirement. Every value in this file is invented so the schema can be reviewed. Do not use it for a real application."
+  },
+  "sourceUrl": "https://example.invalid/not-an-official-source",
+  "lastVerified": "",
+  "verifiedBy": "",
+  "status": "draft",
+  "placeholder": true
+}

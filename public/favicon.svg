@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <style>
+    .ws-sq { fill: #2340C9 }
+    @media (prefers-color-scheme: dark) {
+      .ws-sq { fill: #7F93FF }
+    }
+  </style>
+  <rect class="ws-sq" x="4" y="4" width="56" height="56" rx="14"/>
+  <path d="M33 19H22a3 3 0 0 0-3 3v20a3 3 0 0 0 3 3h16a3 3 0 0 0 3-3V27z" fill="#fff"/>
+</svg>

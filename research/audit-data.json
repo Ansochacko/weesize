@@ -1,0 +1,868 @@
+[
+  {
+    "name": "Compress PDF",
+    "weesize": {
+      "url": "http://127.0.0.1:5000/compress-pdf",
+      "loadTimeMs": 1094,
+      "requestsCount": 34,
+      "totalBytes": 4707475,
+      "externalRequestsCount": 0,
+      "title": "Compress PDF – Pick an Exact Size, Free | Weesize",
+      "metaDesc": "Shrink PDFs to the exact size you need, like 100 KB or 1 MB. Free, no upload, no sign-up. Text stays sharp and readable.",
+      "h1": "Get any file to the exact size you need.; All tools; Compress PDF",
+      "h2Count": 19,
+      "h2Sample": [
+        "Popular tools",
+        "Popular tools",
+        "Optimize",
+        "Organize"
+      ],
+      "wordCount": 373,
+      "jsonLdTypes": [
+        "raw"
+      ],
+      "canonical": "https://weesize.com/compress-pdf",
+      "screenshotDesktop": "weesize-compress-pdf-1440.png",
+      "screenshotMobile": "weesize-compress-pdf-390.png"
+    },
+    "ilove": {
+      "url": "https://www.ilovepdf.com/compress_pdf",
+      "loadTimeMs": 2971,
+      "requestsCount": 23,
+      "totalBytes": 2437364,
+      "thirdPartyHostsCount": 2,
+      "thirdPartySample": [
+        "www.googletagmanager.com",
+        "region1.google-analytics.com"
+      ],
+      "hasCookieBanner": false,
+      "adContainersCount": 2,
+      "title": "Compress PDF online. Same PDF quality less file size",
+      "metaDesc": "Compress PDF file to get the same PDF quality but less filesize. Compress or optimize PDF files online, easily and free.",
+      "h1": "Compress PDF files",
+      "h2Count": 1,
+      "h2Sample": [
+        "Reduce file size while optimizing for maximal PDF quality."
+      ],
+      "wordCount": 168,
+      "jsonLdTypes": [],
+      "canonical": "https://www.ilovepdf.com/compress_pdf",
+      "hreflangCount": 0,
+      "hreflangSample": [],
+      "screenshotDesktop": "ilovepdf-compress-pdf-1440.png",
+      "screenshotMobile": "ilovepdf-compress-pdf-390.png"
+    }
+  },
+  {
+    "name": "Merge PDF",
+    "weesize": {
+      "url": "http://127.0.0.1:5000/merge-pdf",
+      "loadTimeMs": 1082,
+      "requestsCount": 34,
+      "totalBytes": 4706749,
+      "externalRequestsCount": 0,
+      "title": "Merge PDF – Combine Files Free, No Upload | Weesize",
+      "metaDesc": "Combine PDFs in any order with drag and drop. Free, no limits, no sign-up. Files stay on your device the whole time.",
+      "h1": "Get any file to the exact size you need.; All tools; Merge PDF",
+      "h2Count": 19,
+      "h2Sample": [
+        "Popular tools",
+        "Popular tools",
+        "Optimize",
+        "Organize"
+      ],
+      "wordCount": 331,
+      "jsonLdTypes": [
+        "raw"
+      ],
+      "canonical": "https://weesize.com/merge-pdf",
+      "screenshotDesktop": "weesize-merge-pdf-1440.png",
+      "screenshotMobile": "weesize-merge-pdf-390.png"
+    },
+    "ilove": {
+      "url": "https://www.ilovepdf.com/merge_pdf",
+      "loadTimeMs": 142,
+      "requestsCount": 23,
+      "totalBytes": 2436317,
+      "thirdPartyHostsCount": 2,
+      "thirdPartySample": [
+        "www.googletagmanager.com",
+        "region1.google-analytics.com"
+      ],
+      "hasCookieBanner": false,
+      "adContainersCount": 2,
+      "title": "Merge PDF files online. Free service to merge PDF",
+      "metaDesc": "Select multiple PDF files and merge them in seconds. Merge & combine PDF files online, easily and free.",
+      "h1": "Merge PDF files",
+      "h2Count": 1,
+      "h2Sample": [
+        "Combine PDFs in the order you want with the easiest PDF merger available."
+      ],
+      "wordCount": 172,
+      "jsonLdTypes": [],
+      "canonical": "https://www.ilovepdf.com/merge_pdf",
+      "hreflangCount": 0,
+      "hreflangSample": [],
+      "screenshotDesktop": "ilovepdf-merge-pdf-1440.png",
+      "screenshotMobile": "ilovepdf-merge-pdf-390.png"
+    }
+  },
+  {
+    "name": "Split PDF",
+    "weesize": {
+      "url": "http://127.0.0.1:5000/split-pdf",
+      "loadTimeMs": 1123,
+      "requestsCount": 34,
+      "totalBytes": 4706441,
+      "externalRequestsCount": 0,
+      "title": "Split PDF — Weesize",
+      "metaDesc": "Split PDF pages in the browser with no upload. Keep a range and download only the pages you name.",
+      "h1": "Get any file to the exact size you need.; All tools; Split PDF",
+      "h2Count": 19,
+      "h2Sample": [
+        "Popular tools",
+        "Popular tools",
+        "Optimize",
+        "Organize"
+      ],
+      "wordCount": 324,
+      "jsonLdTypes": [
+        "raw"
+      ],
+      "canonical": "https://weesize.com/split-pdf",
+      "screenshotDesktop": "weesize-split-pdf-1440.png",
+      "screenshotMobile": "weesize-split-pdf-390.png"
+    },
+    "ilove": {
+      "url": "https://www.ilovepdf.com/split_pdf",
+      "loadTimeMs": 151,
+      "requestsCount": 23,
+      "totalBytes": 2460547,
+      "thirdPartyHostsCount": 2,
+      "thirdPartySample": [
+        "www.googletagmanager.com",
+        "region1.google-analytics.com"
+      ],
+      "hasCookieBanner": false,
+      "adContainersCount": 2,
+      "title": "Split PDF files online. Free service to split PDF",
+      "metaDesc": "Split a PDF file by page ranges or extract all PDF pages to multiple PDF files. Split or extract PDF files online, easily and free.",
+      "h1": "Split PDF file",
+      "h2Count": 1,
+      "h2Sample": [
+        "Separate one page or a whole set for easy conversion into independent PDF files."
+      ],
+      "wordCount": 173,
+      "jsonLdTypes": [],
+      "canonical": "https://www.ilovepdf.com/split_pdf",
+      "hreflangCount": 0,
+      "hreflangSample": [],
+      "screenshotDesktop": "ilovepdf-split-pdf-1440.png",
+      "screenshotMobile": "ilovepdf-split-pdf-390.png"
+    }
+  },
+  {
+    "name": "JPG to PDF",
+    "weesize": {
+      "url": "http://127.0.0.1:5000/jpg-to-pdf",
+      "loadTimeMs": 1068,
+      "requestsCount": 34,
+      "totalBytes": 4706548,
+      "externalRequestsCount": 0,
+      "title": "JPG to PDF – Free, Instant, No Upload | Weesize",
+      "metaDesc": "Turn photos into one PDF in seconds. Set page size and margins, reduce file size automatically. Free and fully private.",
+      "h1": "Get any file to the exact size you need.; All tools; JPG to PDF",
+      "h2Count": 19,
+      "h2Sample": [
+        "Popular tools",
+        "Popular tools",
+        "Optimize",
+        "Organize"
+      ],
+      "wordCount": 328,
+      "jsonLdTypes": [
+        "raw"
+      ],
+      "canonical": "https://weesize.com/jpg-to-pdf",
+      "screenshotDesktop": "weesize-jpg-to-pdf-1440.png",
+      "screenshotMobile": "weesize-jpg-to-pdf-390.png"
+    },
+    "ilove": {
+      "url": "https://www.ilovepdf.com/jpg_to_pdf",
+      "loadTimeMs": 151,
+      "requestsCount": 23,
+      "totalBytes": 2459002,
+      "thirdPartyHostsCount": 2,
+      "thirdPartySample": [
+        "www.googletagmanager.com",
+        "region1.google-analytics.com"
+      ],
+      "hasCookieBanner": false,
+      "adContainersCount": 2,
+      "title": "Convert JPG to PDF. Images JPG to PDF online",
+      "metaDesc": "Convert JPG images to PDF, rotate them or set a page margin. Convert JPG to PDF online, easily and free.",
+      "h1": "JPG to PDF",
+      "h2Count": 1,
+      "h2Sample": [
+        "Convert JPG images to PDF in seconds. Easily adjust orientation and margins."
+      ],
+      "wordCount": 172,
+      "jsonLdTypes": [],
+      "canonical": "https://www.ilovepdf.com/jpg_to_pdf",
+      "hreflangCount": 0,
+      "hreflangSample": [],
+      "screenshotDesktop": "ilovepdf-jpg-to-pdf-1440.png",
+      "screenshotMobile": "ilovepdf-jpg-to-pdf-390.png"
+    }
+  },
+  {
+    "name": "PDF to JPG",
+    "weesize": {
+      "url": "http://127.0.0.1:5000/pdf-to-jpg",
+      "loadTimeMs": 1146,
+      "requestsCount": 35,
+      "totalBytes": 5180008,
+      "externalRequestsCount": 0,
+      "title": "PDF to JPG — Weesize",
+      "metaDesc": "Save PDF pages as JPG images in the browser with no upload. Each page is rendered on this device.",
+      "h1": "Get any file to the exact size you need.; All tools; PDF to JPG",
+      "h2Count": 19,
+      "h2Sample": [
+        "Popular tools",
+        "Popular tools",
+        "Optimize",
+        "Organize"
+      ],
+      "wordCount": 320,
+      "jsonLdTypes": [
+        "raw"
+      ],
+      "canonical": "https://weesize.com/pdf-to-jpg",
+      "screenshotDesktop": "weesize-pdf-to-jpg-1440.png",
+      "screenshotMobile": "weesize-pdf-to-jpg-390.png"
+    },
+    "ilove": {
+      "url": "https://www.ilovepdf.com/pdf_to_jpg",
+      "loadTimeMs": 387,
+      "requestsCount": 23,
+      "totalBytes": 2443374,
+      "thirdPartyHostsCount": 2,
+      "thirdPartySample": [
+        "www.googletagmanager.com",
+        "region1.google-analytics.com"
+      ],
+      "hasCookieBanner": false,
+      "adContainersCount": 2,
+      "title": "Convert PDF to JPG. Extract images from a PDF",
+      "metaDesc": "Convert all pages in a PDF to JPG or extract all images in a PDF to JPG. Convert or extract PDF to JPG online, easily and free.",
+      "h1": "PDF to JPG",
+      "h2Count": 1,
+      "h2Sample": [
+        "Convert each PDF page into a JPG or extract all images contained in a PDF."
+      ],
+      "wordCount": 174,
+      "jsonLdTypes": [],
+      "canonical": "https://www.ilovepdf.com/pdf_to_jpg",
+      "hreflangCount": 0,
+      "hreflangSample": [],
+      "screenshotDesktop": "ilovepdf-pdf-to-jpg-1440.png",
+      "screenshotMobile": "ilovepdf-pdf-to-jpg-390.png"
+    }
+  },
+  {
+    "name": "PDF to Word",
+    "weesize": {
+      "url": "http://127.0.0.1:5000/pdf-to-word",
+      "loadTimeMs": 1069,
+      "requestsCount": 35,
+      "totalBytes": 5180357,
+      "externalRequestsCount": 0,
+      "title": "PDF to Word – Free, No Upload | Weesize",
+      "metaDesc": "Convert PDF to editable Word documents right in your browser. Free, no sign-up, and your file is never uploaded.",
+      "h1": "Get any file to the exact size you need.; All tools; PDF to Word",
+      "h2Count": 19,
+      "h2Sample": [
+        "Popular tools",
+        "Popular tools",
+        "Optimize",
+        "Organize"
+      ],
+      "wordCount": 342,
+      "jsonLdTypes": [
+        "raw"
+      ],
+      "canonical": "https://weesize.com/pdf-to-word",
+      "screenshotDesktop": "weesize-pdf-to-word-1440.png",
+      "screenshotMobile": "weesize-pdf-to-word-390.png"
+    },
+    "ilove": {
+      "url": "https://www.ilovepdf.com/pdf_to_word",
+      "loadTimeMs": 156,
+      "requestsCount": 23,
+      "totalBytes": 2440823,
+      "thirdPartyHostsCount": 2,
+      "thirdPartySample": [
+        "www.googletagmanager.com",
+        "region1.google-analytics.com"
+      ],
+      "hasCookieBanner": false,
+      "adContainersCount": 2,
+      "title": "PDF to WORD | Convert PDF to Word online for free",
+      "metaDesc": "Convert PDF to editable Word documents for free. PDF to Word conversion is fast, secure and almost 100% accurate. Convert scanned PDF to DOC keeping the layout.",
+      "h1": "PDF to WORD Converter",
+      "h2Count": 1,
+      "h2Sample": [
+        "Convert your PDF to WORD documents with incredible accuracy.\nPowered by Solid Documents."
+      ],
+      "wordCount": 173,
+      "jsonLdTypes": [],
+      "canonical": "https://www.ilovepdf.com/pdf_to_word",
+      "hreflangCount": 0,
+      "hreflangSample": [],
+      "screenshotDesktop": "ilovepdf-pdf-to-word-1440.png",
+      "screenshotMobile": "ilovepdf-pdf-to-word-390.png"
+    }
+  },
+  {
+    "name": "Word to PDF",
+    "weesize": {
+      "url": "http://127.0.0.1:5000/word-to-pdf",
+      "loadTimeMs": 1060,
+      "requestsCount": 35,
+      "totalBytes": 5180299,
+      "externalRequestsCount": 0,
+      "title": "Word to PDF — Weesize",
+      "metaDesc": "Turn a Word file into a PDF in the browser with no upload. Words are kept; complex layouts may shift.",
+      "h1": "Get any file to the exact size you need.; All tools; Word to PDF",
+      "h2Count": 19,
+      "h2Sample": [
+        "Popular tools",
+        "Popular tools",
+        "Optimize",
+        "Organize"
+      ],
+      "wordCount": 335,
+      "jsonLdTypes": [
+        "raw"
+      ],
+      "canonical": "https://weesize.com/word-to-pdf",
+      "screenshotDesktop": "weesize-word-to-pdf-1440.png",
+      "screenshotMobile": "weesize-word-to-pdf-390.png"
+    },
+    "ilove": {
+      "url": "https://www.ilovepdf.com/word_to_pdf",
+      "loadTimeMs": 186,
+      "requestsCount": 23,
+      "totalBytes": 2438260,
+      "thirdPartyHostsCount": 2,
+      "thirdPartySample": [
+        "www.googletagmanager.com",
+        "region1.google-analytics.com"
+      ],
+      "hasCookieBanner": false,
+      "adContainersCount": 2,
+      "title": "Convert Word to PDF. Documents DOC to PDF",
+      "metaDesc": "Convert documents Word to PDF exactly as the original PDF file. Convert Word to PDF online, easily and free.",
+      "h1": "Convert WORD to PDF",
+      "h2Count": 1,
+      "h2Sample": [
+        "Make DOC and DOCX files easy to read by converting them to PDF."
+      ],
+      "wordCount": 174,
+      "jsonLdTypes": [],
+      "canonical": "https://www.ilovepdf.com/word_to_pdf",
+      "hreflangCount": 0,
+      "hreflangSample": [],
+      "screenshotDesktop": "ilovepdf-word-to-pdf-1440.png",
+      "screenshotMobile": "ilovepdf-word-to-pdf-390.png"
+    }
+  },
+  {
+    "name": "Sign PDF",
+    "weesize": {
+      "url": "http://127.0.0.1:5000/sign-pdf",
+      "loadTimeMs": 1093,
+      "requestsCount": 35,
+      "totalBytes": 5180426,
+      "externalRequestsCount": 0,
+      "title": "Sign PDF – Free, No Upload | Weesize",
+      "metaDesc": "Draw, type or upload your signature and sign PDFs in seconds. Free, no account, and your document never leaves your device.",
+      "h1": "Get any file to the exact size you need.; All tools; Sign PDF",
+      "h2Count": 19,
+      "h2Sample": [
+        "Popular tools",
+        "Popular tools",
+        "Optimize",
+        "Organize"
+      ],
+      "wordCount": 328,
+      "jsonLdTypes": [
+        "raw"
+      ],
+      "canonical": "https://weesize.com/sign-pdf",
+      "screenshotDesktop": "weesize-sign-pdf-1440.png",
+      "screenshotMobile": "weesize-sign-pdf-390.png"
+    },
+    "ilove": {
+      "url": "https://www.ilovepdf.com/sign-pdf",
+      "loadTimeMs": 236,
+      "requestsCount": 42,
+      "totalBytes": 3860656,
+      "thirdPartyHostsCount": 4,
+      "thirdPartySample": [
+        "www.googletagmanager.com",
+        "region1.google-analytics.com",
+        "fonts.googleapis.com",
+        "fonts.gstatic.com"
+      ],
+      "hasCookieBanner": false,
+      "adContainersCount": 1,
+      "title": "Sign PDF online | Digital signature of documents.",
+      "metaDesc": "iLovePDF Signature is the easiest way to send, receive and manage electronic signatures securely. Get a complete eSignature solution to sign PDF.",
+      "h1": "Sign PDF",
+      "h2Count": 1,
+      "h2Sample": [
+        "Your tool to eSign documents. Sign a document yourself or send a signature request to others."
+      ],
+      "wordCount": 200,
+      "jsonLdTypes": [],
+      "canonical": "https://www.ilovepdf.com/sign-pdf",
+      "hreflangCount": 0,
+      "hreflangSample": [],
+      "screenshotDesktop": "ilovepdf-sign-pdf-1440.png",
+      "screenshotMobile": "ilovepdf-sign-pdf-390.png"
+    }
+  },
+  {
+    "name": "Organize pages",
+    "weesize": {
+      "url": "http://127.0.0.1:5000/organize-pdf",
+      "loadTimeMs": 1079,
+      "requestsCount": 34,
+      "totalBytes": 4706531,
+      "externalRequestsCount": 0,
+      "title": "Organize PDF — Weesize",
+      "metaDesc": "Organize PDF pages in the browser with no upload. Reorder, rotate, and delete pages, then download.",
+      "h1": "Get any file to the exact size you need.; All tools; Organize PDF",
+      "h2Count": 19,
+      "h2Sample": [
+        "Popular tools",
+        "Popular tools",
+        "Optimize",
+        "Organize"
+      ],
+      "wordCount": 320,
+      "jsonLdTypes": [
+        "raw"
+      ],
+      "canonical": "https://weesize.com/organize-pdf",
+      "screenshotDesktop": "weesize-organize-pages-1440.png",
+      "screenshotMobile": "weesize-organize-pages-390.png"
+    },
+    "ilove": {
+      "url": "https://www.ilovepdf.com/organize-pdf",
+      "loadTimeMs": 358,
+      "requestsCount": 23,
+      "totalBytes": 2442117,
+      "thirdPartyHostsCount": 2,
+      "thirdPartySample": [
+        "www.googletagmanager.com",
+        "region1.google-analytics.com"
+      ],
+      "hasCookieBanner": false,
+      "adContainersCount": 2,
+      "title": "Organize PDF files online. Free tool to sort PDF pages",
+      "metaDesc": "Sort the pages of your PDF however you need. You can also add or remove PDF pages in our PDF organizer at the click of a mouse. Just in a few seconds and free.",
+      "h1": "Organize PDF",
+      "h2Count": 1,
+      "h2Sample": [
+        "Sort, add and delete PDF pages.\nDrag and drop the page thumbnails and sort them in our PDF organizer."
+      ],
+      "wordCount": 177,
+      "jsonLdTypes": [],
+      "canonical": "https://www.ilovepdf.com/organize-pdf",
+      "hreflangCount": 0,
+      "hreflangSample": [],
+      "screenshotDesktop": "ilovepdf-organize-pages-1440.png",
+      "screenshotMobile": "ilovepdf-organize-pages-390.png"
+    }
+  },
+  {
+    "name": "Rotate PDF",
+    "weesize": {
+      "url": "http://127.0.0.1:5000/rotate-pdf",
+      "loadTimeMs": 1115,
+      "requestsCount": 35,
+      "totalBytes": 5179911,
+      "externalRequestsCount": 0,
+      "title": "Rotate PDF — Weesize",
+      "metaDesc": "Rotate PDF pages in the browser with no upload. Turn every page a quarter turn and download.",
+      "h1": "Get any file to the exact size you need.; All tools; Rotate PDF",
+      "h2Count": 19,
+      "h2Sample": [
+        "Popular tools",
+        "Popular tools",
+        "Optimize",
+        "Organize"
+      ],
+      "wordCount": 312,
+      "jsonLdTypes": [
+        "raw"
+      ],
+      "canonical": "https://weesize.com/rotate-pdf",
+      "screenshotDesktop": "weesize-rotate-pdf-1440.png",
+      "screenshotMobile": "weesize-rotate-pdf-390.png"
+    },
+    "ilove": {
+      "url": "https://www.ilovepdf.com/rotate_pdf",
+      "loadTimeMs": 161,
+      "requestsCount": 23,
+      "totalBytes": 2446943,
+      "thirdPartyHostsCount": 2,
+      "thirdPartySample": [
+        "www.googletagmanager.com",
+        "region1.google-analytics.com"
+      ],
+      "hasCookieBanner": false,
+      "adContainersCount": 2,
+      "title": "Rotate PDF online for free",
+      "metaDesc": "Rotate your PDF files as you want. Rotate multiple PDF at same time defining degrees. Select to rotate only vertical PDF or horizontal ones",
+      "h1": "Rotate PDF",
+      "h2Count": 1,
+      "h2Sample": [
+        "Rotate your PDFs the way you need them. You can even rotate multiple PDFs at once!"
+      ],
+      "wordCount": 174,
+      "jsonLdTypes": [],
+      "canonical": "https://www.ilovepdf.com/rotate_pdf",
+      "hreflangCount": 0,
+      "hreflangSample": [],
+      "screenshotDesktop": "ilovepdf-rotate-pdf-1440.png",
+      "screenshotMobile": "ilovepdf-rotate-pdf-390.png"
+    }
+  },
+  {
+    "name": "Protect PDF",
+    "weesize": {
+      "url": "http://127.0.0.1:5000/protect-pdf",
+      "loadTimeMs": 1114,
+      "requestsCount": 35,
+      "totalBytes": 5180131,
+      "externalRequestsCount": 0,
+      "title": "Protect PDF — Weesize",
+      "metaDesc": "Read how PDF passwords work, with no upload. This version will not pretend a file is encrypted.",
+      "h1": "Get any file to the exact size you need.; All tools; Protect PDF",
+      "h2Count": 19,
+      "h2Sample": [
+        "Popular tools",
+        "Popular tools",
+        "Optimize",
+        "Organize"
+      ],
+      "wordCount": 311,
+      "jsonLdTypes": [
+        "raw"
+      ],
+      "canonical": "https://weesize.com/protect-pdf",
+      "screenshotDesktop": "weesize-protect-pdf-1440.png",
+      "screenshotMobile": "weesize-protect-pdf-390.png"
+    },
+    "ilove": {
+      "url": "https://www.ilovepdf.com/protect-pdf",
+      "loadTimeMs": 360,
+      "requestsCount": 23,
+      "totalBytes": 2458661,
+      "thirdPartyHostsCount": 2,
+      "thirdPartySample": [
+        "www.googletagmanager.com",
+        "region1.google-analytics.com"
+      ],
+      "hasCookieBanner": false,
+      "adContainersCount": 2,
+      "title": "Protect PDF. Tool to encrypt PDF with password",
+      "metaDesc": "Encrypt and protect PDF with a password to safeguard sensitive information. Secure your PDF files online, with ease and without registration.",
+      "h1": "Protect PDF file",
+      "h2Count": 1,
+      "h2Sample": [
+        "Encrypt your PDF with a password to keep sensitive data confidential."
+      ],
+      "wordCount": 170,
+      "jsonLdTypes": [],
+      "canonical": "https://www.ilovepdf.com/protect-pdf",
+      "hreflangCount": 0,
+      "hreflangSample": [],
+      "screenshotDesktop": "ilovepdf-protect-pdf-1440.png",
+      "screenshotMobile": "ilovepdf-protect-pdf-390.png"
+    }
+  },
+  {
+    "name": "Unlock PDF",
+    "weesize": {
+      "url": "http://127.0.0.1:5000/unlock-pdf",
+      "loadTimeMs": 1081,
+      "requestsCount": 35,
+      "totalBytes": 5180123,
+      "externalRequestsCount": 0,
+      "title": "Unlock PDF — Weesize",
+      "metaDesc": "See how to unlock a PDF you can already open, with no upload. This app will not guess a password.",
+      "h1": "Get any file to the exact size you need.; All tools; Unlock PDF",
+      "h2Count": 19,
+      "h2Sample": [
+        "Popular tools",
+        "Popular tools",
+        "Optimize",
+        "Organize"
+      ],
+      "wordCount": 314,
+      "jsonLdTypes": [
+        "raw"
+      ],
+      "canonical": "https://weesize.com/unlock-pdf",
+      "screenshotDesktop": "weesize-unlock-pdf-1440.png",
+      "screenshotMobile": "weesize-unlock-pdf-390.png"
+    },
+    "ilove": {
+      "url": "https://www.ilovepdf.com/unlock_pdf",
+      "loadTimeMs": 175,
+      "requestsCount": 23,
+      "totalBytes": 2435982,
+      "thirdPartyHostsCount": 2,
+      "thirdPartySample": [
+        "www.googletagmanager.com",
+        "region1.google-analytics.com"
+      ],
+      "hasCookieBanner": false,
+      "adContainersCount": 2,
+      "title": "Unlock PDF files. Remove PDF password",
+      "metaDesc": "Remove PDF password online. Remove security from password protected PDF files.",
+      "h1": "Unlock PDF",
+      "h2Count": 1,
+      "h2Sample": [
+        "Remove PDF password security, giving you the freedom to use your PDFs as you want."
+      ],
+      "wordCount": 173,
+      "jsonLdTypes": [],
+      "canonical": "https://www.ilovepdf.com/unlock_pdf",
+      "hreflangCount": 0,
+      "hreflangSample": [],
+      "screenshotDesktop": "ilovepdf-unlock-pdf-1440.png",
+      "screenshotMobile": "ilovepdf-unlock-pdf-390.png"
+    }
+  },
+  {
+    "name": "OCR",
+    "weesize": {
+      "url": "http://127.0.0.1:5000/ocr-pdf",
+      "loadTimeMs": 1554,
+      "requestsCount": 35,
+      "totalBytes": 5180038,
+      "externalRequestsCount": 0,
+      "title": "OCR PDF — Weesize",
+      "metaDesc": "See the honest limit for OCR PDF, with no upload. This version does not invent a text layer for a scan.",
+      "h1": "Get any file to the exact size you need.; All tools; OCR PDF",
+      "h2Count": 19,
+      "h2Sample": [
+        "Popular tools",
+        "Popular tools",
+        "Optimize",
+        "Organize"
+      ],
+      "wordCount": 315,
+      "jsonLdTypes": [
+        "raw"
+      ],
+      "canonical": "https://weesize.com/ocr-pdf",
+      "screenshotDesktop": "weesize-ocr-1440.png",
+      "screenshotMobile": "weesize-ocr-390.png"
+    },
+    "ilove": {
+      "url": "https://www.ilovepdf.com/ocr-pdf",
+      "loadTimeMs": 222,
+      "requestsCount": 25,
+      "totalBytes": 2580294,
+      "thirdPartyHostsCount": 2,
+      "thirdPartySample": [
+        "www.googletagmanager.com",
+        "region1.google-analytics.com"
+      ],
+      "hasCookieBanner": false,
+      "adContainersCount": 2,
+      "title": "Make PDF searcheable. Online OCR tool.",
+      "metaDesc": "OCR your PDF to get text from scanned documents. Simply upload your PDF and recognize text automatically. Make your PDF searchable and selectable, for free.",
+      "h1": "OCR PDF",
+      "h2Count": 1,
+      "h2Sample": [
+        "Convert non-selectable PDF files into selectable and searchable PDF with high accuracy."
+      ],
+      "wordCount": 170,
+      "jsonLdTypes": [],
+      "canonical": "https://www.ilovepdf.com/ocr-pdf",
+      "hreflangCount": 0,
+      "hreflangSample": [],
+      "screenshotDesktop": "ilovepdf-ocr-1440.png",
+      "screenshotMobile": "ilovepdf-ocr-390.png"
+    }
+  },
+  {
+    "name": "Edit PDF",
+    "weesize": {
+      "url": "http://127.0.0.1:5000/edit-pdf",
+      "loadTimeMs": 1445,
+      "requestsCount": 35,
+      "totalBytes": 5180307,
+      "externalRequestsCount": 0,
+      "title": "Edit PDF — Weesize",
+      "metaDesc": "See what editing a PDF means here, with no upload. This version is not a full desktop editor.",
+      "h1": "Get any file to the exact size you need.; All tools; Edit PDF",
+      "h2Count": 19,
+      "h2Sample": [
+        "Popular tools",
+        "Popular tools",
+        "Optimize",
+        "Organize"
+      ],
+      "wordCount": 325,
+      "jsonLdTypes": [
+        "raw"
+      ],
+      "canonical": "https://weesize.com/edit-pdf",
+      "screenshotDesktop": "weesize-edit-pdf-1440.png",
+      "screenshotMobile": "weesize-edit-pdf-390.png"
+    },
+    "ilove": {
+      "url": "https://www.ilovepdf.com/edit-pdf",
+      "loadTimeMs": 237,
+      "requestsCount": 26,
+      "totalBytes": 3297357,
+      "thirdPartyHostsCount": 2,
+      "thirdPartySample": [
+        "www.googletagmanager.com",
+        "region1.google-analytics.com"
+      ],
+      "hasCookieBanner": false,
+      "adContainersCount": 1,
+      "title": "Edit PDF | Online PDF Editor and Form Filler",
+      "metaDesc": "Free online PDF Editor. Easily edit documents and add text, shapes, comments and highlights to a PDF file. Fill out PDF forms and modify your PDF by adding annotations.",
+      "h1": "PDF Editor",
+      "h2Count": 1,
+      "h2Sample": [
+        "Edit PDF by adding text, shapes, comments and highlights. Your secure and simple tool to edit PDF."
+      ],
+      "wordCount": 175,
+      "jsonLdTypes": [],
+      "canonical": "https://www.ilovepdf.com/edit-pdf",
+      "hreflangCount": 0,
+      "hreflangSample": [],
+      "screenshotDesktop": "ilovepdf-edit-pdf-1440.png",
+      "screenshotMobile": "ilovepdf-edit-pdf-390.png"
+    }
+  },
+  {
+    "name": "Watermark",
+    "weesize": {
+      "url": "http://127.0.0.1:5000/watermark-pdf",
+      "loadTimeMs": 1533,
+      "requestsCount": 35,
+      "totalBytes": 5180193,
+      "externalRequestsCount": 0,
+      "title": "Watermark PDF — Weesize",
+      "metaDesc": "Add a text watermark to a PDF in the browser with no upload. The words are drawn on the pages locally.",
+      "h1": "Get any file to the exact size you need.; All tools; Watermark PDF",
+      "h2Count": 19,
+      "h2Sample": [
+        "Popular tools",
+        "Popular tools",
+        "Optimize",
+        "Organize"
+      ],
+      "wordCount": 318,
+      "jsonLdTypes": [
+        "raw"
+      ],
+      "canonical": "https://weesize.com/watermark-pdf",
+      "screenshotDesktop": "weesize-watermark-1440.png",
+      "screenshotMobile": "weesize-watermark-390.png"
+    },
+    "ilove": {
+      "url": "https://www.ilovepdf.com/pdf_add_watermark",
+      "loadTimeMs": 345,
+      "requestsCount": 25,
+      "totalBytes": 2620324,
+      "thirdPartyHostsCount": 2,
+      "thirdPartySample": [
+        "www.googletagmanager.com",
+        "region1.google-analytics.com"
+      ],
+      "hasCookieBanner": false,
+      "adContainersCount": 2,
+      "title": "Add a watermark to a PDF. Add text or image to a PDF",
+      "metaDesc": "Choose an image or text to stamp over your PDF files. Select position, transparency and typography.",
+      "h1": "Add watermark into a PDF",
+      "h2Count": 1,
+      "h2Sample": [
+        "Stamp an image or text over your PDF in seconds. Choose the typography, transparency and position."
+      ],
+      "wordCount": 177,
+      "jsonLdTypes": [],
+      "canonical": "https://www.ilovepdf.com/pdf_add_watermark",
+      "hreflangCount": 0,
+      "hreflangSample": [],
+      "screenshotDesktop": "ilovepdf-watermark-1440.png",
+      "screenshotMobile": "ilovepdf-watermark-390.png"
+    }
+  },
+  {
+    "name": "Page numbers",
+    "weesize": {
+      "url": "http://127.0.0.1:5000/add-page-numbers-to-pdf",
+      "loadTimeMs": 1496,
+      "requestsCount": 35,
+      "totalBytes": 5180547,
+      "externalRequestsCount": 0,
+      "title": "Add page numbers to PDF — Weesize",
+      "metaDesc": "Add page numbers to a PDF in the browser with no upload. Choose a start number and skip a cover if you need to.",
+      "h1": "Get any file to the exact size you need.; All tools; Add page numbers to PDF",
+      "h2Count": 19,
+      "h2Sample": [
+        "Popular tools",
+        "Popular tools",
+        "Optimize",
+        "Organize"
+      ],
+      "wordCount": 329,
+      "jsonLdTypes": [
+        "raw"
+      ],
+      "canonical": "https://weesize.com/add-page-numbers-to-pdf",
+      "screenshotDesktop": "weesize-page-numbers-1440.png",
+      "screenshotMobile": "weesize-page-numbers-390.png"
+    },
+    "ilove": {
+      "url": "https://www.ilovepdf.com/add_pdf_page_number",
+      "loadTimeMs": 297,
+      "requestsCount": 25,
+      "totalBytes": 2617119,
+      "thirdPartyHostsCount": 2,
+      "thirdPartySample": [
+        "www.googletagmanager.com",
+        "region1.google-analytics.com"
+      ],
+      "hasCookieBanner": false,
+      "adContainersCount": 2,
+      "title": "Add page numbers to a PDF file online",
+      "metaDesc": "Add page numbers to a PDF file. Choose position, dimensions, format and typography!",
+      "h1": "Add PDF page numbers",
+      "h2Count": 1,
+      "h2Sample": [
+        "Add page numbers into PDFs with ease. Choose your positions, dimensions, typography."
+      ],
+      "wordCount": 172,
+      "jsonLdTypes": [],
+      "canonical": "https://www.ilovepdf.com/add_pdf_page_number",
+      "hreflangCount": 0,
+      "hreflangSample": [],
+      "screenshotDesktop": "ilovepdf-page-numbers-1440.png",
+      "screenshotMobile": "ilovepdf-page-numbers-390.png"
+    }
+  }
+]

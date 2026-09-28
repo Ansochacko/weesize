@@ -1,0 +1,30 @@
+{
+  "id": "example-application-pdf",
+  "country": "Exampleland",
+  "organization": "Example applications desk",
+  "portal": "Example portal",
+  "documentType": "application PDF",
+  "requirements": {
+    "formats": ["application/pdf"],
+    "minBytes": null,
+    "maxBytes": null,
+    "minWidth": null,
+    "maxWidth": null,
+    "minHeight": null,
+    "maxHeight": null,
+    "widthMm": null,
+    "heightMm": null,
+    "minDpi": null,
+    "colorMode": null,
+    "background": null,
+    "allowBackgroundEdit": null,
+    "headSizePercent": null,
+    "maxPages": null,
+    "notes": "PLACEHOLDER — not an official requirement. File-size caps for job or visa forms are not guessed here."
+  },
+  "sourceUrl": "https://example.invalid/not-an-official-source",
+  "lastVerified": "",
+  "verifiedBy": "",
+  "status": "draft",
+  "placeholder": true
+}

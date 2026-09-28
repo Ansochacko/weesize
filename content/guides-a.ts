@@ -1,0 +1,186 @@
+export interface GuideSeed {
+  slug: string;
+  h1: string;
+  keyword: string;
+  description: string;
+  essay: string;
+  steps: [string, string, string];
+  points: [string, string, string];
+  facts: [string, string, string, string, string];
+  related: string[];
+}
+
+const local = 'The work this guide points to stays in the browser. No upload is required to follow it.';
+
+export const GUIDES: GuideSeed[] = [
+  {
+    slug: 'why-is-my-pdf-so-large',
+    h1: 'Why is my PDF so large?',
+    keyword: 'why is my pdf so large',
+    description: 'Why a PDF is large, and what actually shrinks it. No upload. Images, not fonts, are usually the weight.',
+    essay: `A PDF is a container. Text, fonts, and vector drawings are usually small. Photographs and scans are not. A phone picture placed on a page can be several megabytes, and ten of those become a file people cannot mail. A “print to PDF” from a browser can also embed a huge image of the page instead of the text. Open the file and ask what you see: if you can select the words, the text is real and the size is probably pictures. If you cannot select the words, the page is a picture, and that picture is the size.\n\nCompressing works by rewriting those pictures at a smaller pixel size and a stronger JPEG encode, then keeping the result only when it is smaller. It does not retype the document. A 2 KB text file that is “too big” is not a compression problem. A 40 MB scan is. ${local}`,
+    steps: ['Select a word. If you cannot, the page is a picture.', 'Note which pages hold photos or scans.', 'Compress those images, or export the text again from the original program.'],
+    points: ['Pictures dominate file size.', 'Selectable text is already efficient.', 'A fresh export beats a second squeeze of a broken file.'],
+    facts: [
+      'Reading about file size does not upload your PDF. The compressor this guide links to does not either.',
+      'The usual change is a smaller image inside the same pages. Fonts and vectors are rarely the bulk.',
+      'Do not keep recompressing a text-only file and expect it to halve. There is nothing left to remove.',
+      'Compare byte size before and after, then select a sentence. If selection broke, you rasterized the page by accident.',
+      'After the app loads, you can compress with Wi-Fi off. The size of the PDF never needed a server to be explained.',
+    ],
+    related: ['compress-pdf', 'pdf-to-jpg', 'repair-pdf'],
+  },
+  {
+    slug: 'reduce-pdf-size-without-losing-quality',
+    h1: 'Reduce PDF size without losing quality',
+    keyword: 'reduce pdf size without losing quality',
+    description: 'How to reduce PDF size without ruining text. No upload. Shrink images, and stop when the page is still readable.',
+    essay: `Quality in a PDF is not a single slider. Text drawn as text stays sharp at any zoom. A scan is a grid of pixels, and making that grid smaller is what reduces size. The loss shows up in photos and in small type that was never real text. Start with the lighter pass. Read a heading and a signature. Only then try a stronger pass. If the new file is not smaller, keep the original. That rule prevents a “compression” that only adds a second blurry copy.\n\nThere is no honest score that says 92 percent quality unless something measured the pages. This app does not invent that score. Your eyes on the actual page are the check. ${local}`,
+    steps: ['Compress with the lighter setting first.', 'Read text and look at a photo at the size you will send.', 'Stop when another pass hurts the page more than it helps the byte count.'],
+    points: ['Text can stay sharp while images shrink.', 'A smaller file that cannot be read is not a success.', 'The original remains when the new file is not smaller.'],
+    facts: [
+      'This approach does not upload the PDF to judge its quality.',
+      'Images change. Text operators stay. You should still read the page, because a scan’s letters are images.',
+      'Do not chase a tiny size for a page someone must verify. A readable larger file is the better deliverable.',
+      'Zoom to the signature. If the ink breaks into blocks, go back one step.',
+      'The same check works offline after the tool has loaded.',
+    ],
+    related: ['compress-pdf', 'compress-pdf-to-200kb', 'compress-image'],
+  },
+  {
+    slug: 'is-it-safe-to-upload-pdfs',
+    h1: 'Is it safe to upload PDFs to online tools?',
+    keyword: 'is it safe to upload pdfs',
+    description: 'When uploading a PDF is a bad trade. No upload on this site. The file becomes a copy someone else holds.',
+    essay: `Uploading a PDF means a copy exists on a computer you do not control. For a flyer you already published, that may be fine. For a contract, a medical letter, a tax form, or an identity scan, it is a new copy with the operator’s retention, their staff, their breach, and their subprocessors. A privacy policy can describe that. It cannot undo it. “We delete files after two hours” is a promise about a copy that already left.\n\nThe safer design is a tool that never makes the request. You can test it: load the page, disconnect, and finish the job. If the tool refuses until you reconnect, it was using a server. This site is built so that test passes after the app has loaded. ${local}`,
+    steps: ['Ask whether this file is already public.', 'If it is not, do not put it in an upload form.', 'Use a local tool and confirm it still works with the network off.'],
+    points: ['Upload creates a copy you do not hold.', 'Deletion policies apply after the copy exists.', 'The offline test is stronger than a badge.'],
+    facts: [
+      'This page does not ask you to upload a sample in order to learn the lesson.',
+      'Nothing about the article changes your file. The linked tools run locally.',
+      'A lock icon on a website only encrypts the transfer. The server still receives the file.',
+      'Disconnect after load and compress a dummy file. A finished download is the evidence.',
+      'The article stays readable offline. A tool that demands the network to “process” is the case to avoid.',
+    ],
+    related: ['compress-pdf-without-uploading', 'privacy', 'merge-pdf'],
+  },
+  {
+    slug: 'how-to-redact-a-pdf-properly',
+    h1: 'How to redact a PDF properly',
+    keyword: 'how to redact a pdf',
+    description: 'How real PDF redaction works. No upload. Paint is not removal, and this version will not fake it.',
+    essay: `Redaction removes information. In a PDF that means the text operators, the image pixels, and the metadata that still contain the secret are gone, not merely covered. A black rectangle drawn in a editor often sits on top of the text. Select all, or search for the name, and the name is still there. People have filed those files in public dockets.\n\nA proper tool deletes the content and then lets you search to prove the words are absent. This version does not do that pass, and it will not draw the rectangle instead. If you need redaction today, use a desktop tool that documents removal, on a machine you control, and test by searching. Do not upload the unredacted file to a website in order to learn. ${local}`,
+    steps: ['Search the file for the secret before you start.', 'Remove the content with a tool that deletes, not one that only draws.', 'Search again. If the word is found, it was not redacted.'],
+    points: ['Covering text leaves the text.', 'Search is the test.', 'This app will not pretend a box is redaction.'],
+    facts: [
+      'The guide does not upload the document you need to redact.',
+      'This version changes nothing in the file, because a cosmetic mark would be a false redaction.',
+      'Highlight, crop, and watermark are the wrong tools for a name or an account number.',
+      'After any redaction done elsewhere, search for the secret. A hit means you are not done.',
+      'You can read the warning offline. The refusal to fake redaction does not need a network.',
+    ],
+    related: ['redact-pdf', 'crop-pdf', 'compress-pdf'],
+  },
+  {
+    slug: 'why-black-boxes-fail-at-redaction',
+    h1: 'Why black boxes fail at redaction',
+    keyword: 'black box pdf redaction',
+    description: 'Why a black box on a PDF fails. No upload. The text underneath is still in the file.',
+    essay: `A black box is a drawing. PDF readers paint it after, or before, the text, but the text object remains in the content stream. Copy and paste ignores the ink. So does search. So do some converters that “helpfully” extract text. The box is a costume.\n\nThe same failure happens with white rectangles, highlighter marks, and opaque images placed on top. Compression does not fix it; shrinking a page can even leave the hidden text easier to extract because the picture changed and the text did not. If you have already sent a boxed file, assume the secret left with it. ${local}`,
+    steps: ['Draw nothing and search for the word.', 'If a box is already there, search anyway.', 'Replace the file with one where search finds nothing, produced by real removal.'],
+    points: ['Ink order is not deletion.', 'Search and copy see through the box.', 'Compression is unrelated to secrecy.'],
+    facts: [
+      'Explaining the failure does not require uploading an example that still contains the secret.',
+      'This site will not add a black box tool, because the box would not remove the text.',
+      'Do not ship a boxed PDF and call it redacted in a cover note.',
+      'Select the boxed area. If the caret still finds letters, the box failed.',
+      'The explanation holds offline. The underlying text does not disappear when you disconnect.',
+    ],
+    related: ['redact-pdf', 'edit-pdf', 'compress-pdf'],
+  },
+  {
+    slug: 'make-a-scanned-pdf-searchable',
+    h1: 'How to make a scanned PDF searchable',
+    keyword: 'searchable scanned pdf',
+    description: 'What a searchable scan actually is. No upload. OCR adds a text layer; this version does not fake one.',
+    essay: `A scan is a picture. Search looks for text. Those only meet when a recognition step writes a hidden text layer aligned with the picture. Good OCR is close, not perfect, especially on handwriting, stamps, and faint type. You should be able to select a word and see the recognized text, and you should correct names before you trust them.\n\nThis version does not include an OCR engine, so it will not invent that layer. Uploading a passport or a medical scan to a free OCR site trades the search feature for a copy of the identity document. Prefer a recognizer that runs on your computer. Until then, keep the scan as a picture and do not claim it is searchable. ${local}`,
+    steps: ['Try to select a word. Failure means there is no text layer.', 'Run OCR on a machine you control if you need search.', 'Read the recognized names yourself before you file the PDF.'],
+    points: ['Pictures are not text.', 'OCR can be wrong.', 'This app will not pretend a scan became searchable.'],
+    facts: [
+      'The guide does not send your scan to a recognition API.',
+      'No text layer is added by the OCR page in this version. Search will still fail, honestly.',
+      'Do not trust a searchable claim you cannot check by selecting a word.',
+      'Select text after any OCR you do elsewhere. Correct the names that matter.',
+      'Offline, this page still will not fabricate a transcript.',
+    ],
+    related: ['ocr-pdf', 'pdf-to-word', 'scan-to-pdf'],
+  },
+  {
+    slug: 'pdf-vs-pdfa',
+    h1: 'PDF vs PDF/A explained',
+    keyword: 'pdf vs pdf/a',
+    description: 'How PDF/A differs from an ordinary PDF. No upload. This version will not stamp an archival label it did not check.',
+    essay: `An ordinary PDF is a flexible container. It may rely on fonts that are not embedded, on transparency, on JavaScript, or on encryption. PDF/A is a profile for long-term storage: the file should carry what it needs to look the same later, and it should avoid features that depend on a particular viewer’s extras. There are several PDF/A parts and conformance levels. A file is not PDF/A because someone renamed it or because a website added a badge.\n\nValidation is a real check against those rules. This app does not run that check, so it will not write a PDF/A claim. If a records office requires a level, use a validator and a converter you can run locally, and keep their report. ${local}`,
+    steps: ['Read which PDF/A part the recipient asked for.', 'Convert and validate with a tool that reports failures.', 'Do not rename an ordinary PDF and call it archival.'],
+    points: ['PDF/A is a rule set, not a file extension trick.', 'A badge without a validator is a claim.', 'This version will not make that claim.'],
+    facts: [
+      'Comparing the formats does not upload your record.',
+      'This version writes no PDF/A marker, because it does not validate one.',
+      'A portal that demands PDF/A will not be satisfied by a renamed file.',
+      'A validator’s report is the check. This page does not produce that report.',
+      'You can read the distinction offline. Validation is not silently sent away.',
+    ],
+    related: ['pdf-to-pdfa', 'repair-pdf', 'compress-pdf'],
+  },
+  {
+    slug: 'sign-a-pdf-without-printing',
+    h1: 'How to sign a PDF without printing',
+    keyword: 'sign a pdf without printing',
+    description: 'Ways to sign without printing, and what each one means. No upload. A picture of a signature is not a certificate.',
+    essay: `Printing, signing, and scanning produces a picture of ink. It is common, and some recipients accept it. It is not a cryptographic signature. A cryptographic signature uses a certificate, can be validated, and can show whether the bytes changed afterward. Typing your name in a form field is a third thing. Pasting a PNG of your handwriting is closer to the scan than to the certificate.\n\nThis version does not apply any of those, because doing it badly would look like a signature. If you need a certificate, use a tool that shows the certificate’s name. If a portal accepts a scanned ink page, scan it locally. Do not upload the unsigned contract to a site that offers “sign in one click” unless you have decided they may hold it. ${local}`,
+    steps: ['Ask which kind of signature the recipient accepts.', 'Use a certificate flow when they require validation.', 'Keep the unsigned original separate from the signed copy.'],
+    points: ['Ink, a typed name, and a certificate are different.', 'This app will not fake the certificate.', 'Uploading to get a signature creates another copy.'],
+    facts: [
+      'The guide does not collect a signature image from you.',
+      'The Sign PDF screen applies nothing in this version. An unchanged file is not signed.',
+      'Do not paste a signature PNG onto a contract and assume a court or a portal will treat it as a digital signature.',
+      'Open the signed file in a reader that shows signature panels, if a certificate was used. A missing panel means there is no certificate.',
+      'The distinction is the same offline. A fake stamp does not start working when the network returns.',
+    ],
+    related: ['sign-pdf', 'pdf-forms', 'scan-to-pdf'],
+  },
+  {
+    slug: 'compress-a-pdf-on-iphone',
+    h1: 'How to compress a PDF on iPhone',
+    keyword: 'compress a pdf on iphone',
+    description: 'Compress a PDF on iPhone in Safari. No upload. The phone runs the page; it does not send the file away.',
+    essay: `On an iPhone, Safari can run this site like any other browser app. Open the page, wait until it is ready, then add the PDF from Files. You can use the share sheet to bring a file in, and you can Add to Home Screen if you want an icon. The compression still happens on the phone. iCloud is a separate system: if you save the download back to iCloud, that is Apple’s sync, which you can see and choose. This page does not perform that upload for you.\n\nA store app that asks you to sign in before it will shrink a PDF is a different product. Use it only if you want that account. For a local shrink, the browser page is enough, including in airplane mode after it has loaded. ${local}`,
+    steps: ['Open this site in Safari and wait for the ready state.', 'Add the PDF from Files and compress.', 'Save the download where you choose. iCloud sync is a separate decision.'],
+    points: ['Safari is enough. No store account is required.', 'The PDF body is not posted by the compressor.', 'Airplane mode after load is the test.'],
+    facts: [
+      'Following these steps does not create an upload to this site.',
+      'The file is compressed in Safari’s memory. Saving to Files is the download.',
+      'Do not switch to an app that will not start until you create an account, if the goal was to avoid a copy.',
+      'Read a page on the phone after download, at the size you will send.',
+      'Turn on airplane mode after the ready state and compress a second file. It should finish.',
+    ],
+    related: ['compress-pdf-on-iphone', 'compress-pdf', 'scan-to-pdf'],
+  },
+  {
+    slug: 'best-image-format-for-the-web',
+    h1: 'Best image format for the web',
+    keyword: 'jpeg vs webp vs avif',
+    description: 'JPEG, WebP, AVIF, and PNG, without the folklore. No upload. Pick the format the page can show and the picture deserves.',
+    essay: `JPEG is the default for photographs. It throws away detail you are not meant to notice, and almost every form accepts it. WebP can be smaller at a similar look and can keep transparency, but some older tools still reject it. AVIF can be smaller again; support is good in current browsers and uneven in everything else. PNG is for screenshots, logos, and hard edges, where JPEG rings. PNG files of photos are large because they refuse that loss.\n\nThere is no best format in the abstract. A photo on a site you control can be WebP or AVIF with a JPEG fallback. A government form that lists JPG wants a JPG. Convert in the browser when it can decode the source. This site does not upload the picture to borrow a decoder it does not have. HEIC in particular often needs the phone that took it. ${local}`,
+    steps: ['Match the format to the picture: photo, screenshot, or logo.', 'Match it again to what the recipient accepts.', 'Convert locally and look at edges and text.'],
+    points: ['Photographs and screenshots want different formats.', 'Support matters as much as byte size.', 'A converter that cannot decode the file should say so, not upload it.'],
+    facts: [
+      'Comparing formats does not upload your picture.',
+      'A conversion re-encodes pixels. It does not recover detail a JPEG already discarded.',
+      'Do not turn a transparent logo into a JPEG and then wonder where the background came from.',
+      'Zoom the result. Rings around text mean JPEG was the wrong choice, or the quality was too low.',
+      'Local conversion still works offline when the browser itself understands the source format.',
+    ],
+    related: ['compress-image', 'jpg-to-webp', 'png-to-jpg'],
+  },
+];

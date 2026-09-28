@@ -1,0 +1,30 @@
+{
+  "id": "example-signature",
+  "country": "Exampleland",
+  "organization": "Example records office",
+  "portal": "Example portal",
+  "documentType": "signature",
+  "requirements": {
+    "formats": ["image/png"],
+    "minBytes": null,
+    "maxBytes": null,
+    "minWidth": null,
+    "maxWidth": null,
+    "minHeight": null,
+    "maxHeight": null,
+    "widthMm": null,
+    "heightMm": null,
+    "minDpi": null,
+    "colorMode": null,
+    "background": null,
+    "allowBackgroundEdit": null,
+    "headSizePercent": null,
+    "maxPages": null,
+    "notes": "PLACEHOLDER — not an official requirement. Signature size, ink color, and background were not copied from any office."
+  },
+  "sourceUrl": "https://example.invalid/not-an-official-source",
+  "lastVerified": "",
+  "verifiedBy": "",
+  "status": "draft",
+  "placeholder": true
+}

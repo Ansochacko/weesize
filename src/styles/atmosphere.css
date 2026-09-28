@@ -1,0 +1,85 @@
+/* Atmosphere override layer - Classic & Professional Theme Cleanups */
+
+html[data-lite]::before,
+html[data-lite] .spotlight,
+html[data-lite] .dot-grid {
+  display: none;
+}
+
+/* Ensure headings use IBM Plex Serif */
+h1,
+h2,
+.inspector-title {
+  font-family: var(--serif);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.hero h1,
+.home-tools h2,
+.tools-head h1,
+.why-copy h3 {
+  font-family: var(--serif);
+  font-weight: 600;
+}
+
+.num,
+.size-display,
+kbd,
+.btn-hint,
+.result-size {
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+}
+
+/* Remove old decorative effects (spotlight, dot-grid, glows) */
+.spotlight,
+.dot-grid {
+  display: none !important;
+}
+
+/* Clean up hero section layout for desktop and mobile */
+.hero {
+  max-width: var(--page-max);
+  margin: 0 auto;
+  padding: 32px 0;
+}
+
+.hero-panel,
+.precision-card {
+  position: relative;
+  width: 100%;
+  margin: 0;
+  padding: 24px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--rule);
+  background: var(--paper);
+  box-shadow: none;
+}
+
+.drop-hero .drop-mark {
+  margin: 0 auto 8px;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-sm);
+  background: var(--primary-lt);
+  color: var(--primary);
+  display: grid;
+  place-items: center;
+}
+
+/* Remove decorative gradient numbers in Why section */
+.why-num-01,
+.why-num-02,
+.why-num-03 {
+  background: none !important;
+  color: var(--ink) !important;
+  font-family: var(--serif);
+}
+
+/* Clean up topbar scrolled state */
+.topbar.is-scrolled {
+  background: var(--paper);
+  border-bottom-color: var(--rule-2);
+}

@@ -1,0 +1,16 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 300 300] >>
+endobj
+4 0 obj
+<< /Filter /Standard /V 1 /R 2 /O (mock) /U (mock) /P -4 >>
+endobj
+trailer
+<< /Root 1 0 R /Encrypt 4 0 R >>
+%%EOF
