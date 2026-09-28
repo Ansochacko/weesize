@@ -5,6 +5,10 @@ de (Deutsch) reviewed: false
 it (Italiano) reviewed: false
 id (Bahasa Indonesia) reviewed: false
 hi (हिन्दी) reviewed: false
+ar (العربية) reviewed: false
+fil (Filipino) reviewed: false
+bn (বাংলা) reviewed: false
+ur (اردو) reviewed: false
 ja (日本語) reviewed: false
 ko (한국어) reviewed: false
 tr (Türkçe) reviewed: false

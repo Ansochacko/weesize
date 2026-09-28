@@ -57,8 +57,8 @@ export function mountImages(panel: HTMLElement): ToolApi {
 
   const drop = dropZone({
     title: 'Drop images here',
-    detail: 'JPG, PNG, WebP, or GIF.',
-    accept: 'image/jpeg,image/png,image/webp,image/gif,.jpg,.jpeg,.png,.webp,.gif',
+    detail: 'JPG, PNG, WebP, GIF, or HEIC phone photos.',
+    accept: 'image/jpeg,image/png,image/webp,image/gif,image/heic,image/avif,.jpg,.jpeg,.png,.webp,.gif,.heic,.avif',
     multiple: true,
     buttonLabel: 'Choose images',
     onFiles: (files) => {

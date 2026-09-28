@@ -132,11 +132,13 @@ export function mountCompress(panel: HTMLElement): ToolApi {
     ]),
   ]);
 
+  let chosenTargetKb: number | null = toolPreset()?.pdfTargetKb ?? null;
+
   const targetNote = el('p', { class: 'target-note', hidden: '' });
   const goalHost = el('div');
   function paintGoal(): void {
     goalHost.replaceChildren();
-    const kb = toolPreset()?.pdfTargetKb;
+    const kb = chosenTargetKb;
     if (!kb || items.length === 0) return;
     const before = items.reduce((sum, item) => sum + item.size, 0);
     goalHost.append(
@@ -150,7 +152,7 @@ export function mountCompress(panel: HTMLElement): ToolApi {
     );
   }
   function applyTarget(): void {
-    const kb = toolPreset()?.pdfTargetKb;
+    const kb = chosenTargetKb;
     if (!kb) {
       targetNote.hidden = true;
       return;
@@ -167,6 +169,81 @@ export function mountCompress(panel: HTMLElement): ToolApi {
       for (const card of cards) card.setAttribute('aria-checked', card.dataset.level === next ? 'true' : 'false');
     }
   }
+
+  const targetHost = el('div', { class: 'pdf-target-picker', style: 'margin: 12px 0;' });
+  const targetLabel = el('label', { style: 'display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:var(--ink);' }, ['Target size (optional)']);
+  const targetChips = el('div', { class: 'chips-row', style: 'display:flex;gap:6px;flex-wrap:wrap;align-items:center;' });
+  const customTargetInput = el('input', {
+    type: 'number',
+    min: '10',
+    max: '50000',
+    placeholder: 'KB',
+    style: 'width:80px;padding:4px 8px;border-radius:var(--radius-sm);border:1px solid var(--rule);background:var(--paper);color:var(--ink);font-size:13px;',
+    'aria-label': 'Custom target KB',
+  });
+  if (chosenTargetKb) customTargetInput.value = String(chosenTargetKb);
+
+  const targetPresets = [
+    { label: 'Any', kb: null },
+    { label: '100 KB', kb: 100 },
+    { label: '200 KB', kb: 200 },
+    { label: '500 KB', kb: 500 },
+    { label: '1 MB', kb: 1024 },
+    { label: '2 MB', kb: 2048 },
+    { label: 'Custom', kb: -1 },
+  ];
+
+  function renderTargetChips(): void {
+    targetChips.replaceChildren();
+    for (const p of targetPresets) {
+      const isCustom = p.kb === -1;
+      const isSelected = isCustom
+        ? chosenTargetKb !== null && ![100, 200, 500, 1024, 2048].includes(chosenTargetKb)
+        : chosenTargetKb === p.kb;
+      const chip = el('button', {
+        class: `chip${isSelected ? ' is-on' : ''}`,
+        type: 'button',
+        style: 'font-size:12px;padding:4px 10px;',
+      }, [p.label]);
+      chip.addEventListener('click', () => {
+        if (p.kb === null) {
+          chosenTargetKb = null;
+          customTargetInput.value = '';
+        } else if (p.kb === -1) {
+          chosenTargetKb = Number(customTargetInput.value) || 200;
+          customTargetInput.value = String(chosenTargetKb);
+        } else {
+          chosenTargetKb = p.kb;
+          customTargetInput.value = String(p.kb);
+        }
+        applyTarget();
+        paintGoal();
+        renderTargetChips();
+      });
+      targetChips.append(chip);
+    }
+    const isCustomActive = chosenTargetKb !== null && ![100, 200, 500, 1024, 2048].includes(chosenTargetKb);
+    if (isCustomActive || customTargetInput.value) {
+      targetChips.append(customTargetInput);
+    }
+  }
+
+  customTargetInput.addEventListener('input', () => {
+    const val = Number(customTargetInput.value);
+    if (val > 0) {
+      chosenTargetKb = val;
+      applyTarget();
+      paintGoal();
+      renderTargetChips();
+    }
+  });
+
+  targetHost.append(targetLabel, targetChips);
+  renderTargetChips();
+  if (toolPreset()?.pdfTargetKb) {
+    targetHost.hidden = true;
+  }
+
   const action = actionButton('Compress PDF');
   action.el.dataset.action = 'compress-pdf';
   action.el.append(el('kbd', { class: 'btn-hint' }, [navigator.platform.includes('Mac') ? '⌘↵' : 'Ctrl ↵']));
@@ -179,6 +256,7 @@ export function mountCompress(panel: HTMLElement): ToolApi {
   inspector.append(
     el('h2', { class: 'inspector-title' }, ['Compress PDF']),
     toolIntro('Make a PDF smaller. The original stays on this device.'),
+    targetHost,
     targetNote,
     goalHost,
     levels,
@@ -307,12 +385,19 @@ export function mountCompress(panel: HTMLElement): ToolApi {
       }
       const single = outputs.length === 1 ? outputs[0] : undefined;
       const unchanged = outputs.every((file) => file.unchanged);
+      const missedTarget = chosenTargetKb && single && single.bytes.byteLength > chosenTargetKb * 1024;
       showResult(panel, {
         source: 'compress',
         files: outputs.map((file) => ({ name: file.name, bytes: file.bytes })),
         ...(outputs.length > 1 ? { zipName: compressedName(snapshot[0]?.name ?? 'files').replace(/\.pdf$/, '.zip') } : {}),
         ...(single ? { beforeBytes: single.before } : {}),
-        ...(unchanged ? { unchanged: ALREADY_SMALL } : {}),
+        ...(unchanged
+          ? { unchanged: ALREADY_SMALL }
+          : missedTarget
+            ? {
+                unchanged: `Target was ${formatTarget(chosenTargetKb!)}. Reached ${formatTarget(Math.round(single.bytes.byteLength / 1024))}. Vector lines and fonts were preserved for legibility.`,
+              }
+            : {}),
         ...(single && !single.unchanged ? { compare: { before: snapshot[0]?.bytes ?? single.bytes, after: single.bytes } } : {}),
         onStartOver: clearAll,
       });

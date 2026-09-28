@@ -1708,4 +1708,80 @@ html:has(.palette:not([hidden])) #command-open {
   background: var(--paper-2);
 }
 
+/* Language Switcher & Suggestion Banner */
+.lang-banner {
+  background: var(--paper-2);
+  border-bottom: 1px solid var(--rule);
+  padding: 8px 16px;
+  font-size: 13px;
+  color: var(--ink);
+}
+
+.lang-banner-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.lang-banner-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-sm {
+  height: 28px !important;
+  min-height: 28px !important;
+  padding: 0 10px !important;
+  font-size: 12px !important;
+}
+
+.lang-select-wrap {
+  display: inline-flex;
+  align-items: center;
+}
+
+.lang-select {
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--rule);
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 13px;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+/* RTL Support */
+[dir="rtl"] {
+  direction: rtl;
+  text-align: right;
+}
+
+[dir="rtl"] .sidebar {
+  border-right: none;
+  border-left: 1px solid var(--rule);
+}
+
+[dir="rtl"] .compare-table {
+  text-align: right;
+}
+
+[dir="rtl"] .search-btn kbd {
+  margin-left: 0;
+  margin-right: auto;
+}
+
+[dir="rtl"] .nav-arrow,
+[dir="rtl"] .faq-chevron {
+  margin-left: 0;
+  margin-right: 6px;
+}
+
+[dir="rtl"] .foot-bar {
+  flex-direction: row-reverse;
+}
+
 

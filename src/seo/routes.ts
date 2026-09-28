@@ -36,6 +36,7 @@ export const TOOL_SLUG: Record<string, string> = {
   workflows: 'pdf-workflows',
   presets: 'get-it-accepted',
   'id-photo': 'id-photo',
+  'signature-resizer': 'signature-resizer',
   'share-check': 'check-pdf-before-sending',
   commands: 'pdf-commands',
   accessible: 'make-pdf-accessible',

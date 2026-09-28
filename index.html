@@ -89,6 +89,15 @@
             <p>Your files are processed in this browser and never uploaded. Try it: turn off Wi‑Fi and keep working.</p>
             <a href="#/privacy">Privacy</a>
           </div>
+          <aside id="lang-banner" class="lang-banner" hidden aria-label="Language switch suggestion">
+            <div class="wrap lang-banner-inner">
+              <span id="lang-banner-msg"></span>
+              <div class="lang-banner-actions">
+                <button type="button" class="btn primary btn-sm" id="lang-banner-switch">Switch</button>
+                <button type="button" class="btn quiet btn-sm" id="lang-banner-dismiss">Dismiss</button>
+              </div>
+            </div>
+          </aside>
           <div class="app">
             <main id="top">
               <section class="view wrap" id="view-home">
@@ -263,7 +272,22 @@
             </div>
             <div class="wrap foot-bar">
               <p>© 2026 Weesize. Processed on your device.</p>
-              <p>English</p>
+              <div class="lang-select-wrap">
+                <label for="lang-select" class="sr-only">Language</label>
+                <select id="lang-select" class="lang-select" aria-label="Choose language">
+                  <option value="en">English</option>
+                  <option value="hi">हिन्दी (Hindi)</option>
+                  <option value="es">Español (Spanish)</option>
+                  <option value="pt-br">Português (Brasil)</option>
+                  <option value="id">Bahasa Indonesia</option>
+                  <option value="ar">العربية (Arabic - RTL)</option>
+                  <option value="fr">Français (French)</option>
+                  <option value="de">Deutsch (German)</option>
+                  <option value="fil">Filipino</option>
+                  <option value="bn">বাংলা (Bengali)</option>
+                  <option value="ur">اردو (Urdu - RTL)</option>
+                </select>
+              </div>
             </div>
           </footer>
         </div>

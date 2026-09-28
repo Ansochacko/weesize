@@ -256,4 +256,28 @@ export const toolSeedsC: Seed[] = [
     priority: 1,
     keywords: ['pdf tool url parameters', 'compress pdf target query'],
   },
+  {
+    path: 'signature-resizer',
+    kind: 'tool',
+    h1: 'Signature resizer for online forms',
+    keyword: 'signature resizer',
+    title: 'Signature Resizer – Clean Background & Exact KB | Weesize',
+    description: 'Clean background to white, darken ink, and resize signature to exact KB and pixels with no upload.',
+    toolId: 'signature-resizer',
+    essay:
+      'Signature resizer prepares photo scans and mobile camera pictures of pen signatures for online forms, exams, and government portals. The processing runs directly in your browser. It crops excess borders, enhances contrast, cleans paper background to pure white, deepens ink darkness, and scales to exact dimensions and KB limits required by JEE, NEET, SSC, UPSC, and visa portals. Your signature stays on this device.',
+    steps: how('Signature resizer'),
+    points: why('signature editing and whitening runs 100% locally in your browser memory.'),
+    facts: localFacts(
+      'Signature resizer for online forms',
+      'Crops signature ink bounds, whitens background paper, and darkens pen contrast.',
+      'Supports exact pixel dimensions (such as 140×60 px) and exact file size limits in KB.',
+      'All processing runs inside client-side canvas without remote server calls.',
+    ),
+    related: ['id-photo', 'compress-image', 'compress-pdf', 'tools', 'privacy'],
+    guides,
+    intent: 'commercial',
+    priority: 1,
+    keywords: ['signature resizer', 'resize signature for online application', 'darken signature'],
+  },
 ];

@@ -147,7 +147,7 @@ describe('seo pages', () => {
     expect(drafts.length).toBeGreaterThan(0);
     expect(drafts.every((page) => page.noindex)).toBe(true);
     expect(indexablePages().every((page) => page.lang === 'en')).toBe(true);
-    expect(LOCALES).toHaveLength(16);
+    expect(LOCALES).toHaveLength(20);
     expect(AWAITING_OFFICIAL_SOURCES.length).toBeGreaterThan(0);
   });
 });

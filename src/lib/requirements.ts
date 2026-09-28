@@ -3,6 +3,7 @@ import signature from '../../content/requirements/example-signature.json' with {
 import idScan from '../../content/requirements/example-id-scan.json' with { type: 'json' };
 import certificate from '../../content/requirements/example-certificate.json' with { type: 'json' };
 import application from '../../content/requirements/example-application-pdf.json' with { type: 'json' };
+import { VERIFIED_PRESETS } from './verified-presets';
 import { brand } from '../brand';
 
 export type RequirementStatus = 'draft' | 'verified' | 'outdated';
@@ -54,10 +55,105 @@ export interface CheckItem {
   detail: string;
 }
 
-const shipped = [photo, signature, idScan, certificate, application] as Requirement[];
+const shipped = [...VERIFIED_PRESETS, photo, signature, idScan, certificate, application] as Requirement[];
 
 export function allRequirements(): readonly Requirement[] {
   return shipped;
+}
+
+export function parseCustomRule(ruleText: string): Requirement {
+  const text = ruleText.trim();
+  const formats: string[] = [];
+  if (/jpe?g/i.test(text)) formats.push('image/jpeg');
+  if (/png/i.test(text)) formats.push('image/png');
+  if (/webp/i.test(text)) formats.push('image/webp');
+  if (/pdf/i.test(text)) formats.push('application/pdf');
+
+  let minBytes: number | null = null;
+  let maxBytes: number | null = null;
+
+  const rangeMatch = /(\d+(?:\.\d+)?)\s*(?:-|–|to)\s*(\d+(?:\.\d+)?)\s*(kb|mb)/i.exec(text);
+  if (rangeMatch && rangeMatch[1] && rangeMatch[2]) {
+    const unit = rangeMatch[3]?.toLowerCase() === 'mb' ? 1024 * 1024 : 1024;
+    minBytes = Math.round(parseFloat(rangeMatch[1]) * unit);
+    maxBytes = Math.round(parseFloat(rangeMatch[2]) * unit);
+  } else {
+    const singleMatch = /(?:under|max|less than|<=|<|up to)?\s*(\d+(?:\.\d+)?)\s*(kb|mb)/i.exec(text);
+    if (singleMatch && singleMatch[1]) {
+      const unit = singleMatch[2]?.toLowerCase() === 'mb' ? 1024 * 1024 : 1024;
+      maxBytes = Math.round(parseFloat(singleMatch[1]) * unit);
+    }
+  }
+
+  let minWidth: number | null = null;
+  let maxWidth: number | null = null;
+  let minHeight: number | null = null;
+  let maxHeight: number | null = null;
+  let widthMm: number | null = null;
+  let heightMm: number | null = null;
+
+  const dimMatch = /(\d+)\s*(?:x|×|\*)\s*(\d+)\s*(px|mm|in|cm)?/i.exec(text);
+  if (dimMatch && dimMatch[1] && dimMatch[2]) {
+    const w = parseInt(dimMatch[1], 10);
+    const h = parseInt(dimMatch[2], 10);
+    const unit = dimMatch[3]?.toLowerCase();
+    if (unit === 'mm') {
+      widthMm = w;
+      heightMm = h;
+      minWidth = Math.round((w * 300) / 25.4);
+      maxWidth = minWidth;
+      minHeight = Math.round((h * 300) / 25.4);
+      maxHeight = minHeight;
+    } else if (unit === 'cm') {
+      widthMm = w * 10;
+      heightMm = h * 10;
+      minWidth = Math.round((w * 10 * 300) / 25.4);
+      maxWidth = minWidth;
+      minHeight = Math.round((h * 10 * 300) / 25.4);
+      maxHeight = minHeight;
+    } else if (unit === 'in') {
+      minWidth = Math.round(w * 300);
+      maxWidth = minWidth;
+      minHeight = Math.round(h * 300);
+      maxHeight = minHeight;
+    } else {
+      minWidth = w;
+      maxWidth = w;
+      minHeight = h;
+      maxHeight = h;
+    }
+  }
+
+  return {
+    id: 'custom-rule',
+    country: 'Custom Rule',
+    organization: 'Custom form rule',
+    portal: 'Form requirements',
+    documentType: 'Document',
+    requirements: {
+      formats,
+      minBytes,
+      maxBytes,
+      minWidth,
+      maxWidth,
+      minHeight,
+      maxHeight,
+      widthMm,
+      heightMm,
+      minDpi: widthMm ? 300 : null,
+      colorMode: null,
+      background: null,
+      allowBackgroundEdit: true,
+      headSizePercent: null,
+      maxPages: formats.includes('application/pdf') ? null : 1,
+      notes: text || 'Custom rule applied.',
+    },
+    sourceUrl: 'https://weesize.com',
+    lastVerified: new Date().toISOString().slice(0, 10),
+    verifiedBy: 'User custom requirement',
+    status: 'verified',
+    placeholder: false,
+  };
 }
 
 /** A record is public only when a person has checked an official page and cleared every placeholder guard. */
@@ -78,12 +174,15 @@ export function requirementById(id: string): Requirement | undefined {
 }
 
 export function searchRequirements(query: string): Requirement[] {
-  const q = query.trim().toLowerCase();
+  const tokens = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
   const list = publicRequirements();
-  if (!q) return list;
-  return list.filter((entry) =>
-    [entry.id, entry.country, entry.organization, entry.portal, entry.documentType].join(' ').toLowerCase().includes(q),
-  );
+  if (!tokens.length) return list;
+  return list.filter((entry) => {
+    const haystack = [entry.id, entry.country, entry.organization, entry.portal, entry.documentType, entry.requirements.notes]
+      .join(' ')
+      .toLowerCase();
+    return tokens.every((token) => haystack.includes(token));
+  });
 }
 
 export function reportOutdatedHref(entry: Requirement): string {

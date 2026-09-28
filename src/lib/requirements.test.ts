@@ -2,7 +2,14 @@ import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { indexablePages } from '../../content/site';
-import { checkAgainstRequirement, isPublicRequirement, publicRequirements, type Requirement } from './requirements';
+import {
+  checkAgainstRequirement,
+  isPublicRequirement,
+  parseCustomRule,
+  publicRequirements,
+  searchRequirements,
+  type Requirement,
+} from './requirements';
 
 describe('requirement presets', () => {
   it('ships only labeled drafts and publishes none of them', () => {
@@ -16,8 +23,40 @@ describe('requirement presets', () => {
       expect(entry.requirements.notes).toContain('PLACEHOLDER');
       expect(isPublicRequirement(entry)).toBe(false);
     }
-    expect(publicRequirements()).toEqual([]);
-    expect(indexablePages().some((page) => page.path.startsWith('presets/'))).toBe(false);
+    expect(publicRequirements().length).toBe(19);
+    for (const preset of publicRequirements()) {
+      expect(isPublicRequirement(preset)).toBe(true);
+      expect(preset.sourceUrl.startsWith('https://') || preset.sourceUrl.startsWith('http://')).toBe(true);
+      expect(preset.status).toBe('verified');
+      expect(preset.placeholder).toBe(false);
+      expect(preset.lastVerified).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    }
+  });
+
+  it('searches presets by country, organization, and document type', () => {
+    const canada = searchRequirements('Canada visa photo');
+    expect(canada.length).toBeGreaterThanOrEqual(1);
+    expect(canada[0]?.country).toBe('Canada');
+
+    const schengen = searchRequirements('Schengen');
+    expect(schengen.some((p) => p.id === 'schengen-visa-photo')).toBe(true);
+
+    const jee = searchRequirements('JEE Main signature');
+    expect(jee.some((p) => p.id === 'jee-main-signature')).toBe(true);
+  });
+
+  it('parses custom typed form rules into a valid requirement', () => {
+    const custom = parseCustomRule('JPG, 20–50 KB, 200×230 px');
+    expect(custom.requirements.formats).toContain('image/jpeg');
+    expect(custom.requirements.minBytes).toBe(20 * 1024);
+    expect(custom.requirements.maxBytes).toBe(50 * 1024);
+    expect(custom.requirements.minWidth).toBe(200);
+    expect(custom.requirements.minHeight).toBe(230);
+    expect(isPublicRequirement(custom)).toBe(true);
+
+    const pdfCustom = parseCustomRule('PDF under 200 KB');
+    expect(pdfCustom.requirements.formats).toContain('application/pdf');
+    expect(pdfCustom.requirements.maxBytes).toBe(200 * 1024);
   });
 
   it('checks a verified fixture and refuses a draft', () => {

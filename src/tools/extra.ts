@@ -24,6 +24,7 @@ import { toolById, type ToolInfo } from './registry';
 import { brandName } from '../brand';
 import { toolPreset } from '../seo/preset';
 import { mountNext } from './next';
+import { mountSignature } from './signature';
 import { hrefFor } from '../router';
 
 export function mountExtra(panel: HTMLElement, id: string, incoming?: File[]): void {
@@ -42,6 +43,8 @@ export function mountExtra(panel: HTMLElement, id: string, incoming?: File[]): v
     mountHtml(panel);
   } else if (id === 'compare') {
     mountCompare(panel);
+  } else if (id === 'signature-resizer') {
+    mountSignature(panel, incoming);
   } else if (id === 'compress-images') {
     mountImageCompress(panel, incoming);
   } else if (id === 'presets' || id === 'id-photo' || id === 'share-check' || id === 'commands' || id === 'accessible' || id === 'genuine' || id === 'chat' || id === 'hot-folders' || id === 'lite') {
@@ -56,13 +59,13 @@ function mountComingSoon(panel: HTMLElement, tool: ToolInfo): void {
     el('span', { class: 'tool-icon', 'data-cat': tool.category }, [iconElement(tool.icon, { size: 24 })]),
     el('span', { class: 'badge badge-neutral' }, ['Coming soon']),
   ]);
-  const head = el('h1', undefined, [tool.name]);
+  const head = el('h2', undefined, [tool.name]);
   const intro = toolIntro(tool.description);
   const explainer = el('div', { class: 'coming-soon-card' }, [
     el('p', { class: 'coming-soon-lead' }, [
       "We're building a privacy-first, on-device version of this tool. No files will ever leave your browser.",
     ]),
-    el('p', { class: 'coming-soon-sub' }, [
+    el('p', { class: 'coming-soon-sub status', 'data-tone': 'bad', role: 'status' }, [
       tool.limit ?? 'This feature is currently in active development.',
     ]),
   ]);
@@ -74,7 +77,7 @@ function mountComingSoon(panel: HTMLElement, tool: ToolInfo): void {
     .slice(0, 3);
 
   const relatedSection = el('div', { class: 'coming-soon-related' }, [
-    el('h2', { class: 'related-title' }, ['Working alternatives you can use right now:']),
+    el('h3', { class: 'related-title' }, ['Working alternatives you can use right now:']),
     el(
       'div',
       { class: 'related-tools-grid' },
@@ -249,12 +252,54 @@ function suffix(id: string): string {
 
 function mountImageCompress(panel: HTMLElement, incoming?: File[]): void {
   const preset = toolPreset();
-  const mime = preset?.imageMime ?? 'image/jpeg';
-  const targetBytes = preset?.imageTargetKb ? preset.imageTargetKb * 1024 : null;
+  let mime: string = preset?.imageMime ?? 'image/jpeg';
+  let targetKb: number | null = preset?.imageTargetKb ?? 50;
   let files: File[] = (incoming ?? []).filter(isImageFile);
+
+  const targetBox = el('div', { class: 'target-size-control', style: 'background:var(--paper-2);padding:14px;border-radius:var(--radius-md);margin-bottom:16px;border:1px solid var(--rule);display:flex;flex-wrap:wrap;align-items:center;gap:12px;' });
+  const formatSelect = el('select', { class: 'select', 'aria-label': 'Output format', style: 'padding:6px 10px;border-radius:var(--radius-sm);border:1px solid var(--rule);background:var(--paper);color:var(--ink);' }, [
+    el('option', { value: 'image/jpeg' }, ['JPG (Recommended)']),
+    el('option', { value: 'image/webp' }, ['WebP (Modern)']),
+    el('option', { value: 'image/png' }, ['PNG (Lossless)']),
+  ]);
+  formatSelect.value = mime;
+
+  const targetInput = el('input', { type: 'number', min: '5', max: '20000', value: String(targetKb ?? 50), 'aria-label': 'Target size in KB', style: 'width:90px;padding:6px 10px;border-radius:var(--radius-sm);border:1px solid var(--rule);background:var(--paper);color:var(--ink);' });
+
+  const presetsWrap = el('div', { style: 'display:flex;gap:6px;flex-wrap:wrap;' });
+  const quickSizes = [20, 50, 100, 200, 500];
+  quickSizes.forEach((kb) => {
+    const btn = el('button', { class: 'btn quiet', type: 'button', style: 'font-size:12px;padding:4px 8px;' }, [`${kb} KB`]);
+    btn.addEventListener('click', () => {
+      targetKb = kb;
+      targetInput.value = String(kb);
+      status.set(`Target set to ${kb} KB.`, 'neutral');
+    });
+    presetsWrap.append(btn);
+  });
+
+  formatSelect.addEventListener('change', () => {
+    mime = formatSelect.value;
+  });
+
+  targetInput.addEventListener('input', () => {
+    const val = Number(targetInput.value);
+    targetKb = val > 0 ? val : null;
+  });
+
+  targetBox.append(
+    el('strong', { style: 'font-size:13px;' }, ['Target size:']),
+    targetInput,
+    el('span', { class: 'num', style: 'font-size:13px;color:var(--ink-2);' }, ['KB']),
+    presetsWrap,
+    el('span', { style: 'border-left:1px solid var(--rule);height:20px;margin:0 4px;' }),
+    el('strong', { style: 'font-size:13px;' }, ['Format:']),
+    formatSelect,
+  );
+
   const drop = dropZone({
     title: 'Drop images here',
-    detail: 'JPG, PNG, WebP, GIF, or a format this browser already opens.',
+    detail: 'JPG, PNG, WebP, GIF, or HEIC phone camera photos.',
     accept: 'image/jpeg,image/png,image/webp,image/gif,image/heic,image/avif,.jpg,.jpeg,.png,.webp,.gif,.heic,.avif',
     multiple: true,
     buttonLabel: 'Choose images',
@@ -265,28 +310,37 @@ function mountImageCompress(panel: HTMLElement, incoming?: File[]): void {
       action.idle('Compress images', accepted.length > 0);
     },
   });
-  const action = actionButton('Compress images');
+
+  const action = actionButton('Compress images to target');
   const status = statusLine();
-  const row = el('div', { class: 'action-row' }, [action.el, status.el]);
-  panel.append(el('h2', undefined, ['Compress images']), toolIntro('Shrink photos and screenshots. Location data is removed.'), drop.el, row);
-  action.idle('Compress images', files.length > 0);
+  const row = el('div', { class: 'action-row', style: 'margin-top:16px;' }, [action.el, status.el]);
+  panel.append(el('h2', undefined, ['Compress images to exact size']), toolIntro('Shrink photos and screenshots to an exact file size in KB. Processed 100% on your device.'), targetBox, drop.el, row);
+  action.idle('Compress images to target', files.length > 0);
   if (files.length) status.set(`${files.length} images ready.`, 'neutral');
+
   action.el.addEventListener('click', () => {
     void (async () => {
-      action.busy('Compressing…', 0.05);
+      action.busy('Compressing to exact size…', 0.05);
+      const targetBytes = targetKb ? targetKb * 1024 : null;
       const outputs: Array<{ name: string; bytes: Uint8Array }> = [];
       for (let index = 0; index < files.length; index += 1) {
         const file = files[index];
         if (!file) continue;
-        action.busy(`Compressing image ${index + 1} of ${files.length}`, index / files.length);
+        action.busy(`Compressing image ${index + 1} of ${files.length}`, (index + 0.5) / files.length);
         const shrunk = await shrinkImage(file, mime, targetBytes);
         const ext = mime === 'image/png' ? 'png' : mime === 'image/webp' ? 'webp' : 'jpg';
         outputs.push({ name: compressedName(file.name).replace(/\.pdf$/, `.${ext}`).replace(/\.[^.]+$/, `.${ext}`), bytes: shrunk });
       }
-      if (outputs.length === 1 && outputs[0]) downloadBytes(outputs[0].bytes, outputs[0].name, mime);
-      else await downloadZip(outputs, 'images-compressed.zip');
-      status.set('The smaller images are downloading.', 'neutral');
-      action.idle('Compress images', true);
+      if (outputs.length === 1 && outputs[0]) {
+        const finalKb = Math.round((outputs[0].bytes.byteLength / 1024) * 10) / 10;
+        downloadBytes(outputs[0].bytes, outputs[0].name, mime);
+        const hit = targetKb ? finalKb <= targetKb : true;
+        status.set(`Downloaded ${outputs[0].name} (${finalKb} KB)${hit ? ' ✓ Target reached' : ''}`, hit ? 'good' : 'neutral');
+      } else {
+        await downloadZip(outputs, 'images-compressed.zip');
+        status.set('The compressed images zip is downloading.', 'good');
+      }
+      action.idle('Compress images to target', true);
     })();
   });
 }
@@ -298,23 +352,54 @@ async function shrinkImage(file: File, mime: string, targetBytes: number | null)
   } catch {
     return new Uint8Array(await file.arrayBuffer());
   }
-  let maxEdge = 1600;
-  let quality = 0.72;
-  let best = new Uint8Array(await file.arrayBuffer());
-  for (let attempt = 0; attempt < 6; attempt += 1) {
+  const originalBytes = new Uint8Array(await file.arrayBuffer());
+  if (!targetBytes) {
+    const maxEdge = 1600;
     const scale = Math.min(1, maxEdge / Math.max(bitmap.width, bitmap.height));
     const canvas = document.createElement('canvas');
     canvas.width = Math.max(1, Math.round(bitmap.width * scale));
     canvas.height = Math.max(1, Math.round(bitmap.height * scale));
     canvas.getContext('2d')?.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
-    const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, mime, quality));
-    if (!blob) break;
-    const bytes = new Uint8Array(await blob.arrayBuffer());
-    best = bytes;
-    if (!targetBytes || bytes.byteLength <= targetBytes || mime === 'image/png' && maxEdge <= 480) break;
-    maxEdge = Math.round(maxEdge * 0.72);
-    quality = Math.max(0.45, quality - 0.08);
+    const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, mime, 0.75));
+    bitmap.close();
+    return blob ? new Uint8Array(await blob.arrayBuffer()) : originalBytes;
   }
+
+  let maxEdge = 1920;
+  let best = originalBytes;
+
+  for (let edgePass = 0; edgePass < 5; edgePass++) {
+    const scale = Math.min(1, maxEdge / Math.max(bitmap.width, bitmap.height));
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.max(1, Math.round(bitmap.width * scale));
+    canvas.height = Math.max(1, Math.round(bitmap.height * scale));
+    canvas.getContext('2d')?.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+
+    let minQ = 0.15;
+    let maxQ = 0.95;
+    for (let qPass = 0; qPass < 6; qPass++) {
+      const q = (minQ + maxQ) / 2;
+      const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, mime, q));
+      if (!blob) break;
+      const bytes = new Uint8Array(await blob.arrayBuffer());
+      best = bytes;
+      if (bytes.byteLength <= targetBytes) {
+        if (targetBytes - bytes.byteLength <= targetBytes * 0.05) {
+          bitmap.close();
+          return best;
+        }
+        minQ = q;
+      } else {
+        maxQ = q;
+      }
+    }
+
+    if (best.byteLength <= targetBytes || (mime === 'image/png' && maxEdge <= 400)) {
+      break;
+    }
+    maxEdge = Math.round(maxEdge * 0.7);
+  }
+
   bitmap.close();
   return best;
 }

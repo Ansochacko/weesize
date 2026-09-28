@@ -20,6 +20,7 @@ import { canonicalizeLocation, navigate, onRoute, parseRoute, type Route } from 
 import { setToolPreset } from './seo/preset';
 import { targetFromPath } from './seo/routes';
 import { brand, brandName } from './brand';
+import { currentLocale, detectBrowserLocale, getSavedLocale, setLocale, t } from './lib/i18n';
 import { lockupHorizontal } from './assets/brand/lockup';
 import { loadRecent, markCurrent, mountCatalog, mountPalette, noteRecent } from './shell/catalog';
 import { mountHome } from './tools/home';
@@ -550,3 +551,72 @@ new MutationObserver(paintStatusIcon).observe(proofChip, { attributes: true, att
     }
   }
 }
+
+function initI18n(): void {
+  const langSelect = document.querySelector<HTMLSelectElement>('#lang-select');
+  const banner = document.querySelector<HTMLElement>('#lang-banner');
+  const bannerMsg = document.querySelector<HTMLElement>('#lang-banner-msg');
+  const switchBtn = document.querySelector<HTMLButtonElement>('#lang-banner-switch');
+  const dismissBtn = document.querySelector<HTMLButtonElement>('#lang-banner-dismiss');
+  const heroH1 = document.querySelector<HTMLElement>('.hero-copy h1');
+  const heroLede = document.querySelector<HTMLElement>('.hero-copy .lede');
+
+  const updatePageStrings = () => {
+    if (heroH1) heroH1.textContent = t('tagline');
+    if (heroLede) heroLede.textContent = t('subtag');
+  };
+
+  const initial = currentLocale();
+  if (langSelect) langSelect.value = initial.code;
+  if (initial.code !== 'en') {
+    setLocale(initial.code);
+    updatePageStrings();
+  }
+
+  const syncDocument = (code: string) => {
+    setLocale(code);
+    if (langSelect) langSelect.value = code;
+    updatePageStrings();
+  };
+
+  if (langSelect) {
+    langSelect.addEventListener('change', () => {
+      syncDocument(langSelect.value);
+      if (banner) banner.hidden = true;
+    });
+  }
+
+  // Non-intrusive suggestion chip for non-English browser locales
+  const saved = getSavedLocale();
+  let dismissed = false;
+  try {
+    dismissed = localStorage.getItem('weesize-lang-dismissed') === '1';
+  } catch {
+    dismissed = false;
+  }
+
+  if (!saved && !dismissed) {
+    const detected = detectBrowserLocale();
+    if (detected.code !== 'en' && banner && bannerMsg && switchBtn && dismissBtn) {
+      bannerMsg.textContent = t('switchSuggestion', { lang: detected.nativeLabel });
+      switchBtn.textContent = t('switchBtn');
+      banner.hidden = false;
+
+      switchBtn.addEventListener('click', () => {
+        syncDocument(detected.code);
+        banner.hidden = true;
+      });
+
+      dismissBtn.addEventListener('click', () => {
+        try {
+          localStorage.setItem('weesize-lang-dismissed', '1');
+        } catch {
+          // ignore
+        }
+        banner.hidden = true;
+      });
+    }
+  }
+}
+
+initI18n();

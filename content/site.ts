@@ -2,6 +2,7 @@ import { toPage, type Seed } from './factory';
 import { GUIDES } from './guides';
 import { AWAITING_OFFICIAL_SOURCES, compareSeeds, convertSeeds, deviceSeeds, frameSeeds, guideSeeds, privacySeeds, usecaseSeeds } from './misc';
 import { imageSizeSeeds, pdfSizeSeeds } from './sizes';
+import { presetSeeds } from './preset-pages';
 import { toolSeeds } from './tools-a';
 import { toolSeedsB } from './tools-b';
 import { toolSeedsC } from './tools-c';
@@ -12,7 +13,19 @@ const tools: Seed[] = [...toolSeeds, ...toolSeedsB, ...toolSeedsC].map((seed) =>
   seed.path === 'compress-image' ? { ...seed, neighbors: IMAGE_SIZE_SLUGS } : seed,
 );
 
-export const englishPages: SeoPage[] = [...frameSeeds, ...tools, ...pdfSizeSeeds, ...imageSizeSeeds, ...privacySeeds, ...deviceSeeds, ...usecaseSeeds, ...convertSeeds, ...compareSeeds, ...guideSeeds].map(toPage);
+export const englishPages: SeoPage[] = [
+  ...frameSeeds,
+  ...tools,
+  ...pdfSizeSeeds,
+  ...imageSizeSeeds,
+  ...presetSeeds,
+  ...privacySeeds,
+  ...deviceSeeds,
+  ...usecaseSeeds,
+  ...convertSeeds,
+  ...compareSeeds,
+  ...guideSeeds,
+].map(toPage);
 
 const sitemap = englishPages.find((page) => page.path === 'sitemap');
 if (sitemap) sitemap.related = englishPages.filter((page) => page.path && page.path !== 'sitemap' && !page.noindex).map((page) => page.path);
@@ -36,6 +49,10 @@ export const LOCALES: Locale[] = [
   { code: 'it', htmlLang: 'it', label: 'Italiano', compress: 'comprimere-pdf' },
   { code: 'id', htmlLang: 'id', label: 'Bahasa Indonesia', compress: 'kompres-pdf' },
   { code: 'hi', htmlLang: 'hi', label: 'हिन्दी', compress: 'pdf-compress-karen' },
+  { code: 'ar', htmlLang: 'ar', label: 'العربية', compress: 'daght-pdf' },
+  { code: 'fil', htmlLang: 'fil', label: 'Filipino', compress: 'i-compress-ang-pdf' },
+  { code: 'bn', htmlLang: 'bn', label: 'বাংলা', compress: 'pdf-compress-korun' },
+  { code: 'ur', htmlLang: 'ur', label: 'اردو', compress: 'pdf-compress-karein' },
   { code: 'ja', htmlLang: 'ja', label: '日本語', compress: 'pdf-asshuku' },
   { code: 'ko', htmlLang: 'ko', label: '한국어', compress: 'pdf-apchuk' },
   { code: 'tr', htmlLang: 'tr', label: 'Türkçe', compress: 'pdf-sikistir' },
