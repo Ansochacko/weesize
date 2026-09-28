@@ -4,6 +4,9 @@
   "version": "1.0.0",
   "license": "MIT",
   "type": "module",
+  "engines": {
+    "node": ">=22.x"
+  },
   "scripts": {
     "dev": "vite",
     "build": "node --experimental-strip-types scripts/build-icons.ts && node --experimental-strip-types scripts/build-brand.ts && tsc --noEmit && vite build && node --experimental-strip-types --import ./scripts/register-ts.mjs scripts/prerender.ts",

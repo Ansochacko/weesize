@@ -26,7 +26,8 @@ writeBoth('favicon.svg', faviconSvg());
 writeFileSync(join(root, 'public', 'favicon.svg'), faviconSvg());
 
 const fontPath = join(root, 'node_modules', '@fontsource', 'ibm-plex-sans', 'files', 'ibm-plex-sans-latin-600-normal.woff');
-const font = opentype.parse(readFileSync(fontPath).buffer);
+const fontBuf = readFileSync(fontPath);
+const font = opentype.parse(fontBuf.buffer.slice(fontBuf.byteOffset, fontBuf.byteOffset + fontBuf.byteLength));
 
 function pathData(glyphPath: { commands: Array<Record<string, number | string>> }): string {
   const n = (value: number | string | undefined) => String(Math.round(Number(value) * 100) / 100);
