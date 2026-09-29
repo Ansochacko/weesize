@@ -1,35 +1,16 @@
-import { PDFDocument } from 'pdf-lib';
-import { applyAccessibilityFixes, checkAccessibility } from '../lib/a11y-check';
-import { answerFromDocument, answerWithPrompt, browserPromptAvailable, findClauses, type PromptClient } from '../lib/doc-search';
 import { centerCrop, cornerUniformity, sheetSlots, PRINT_SHEET } from '../lib/id-photo';
-import { inspectGenuine } from '../lib/genuine';
-import { outputName, runHotQueue } from '../lib/hot-queue';
-import { parseCommand, planLines, takePendingCommand, type CommandStep } from '../lib/commands';
-import { checkAgainstRequirement, parseCustomRule, publicRequirements, reportOutdatedHref, requirementById, searchRequirements, type Requirement } from '../lib/requirements';
-import { fixPdf, scanPdf, stripJpegMetadata, type Finding } from '../lib/share-check';
-import { readLiteSignals, shouldUseLite } from '../lib/lite';
-import { URL_PARAMETER_HELP } from '../lib/url-params';
-import { actionButton, dropZone, el, formatBytes, toolIntro } from '../lib/dom';
+import { checkAgainstRequirement, parseCustomRule, publicRequirements, reportOutdatedHref, requirementById, searchRequirements, type CheckItem, type FileFacts, type Requirement } from '../lib/requirements';
+import { fixPdf, scanPdf, type Finding } from '../lib/share-check';
+import { actionButton, dropZone, el, toolIntro } from '../lib/dom';
 import { isImageFile, isPdfFile } from '../lib/detect';
-import { editPdf, openPdf, pageText, releaseDocument } from '../lib/pdf';
-import { compressDocument, COMPRESS_LEVELS } from '../lib/pdf';
 import { readFileBytes } from '../lib/pdf';
-import { showResult } from './result';
 import { toolPreset } from '../seo/preset';
-import { brandName } from '../brand';
 import type { ToolInfo } from './registry';
-import { savePrefs } from '../lib/prefs';
 
 export function mountNext(panel: HTMLElement, tool: ToolInfo, incoming?: File[]): void {
   if (tool.id === 'presets') mountPresets(panel);
   else if (tool.id === 'id-photo') mountIdPhoto(panel, incoming);
   else if (tool.id === 'share-check') mountShare(panel, incoming);
-  else if (tool.id === 'commands') mountCommands(panel, incoming);
-  else if (tool.id === 'accessible') mountAccessible(panel, incoming);
-  else if (tool.id === 'genuine') mountGenuine(panel, incoming);
-  else if (tool.id === 'chat') mountChat(panel, incoming);
-  else if (tool.id === 'hot-folders') mountHot(panel);
-  else if (tool.id === 'lite') mountLite(panel);
   else panel.append(el('p', undefined, ['This tool is not wired.']));
 }
 
@@ -97,85 +78,125 @@ function mountPresets(panel: HTMLElement): void {
     const dim = req.widthMm ? `${req.widthMm}×${req.heightMm} mm` : req.minWidth ? `${req.minWidth}×${req.minHeight} px` : 'Any';
     const sz = req.minBytes && req.maxBytes ? `${Math.round(req.minBytes / 1024)}–${Math.round(req.maxBytes / 1024)} KB` : req.maxBytes ? `≤ ${Math.round(req.maxBytes / 1024)} KB` : 'Any';
 
+    const displayName = `${entry.country}: ${entry.organization} (${entry.documentType})`;
     detail.append(
-      el('h3', { style: 'margin:0 0 4px;' }, [`${entry.country}: ${entry.documentType}`]),
-      el('p', { style: 'margin:0 0 6px;color:var(--ink-2);font-size:13px;' }, [`${entry.organization} (${entry.portal})`]),
-      el('p', { style: 'margin:0 0 6px;font-size:13px;' }, [`Requirements: ${dim} · ${sz} · ${req.formats.join(' or ')} · Background: ${req.background ?? 'Normal'}`]),
-      el('p', { style: 'margin:0;font-size:12px;color:var(--ink-2);' }, [`Verified: ${entry.lastVerified} · `, sourceLink, ' · ', report]),
+      el('h3', undefined, [displayName]),
+      el('p', undefined, [entry.requirements.notes || entry.portal]),
+      el('p', { class: 'num' }, [`Formats: ${req.formats.join(', ')} | Size: ${sz} | Dimensions: ${dim}`]),
+      el('p', { style: 'font-size:12px;color:var(--ink-2);' }, ['Last checked: ', entry.lastVerified, ' · ', sourceLink, ' · ', report]),
     );
 
-    status.textContent = `Active preset: ${entry.country} ${entry.documentType}. Drop your file below to verify.`;
+    const targetTool = entry.documentType.toLowerCase().includes('signature')
+      ? 'signature-resizer'
+      : entry.documentType.toLowerCase().includes('photo')
+      ? 'id-photo'
+      : req.formats.includes('application/pdf')
+      ? 'compress-pdf'
+      : 'compress-image';
 
-    const isSig = entry.documentType.toLowerCase().includes('signature');
-    const isPhoto = entry.documentType.toLowerCase().includes('photo');
-    const toolHref = isSig ? '#/signature-resizer' : isPhoto ? '#/id-photo' : '#/compress-pdf';
-    const toolText = isSig ? 'Open Signature Resizer →' : isPhoto ? 'Open ID Photo Maker →' : 'Open PDF Compressor →';
-
-    const launchBtn = el('a', { class: 'btn primary', href: toolHref }, [toolText]);
-    toolLinkRow.append(launchBtn);
+    const toolBtn = el('a', { class: 'btn primary', href: `/${targetTool}` }, [`Open ${targetTool} Tool`]);
+    toolLinkRow.append(toolBtn);
   };
 
-  customBtn.addEventListener('click', () => {
-    if (!customInput.value.trim()) return;
-    const parsed = parseCustomRule(customInput.value);
-    showEntry(parsed);
+  const applyCustom = (): void => {
+    const raw = customInput.value.trim();
+    if (!raw) return;
+    const customReq = parseCustomRule(raw);
+    showEntry(customReq);
+    status.textContent = 'Custom rule applied. Drop your file below to verify.';
+  };
+
+  customBtn.addEventListener('click', applyCustom);
+  customInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      applyCustom();
+    }
   });
 
-  const paint = (text: string): void => {
-    const found = searchRequirements(text);
+  const paint = (filter: string): void => {
     list.replaceChildren();
-    if (!found.length) {
-      list.append(el('p', undefined, ['No matching preset found. You can type any rule in the Custom box above.']));
+    const matches = filter ? searchRequirements(filter) : publicRequirements();
+    if (matches.length === 0) {
+      list.append(el('span', { style: 'font-size:13px;color:var(--ink-2);padding:4px;' }, ['No matching official preset found. Try typing a custom rule above.']));
       return;
     }
-    for (const entry of found.slice(0, 16)) {
-      const button = el('button', { class: 'btn quiet', type: 'button', style: 'font-size:12px;padding:4px 8px;' }, [`${entry.country}: ${entry.documentType}`]);
-      button.addEventListener('click', () => showEntry(entry));
-      list.append(button);
+    for (const item of matches.slice(0, 15)) {
+      const label = `${item.country}: ${item.organization} (${item.documentType})`;
+      const btn = el('button', { class: 'btn quiet', type: 'button', style: 'font-size:12px;padding:4px 8px;' }, [label]);
+      btn.addEventListener('click', () => showEntry(item));
+      list.append(btn);
     }
   };
 
   query.addEventListener('input', () => paint(query.value));
-  paint(wanted);
-  if (selectedEntry) {
-    showEntry(selectedEntry);
-  } else if (publicRequirements().length) {
-    showEntry(publicRequirements()[0]!);
-  }
+  paint('');
+  if (selectedEntry) showEntry(selectedEntry);
 
   const drop = dropZone({
-    title: 'Drop a file to verify',
-    detail: 'The checklist validates against the active preset.',
-    accept: 'application/pdf,image/*',
+    title: 'Drop your file to check against this requirement',
+    detail: 'JPG, PNG, WebP, or PDF.',
+    accept: 'image/*,application/pdf,.pdf,.jpg,.jpeg,.png,.webp',
     multiple: false,
-    buttonLabel: 'Choose a file',
+    buttonLabel: 'Choose file to check',
     onFiles: (files) => {
       const file = files[0];
       if (!file || !selectedEntry) {
-        status.textContent = 'Select a preset or apply a custom rule first.';
+        if (!selectedEntry) status.textContent = 'Select a requirement or apply a custom rule first.';
         return;
       }
-      void file.arrayBuffer().then(async (buffer) => {
-        const bytes = new Uint8Array(buffer);
+
+      void (async () => {
+        status.textContent = `Checking ${file.name}…`;
         let width: number | undefined;
         let height: number | undefined;
+
         if (isImageFile(file)) {
-          const bitmap = await createImageBitmap(file);
-          width = bitmap.width;
-          height = bitmap.height;
-          bitmap.close();
+          try {
+            const bitmap = await createImageBitmap(file);
+            width = bitmap.width;
+            height = bitmap.height;
+            bitmap.close();
+          } catch {
+            /* ignore */
+          }
         }
-        const items = checkAgainstRequirement(
-          { mime: file.type || 'application/octet-stream', bytes: bytes.byteLength, ...(width ? { width } : {}), ...(height ? { height } : {}) },
-          selectedEntry!,
-        );
+
+        const facts: FileFacts = {
+          mime: file.type || 'application/octet-stream',
+          bytes: file.size,
+          ...(width !== undefined && height !== undefined ? { width, height } : {}),
+        };
+
+        const res = checkAgainstRequirement(facts, selectedEntry!);
         checks.replaceChildren();
-        for (const item of items) {
-          const mark = item.met === true ? '✓ Met' : item.met === false ? '✗ Not met' : '○ Info';
-          const color = item.met === true ? 'var(--safe)' : item.met === false ? '#DC2626' : 'var(--ink-2)';
-          checks.append(el('p', { style: `color:${color};margin:4px 0;font-size:13px;` }, [`${mark}: ${item.label}. ${item.detail}`]));
-        }
-      });
+
+        const allPass = res.every((c) => c.met === true || c.met === null) && !res.some((c) => c.met === false);
+
+        const summaryBox = el('div', {
+          style: `padding:12px;border-radius:var(--radius-sm);margin:8px 0;background:var(--paper-2);border:1.5px solid ${allPass ? 'var(--accent)' : 'var(--rule-2)'};`,
+        });
+
+        summaryBox.append(
+          el('strong', { style: `color:${allPass ? 'var(--accent)' : 'var(--ink)'};display:block;margin-bottom:6px;` }, [
+            allPass ? '✓ File meets all requirements!' : '⚠ File does not meet some requirements:',
+          ]),
+        );
+
+        res.forEach((c: CheckItem) => {
+          const passIcon = c.met === true ? '✓' : c.met === false ? '✗' : 'ℹ';
+          const passColor = c.met === true ? '#1B7A4A' : c.met === false ? '#DC2626' : 'var(--ink-2)';
+          const row = el('div', { style: 'display:flex;align-items:center;gap:8px;font-size:13px;margin:4px 0;' }, [
+            el('span', { style: `color:${passColor};font-weight:bold;` }, [passIcon]),
+            el('span', { style: 'font-weight:600;' }, [c.label]),
+            el('span', { style: 'color:var(--ink-2);font-size:12px;' }, [`- ${c.detail}`]),
+          ]);
+          summaryBox.append(row);
+        });
+
+        checks.append(summaryBox);
+        status.textContent = allPass ? 'All checks passed.' : 'Review check details above.';
+      })();
     },
   });
 
@@ -183,8 +204,8 @@ function mountPresets(panel: HTMLElement): void {
     title,
     intro,
     customBox,
-    query,
     filterRow,
+    query,
     list,
     detail,
     drop.el,
@@ -440,29 +461,6 @@ function mountIdPhoto(panel: HTMLElement, incoming?: File[]): void {
     },
   });
 
-  const camera = el('button', { class: 'btn quiet', type: 'button', 'data-action': 'capture-photo' }, ['Use the camera']);
-  camera.addEventListener('click', () => {
-    void navigator.mediaDevices?.getUserMedia?.({ video: { facingMode: 'user' } }).then((stream) => {
-      const video = document.createElement('video');
-      video.srcObject = stream;
-      void video.play();
-      const take = el('button', { class: 'btn primary', type: 'button' }, ['Take photo']);
-      take.addEventListener('click', () => {
-        const grab = document.createElement('canvas');
-        grab.width = video.videoWidth || 640;
-        grab.height = video.videoHeight || 480;
-        grab.getContext('2d')?.drawImage(video, 0, 0);
-        for (const track of stream.getTracks()) track.stop();
-        video.remove();
-        take.remove();
-        void blobFromCanvas(grab, 'image/jpeg').then((blob) => paint(new File([blob], 'camera.jpg', { type: 'image/jpeg' })));
-      });
-      panel.append(video, take);
-    }).catch(() => {
-      checks.replaceChildren(el('p', undefined, ['Camera not available in this browser.']));
-    });
-  });
-
   sheet.addEventListener('click', () => {
     if (!last) return;
     const board = document.createElement('canvas');
@@ -505,7 +503,6 @@ function mountIdPhoto(panel: HTMLElement, incoming?: File[]): void {
     downloadPhotoBtn,
     replaceBgBtn,
     sheet,
-    camera,
   ]);
 
   panel.append(
@@ -562,27 +559,33 @@ function mountShare(panel: HTMLElement, incoming?: File[]): void {
       });
     },
   });
+
   fix.el.addEventListener('click', () => {
     if (!bytes) return;
     void (async () => {
-      const before = bytes.byteLength;
-      const next = image ? stripJpegMetadata(bytes) : await fixPdf(bytes);
-      bytes = next;
-      await scan();
-      status.textContent = findingsHost.textContent?.includes('Nothing risky found')
-        ? 'Checked again. Nothing risky found.'
-        : 'Checked again. Some signals are still listed above.';
-      showResult(panel, {
-        source: 'compress',
-        files: [{ name: image ? name.replace(/\.\w+$/, '') + '-clean.jpg' : name.replace(/\.pdf$/i, '') + '-clean.pdf', bytes: next }],
-        beforeBytes: before,
-        onStartOver: () => undefined,
-      });
+      fix.busy('Sanitizing…', 0.5);
+      const fixed = image ? bytes : await fixPdf(bytes);
+      const blob = new Blob([fixed as unknown as BlobPart], { type: image ? 'image/jpeg' : 'application/pdf' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `sanitized-${name}`;
+      link.click();
+      URL.revokeObjectURL(url);
+      fix.idle('Fix all', false);
+      status.textContent = 'Saved without hidden metadata.';
     })();
   });
-  panel.append(el('h2', undefined, ['Safe to share']), el('p', { class: 'tool-intro' }, ['Signals, not a guarantee. A clean list means this check found nothing it knows how to see.']), drop.el, findingsHost, status, fix.el);
+
+  panel.append(
+    el('h2', undefined, ['Safe to share']),
+    toolIntro('Check and remove metadata, GPS location, hidden text, and form history before you send a document or photo.'),
+    drop.el,
+    findingsHost,
+    el('div', { class: 'action-row', style: 'margin-top:12px;' }, [fix.el, status]),
+  );
+
   const first = incoming?.[0];
-  if (first) drop.el.querySelector('input')?.dispatchEvent(new Event('change'));
   if (first) {
     name = first.name;
     image = isImageFile(first) && !isPdfFile(first);
@@ -593,313 +596,8 @@ function mountShare(panel: HTMLElement, incoming?: File[]): void {
   }
 }
 
-function mountCommands(panel: HTMLElement, incoming?: File[]): void {
-  const field = el('textarea', { 'aria-label': 'Instruction', rows: '3' });
-  field.placeholder = 'make this under 2 MB and remove page 3';
-  const plan = el('div');
-  const status = el('p', { class: 'status', role: 'status' });
-  const run = el('button', { class: 'btn primary', type: 'button', 'data-action': 'run-command' }, ['Run']);
-  const edit = el('button', { class: 'btn quiet', type: 'button', 'data-action': 'edit-command' }, ['Edit']);
-  run.disabled = true;
-  let steps: CommandStep[] | null = takePendingCommand();
-  let chosen: File[] = incoming ? [...incoming] : [];
-  const paint = (): void => {
-    plan.replaceChildren();
-    if (!steps) {
-      plan.append(el('p', undefined, ['Type an instruction. Nothing runs until you press Run.']));
-      run.disabled = true;
-      return;
-    }
-    for (const line of planLines(steps)) plan.append(el('p', undefined, [line]));
-    plan.append(el('p', undefined, ['Confirm these steps. Nothing has run yet.']));
-    run.disabled = chosen.length === 0;
-  };
-  field.addEventListener('input', () => {
-    steps = parseCommand(field.value);
-    if (!steps && browserPromptAvailable()) status.textContent = 'The built-in parser did not recognise that. An on-device model is available, and this version still will not send the sentence to a server.';
-    else status.textContent = '';
-    paint();
-  });
-  edit.addEventListener('click', () => field.focus());
-  const drop = dropZone({
-    title: 'Drop the PDF these steps should use',
-    detail: 'One file for compress, rotate, or delete. Two or more to merge.',
-    accept: 'application/pdf,.pdf',
-    multiple: true,
-    buttonLabel: 'Choose PDFs',
-    onFiles: (files) => {
-      chosen = files;
-      status.textContent = files.length ? `${files.length} file${files.length === 1 ? '' : 's'} ready.` : '';
-      paint();
-    },
-  });
-  run.addEventListener('click', () => {
-    if (!steps || !chosen.length) return;
-    void runSteps(chosen, steps, status, panel);
-  });
-  panel.append(el('h2', undefined, ['Commands']), el('p', { class: 'tool-intro' }, ['The plan is shown first. Run is the confirmation.']), field, plan, drop.el, edit, run, status);
-  if (steps) {
-    field.value = steps.map((step) => step.label).join('. ');
-    paint();
-  }
-}
-
-async function runSteps(files: File[], steps: CommandStep[], status: HTMLElement, panel: HTMLElement): Promise<void> {
-  let bytes = new Uint8Array(await files[0]!.arrayBuffer());
-  const name = files[0]!.name;
-  for (const step of steps) {
-    if (step.op === 'unsupported') {
-      status.textContent = step.label;
-      continue;
-    }
-    status.textContent = step.label;
-    if (step.op === 'delete-pages') {
-      const doc = await PDFDocument.load(bytes);
-      const indexes = doc.getPageIndices();
-      const dropPages = new Set(step.lastPage ? [indexes.length] : (step.pages ?? []));
-      const keep = indexes.filter((index) => !dropPages.has(index + 1));
-      const out = await PDFDocument.create();
-      const copied = await out.copyPages(doc, keep);
-      for (const page of copied) out.addPage(page);
-      bytes = new Uint8Array(await out.save());
-    } else if (step.op === 'rotate' && step.turns) {
-      bytes = new Uint8Array(await editPdf(bytes, { kind: 'rotate', turns: step.turns }));
-    } else if (step.op === 'watermark' && step.text) {
-      bytes = new Uint8Array(await editPdf(bytes, { kind: 'watermark', text: step.text }));
-    } else if (step.op === 'numbers') {
-      bytes = new Uint8Array(await editPdf(bytes, { kind: 'numbers', start: 1, skipFirst: false }));
-    } else if (step.op === 'compress' || step.op === 'grayscale') {
-      const id = `cmd-${Date.now()}`;
-      await openPdf(id, bytes);
-      const level = COMPRESS_LEVELS[step.targetKb && step.targetKb <= 200 ? 'strong' : 'recommended'];
-      const saved = await compressDocument(id, { ...level, grayscale: step.op === 'grayscale', squeeze: false }, () => undefined);
-      releaseDocument(id);
-      bytes = new Uint8Array(saved.bytes);
-      if (step.targetKb) status.textContent = `Compress finished at ${formatBytes(bytes.byteLength)}. ${formatBytes(step.targetKb * 1024)} was the goal, not a promise.`;
-    } else if (step.op === 'merge') {
-      status.textContent = files.length < 2 ? 'Merge needs at least two PDFs.' : 'Open Merge PDF to combine these files in order.';
-    } else if (step.op === 'split') {
-      status.textContent = step.range ? `Open Split PDF. The range ${step.range} is the plan.` : 'Open Split PDF to choose pages.';
-    }
-  }
-  showResult(panel, {
-    source: 'compress',
-    files: [{ name: name.replace(/\.pdf$/i, '') + '-edited.pdf', bytes }],
-    onStartOver: () => undefined,
-  });
-}
-
-function mountAccessible(panel: HTMLElement, incoming?: File[]): void {
-  let bytes: Uint8Array | null = null;
-  const report = el('div');
-  const title = el('input', { type: 'text', 'aria-label': 'Document title' });
-  const language = el('input', { type: 'text', value: 'en', 'aria-label': 'Language code' });
-  const fix = el('button', { class: 'btn quiet', type: 'button', 'data-action': 'fix-title-language' }, ['Write title and language']);
-  const note = el('p', undefined, ['Automatic fixes cover the title and the language you type. For legal compliance, review the report and test with a screen reader. Free checkers such as PDF Accessibility Checker and Adobe Acrobat\'s checker are outside this app.']);
-  const paint = async (): Promise<void> => {
-    if (!bytes) return;
-    report.replaceChildren();
-    for (const item of await checkAccessibility(bytes)) {
-      const state = item.state === 'pass' ? 'Pass' : item.state === 'fix' ? 'Fix available' : 'Needs a human';
-      report.append(el('p', undefined, [`${state}: ${item.title}. ${item.detail}`]));
-    }
-  };
-  fix.addEventListener('click', () => {
-    void (async () => {
-      if (!bytes) return;
-      bytes = await applyAccessibilityFixes(bytes, title.value, language.value);
-      await paint();
-    })();
-  });
-  const drop = dropZone({
-    title: 'Drop a PDF',
-    detail: 'The report runs on this device.',
-    accept: 'application/pdf,.pdf',
-    multiple: false,
-    buttonLabel: 'Choose a PDF',
-    onFiles: (files) => {
-      const file = files[0];
-      if (!file) return;
-      title.value = file.name.replace(/\.pdf$/i, '');
-      void readFileBytes(file).then((data) => {
-        bytes = data;
-        void paint();
-      });
-    },
-  });
-  panel.append(el('h2', undefined, ['Make accessible']), el('p', { class: 'tool-intro' }, ['This is an in-house report. It is not a PDF/UA certificate.']), drop.el, report, el('label', undefined, ['Title ', title]), el('label', undefined, ['Language ', language]), fix, note);
-  const first = incoming?.[0];
-  if (first) void readFileBytes(first).then((data) => { bytes = data; title.value = first.name.replace(/\.pdf$/i, ''); void paint(); });
-}
-
-function mountGenuine(panel: HTMLElement, incoming?: File[]): void {
-  const report = el('div');
-  const drop = dropZone({
-    title: 'Drop a PDF',
-    detail: 'The wording stays short of a verdict.',
-    accept: 'application/pdf,.pdf',
-    multiple: false,
-    buttonLabel: 'Choose a PDF',
-    onFiles: (files) => {
-      const file = files[0];
-      if (!file) return;
-      void readFileBytes(file).then(async (bytes) => {
-        const found = await inspectGenuine(bytes);
-        report.replaceChildren(...found.lines.map((line) => el('p', undefined, [line])));
-      });
-    },
-  });
-  panel.append(el('h2', undefined, ['Signature check']), el('p', { class: 'tool-intro' }, ['Coverage and edit signals. This does not prove who signed, and it does not say a file is genuine.']), drop.el, report);
-  const first = incoming?.[0];
-  if (first) void readFileBytes(first).then(async (bytes) => {
-    const found = await inspectGenuine(bytes);
-    report.replaceChildren(...found.lines.map((line) => el('p', undefined, [line])));
-  });
-}
-
-function mountChat(panel: HTMLElement, incoming?: File[]): void {
-  let pages: string[] = [];
-  const question = el('input', { type: 'text', 'aria-label': 'Question about this document' });
-  const answer = el('div');
-  const ask = el('button', { class: 'btn primary', type: 'button', 'data-action': 'ask-document' }, ['Ask']);
-  const clear = (): void => {
-    pages = [];
-    answer.replaceChildren();
-  };
-  const show = (text: string, cited: number[]): void => {
-    answer.replaceChildren(el('p', undefined, [text]));
-    for (const page of cited) {
-      const jump = el('button', { class: 'btn quiet', type: 'button' }, [`Page ${page}`]);
-      jump.addEventListener('click', () => {
-        const passage = pages[page - 1] ?? '';
-        answer.append(el('p', undefined, [`Page ${page}: ${passage}`]));
-      });
-      answer.append(jump);
-    }
-  };
-  ask.addEventListener('click', () => {
-    const client: PromptClient | null = null;
-    void answerWithPrompt(pages, question.value, client).then((result) => show(result.text, result.pages));
-  });
-  for (const label of ['Summarize', 'Dates and amounts', 'Clauses']) {
-    const button = el('button', { class: 'btn quiet', type: 'button' }, [label]);
-    button.addEventListener('click', () => {
-      if (label === 'Clauses') {
-        const hits = findClauses(pages);
-        show(hits.length ? hits.map((hit) => `Page ${hit.page}: ${hit.text}`).join('\n') : "I couldn't find that in this document.", hits.map((hit) => hit.page));
-        return;
-      }
-      const query = label === 'Summarize' ? 'summary of the pages' : 'date amount payment';
-      const result = answerFromDocument(pages, query);
-      show(result.text, result.pages);
-    });
-    panel.append(button);
-  }
-  const drop = dropZone({
-    title: 'Drop a PDF',
-    detail: 'Text is read on this device. The index is dropped when you start over.',
-    accept: 'application/pdf,.pdf',
-    multiple: false,
-    buttonLabel: 'Choose a PDF',
-    onFiles: (files) => {
-      const file = files[0];
-      if (!file) return;
-      clear();
-      void readFileBytes(file).then(async (bytes) => {
-        const id = `chat-${Date.now()}`;
-        await openPdf(id, bytes);
-        pages = await pageText(id);
-        releaseDocument(id);
-        answer.replaceChildren(el('p', undefined, [`${pages.length} pages read. Ask a question. A downloadable model is not published with this version, so answers come from the words in the file.`]));
-      });
-    },
-  });
-  const reset = el('button', { class: 'btn quiet', type: 'button' }, ['Close the document']);
-  reset.addEventListener('click', clear);
-  panel.prepend(el('h2', undefined, ['Chat with PDF']), el('p', { class: 'tool-intro' }, ['Every answer cites a page, or says the document does not contain it.']), drop.el, question, ask);
-  panel.append(answer, reset);
-  const first = incoming?.[0];
-  if (first) void readFileBytes(first).then(async (bytes) => {
-    const id = `chat-${Date.now()}`;
-    await openPdf(id, bytes);
-    pages = await pageText(id);
-    releaseDocument(id);
-  });
-}
-
-interface DirHandle {
-  entries(): AsyncIterable<[string, { kind: string }]>;
-  getDirectoryHandle(name: string, options: { create: boolean }): Promise<DirHandle>;
-  getFileHandle(name: string, options?: { create: boolean }): Promise<{
-    getFile(): Promise<File>;
-    createWritable(): Promise<{ write(data: BufferSource): Promise<void>; close(): Promise<void> }>;
-  }>;
-}
-
-function mountHot(panel: HTMLElement): void {
-  const log = el('div');
-  const status = el('p', undefined, [`Runs while ${brandName()} is open. New files are copies, not compressed. Originals stay in place.`]);
-  const supported = 'showDirectoryPicker' in window;
-  if (!supported) {
-    panel.append(el('h2', undefined, ['Hot folders']), el('p', { class: 'tool-intro' }, ['Folder watching needs a desktop Chromium browser. This browser does not offer it.']));
-    return;
-  }
-  let paused = false;
-  let timer = 0;
-  const pause = el('button', { class: 'btn quiet', type: 'button', 'data-action': 'pause-hot-folder' }, ['Pause']);
-  const start = el('button', { class: 'btn primary', type: 'button', 'data-action': 'start-hot-folder' }, ['Choose an input folder']);
-  start.addEventListener('click', () => {
-    const picker = (window as unknown as { showDirectoryPicker: () => Promise<DirHandle> }).showDirectoryPicker;
-    void picker().then(async (input) => {
-      const output = await input.getDirectoryHandle(`${brandName()} output`, { create: true });
-      const tick = async (): Promise<void> => {
-        const names: string[] = [];
-        for await (const [name, handle] of input.entries()) {
-          if (handle.kind === 'file' && name.toLowerCase().endsWith('.pdf')) names.push(name);
-        }
-        const events = await runHotQueue(names, async (file) => {
-          const source = await input.getFileHandle(file);
-          const blob = await (await source.getFile()).arrayBuffer();
-          const target = outputName(file);
-          const dest = await output.getFileHandle(target, { create: true });
-          const writable = await dest.createWritable();
-          await writable.write(blob);
-          await writable.close();
-          return { savedBytes: 0 };
-        }, () => paused);
-        log.replaceChildren(...events.slice(-8).map((event) => el('p', undefined, [`${event.file}: ${event.detail}`])));
-      };
-      await tick();
-      timer = window.setInterval(() => void tick().catch(() => {
-        status.textContent = 'Permission was lost. Choose the folder again.';
-        window.clearInterval(timer);
-      }), 5000);
-    }).catch(() => {
-      status.textContent = 'The folder was not chosen.';
-    });
-  });
-  pause.addEventListener('click', () => {
-    paused = !paused;
-    pause.textContent = paused ? 'Resume' : 'Pause';
-  });
-  panel.append(el('h2', undefined, ['Hot folders']), status, start, pause, log);
-  window.addEventListener('pagehide', () => window.clearInterval(timer), { once: true });
-}
-
-function mountLite(panel: HTMLElement): void {
-  const on = shouldUseLite({ ...readLiteSignals(), forced: true });
-  if (on) document.documentElement.dataset.lite = 'on';
-  void savePrefs({ lite: true });
-  panel.append(
-    el('h2', undefined, ['Lite mode']),
-    el('p', { class: 'tool-intro' }, ['Animations stay off. The everyday tools are Compress, Merge, Images to PDF, ID photo resize, and Safe to share.']),
-    el('p', undefined, ['No model is downloaded unless you ask, and this version has no model file to ask for.']),
-  );
-  for (const item of URL_PARAMETER_HELP) panel.append(el('p', undefined, [item.path]));
-}
-
-function blobFromCanvas(canvas: HTMLCanvasElement, type: string): Promise<Blob> {
-  return new Promise((resolve, reject) => {
-    canvas.toBlob((blob) => (blob ? resolve(blob) : reject(new Error('The canvas was empty.'))), type);
+function blobFromCanvas(canvas: HTMLCanvasElement, mime = 'image/jpeg', quality = 0.92): Promise<Blob> {
+  return new Promise<Blob>((resolve) => {
+    canvas.toBlob((blob) => resolve(blob ?? new Blob()), mime, quality);
   });
 }

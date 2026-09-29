@@ -5,9 +5,9 @@ import { brand, brandName, brandOrigin } from '../src/brand.ts';
 import { AWAITING_OFFICIAL_SOURCES, englishPages, indexablePages, LOCALES } from '../content/site.ts';
 import { breadcrumb, escapeHtml, jsonLd, landingHead, landingRest, UPDATED } from '../src/seo/document.ts';
 import { toolIcons } from '../src/lib/icons.ts';
-import { activeToolsCount, CATEGORIES, comingSoonTools, popularTools, toolById, toolsIn, TOOLS, type ToolInfo } from '../src/tools/registry.ts';
+import { activeToolsCount, CATEGORIES, popularTools, toolsIn, type ToolInfo } from '../src/tools/registry.ts';
 import { lockupHorizontal } from '../src/assets/brand/lockup.ts';
-import { hrefFor } from '../src/seo/routes.ts';
+import { hrefFor, REMOVED_TOOL_SLUGS } from '../src/seo/routes.ts';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const dist = join(root, 'dist');
@@ -16,21 +16,15 @@ const indexable = indexablePages();
 const pages = englishPages;
 const labels = new Map(pages.map((page) => [page.path, page.h1]));
 
-function toolCardHtml(tool: ToolInfo, isComingSoon = false): string {
+function toolCardHtml(tool: ToolInfo): string {
   const svg = (toolIcons[tool.icon]?.svg ?? '').replaceAll('width="24"', 'width="18"').replaceAll('height="24"', 'height="18"');
-  const isSoon = isComingSoon || tool.status === 'coming-soon';
   let badgeHtml = '';
-  if (isSoon) {
-    badgeHtml = '<span class="badge badge-neutral">Coming soon</span>';
-  } else if (tool.status === 'beta' || tool.badges?.includes('Beta')) {
+  if (tool.status === 'beta' || tool.badges?.includes('Beta')) {
     badgeHtml = '<span class="badge badge-ok">Beta</span>';
   }
-  const top = `<span class="tool-top"><span class="tool-icon" data-cat="${escapeHtml(tool.category)}">${svg}</span>${badgeHtml}</span>`;
+  const top = `<span class="tool-top"><span class="tool-icon">${svg}</span>${badgeHtml}</span>`;
   const body = `<span class="tool-copy"><span class="tool-name">${escapeHtml(tool.name)}</span><span class="tool-desc">${escapeHtml(tool.description)}</span></span>`;
-  if (isSoon) {
-    return `<div class="tool-card tool-card-muted" data-tool="${escapeHtml(tool.id)}" data-cat="${escapeHtml(tool.category)}" aria-label="${escapeHtml(tool.name)} – Coming soon">${top}${body}</div>`;
-  }
-  return `<a class="tool-card" href="${hrefFor(tool.id)}" data-tool="${escapeHtml(tool.id)}" data-cat="${escapeHtml(tool.category)}" aria-label="${escapeHtml(tool.name)} – ${escapeHtml(tool.description)}">${top}${body}</a>`;
+  return `<a class="tool-card" href="${hrefFor(tool.id)}" data-tool="${escapeHtml(tool.id)}" aria-label="${escapeHtml(tool.name)} – ${escapeHtml(tool.description)}">${top}${body}</a>`;
 }
 
 function catalogShell(): { popular: string; catalog: string } {
@@ -40,37 +34,15 @@ function catalogShell(): { popular: string; catalog: string } {
     if (!tools.length) return '';
     return `<section class="tool-section"><h2>${escapeHtml(category.label)}</h2><div class="tool-grid-wrap"><div class="tool-grid">${tools.map((t) => toolCardHtml(t)).join('')}</div></div></section>`;
   }).join('');
-  const soon = comingSoonTools();
-  const soonSection = soon.length
-    ? `<section class="tool-section tool-section-soon"><header class="tool-section-head"><h2>Coming soon</h2><span class="tool-section-tag">in development</span></header><div class="tool-grid-wrap"><div class="tool-grid tool-grid-soon">${soon.map((t) => toolCardHtml(t, true)).join('')}</div></div></section>`
-    : '';
-  return { popular, catalog: `${categorySections}${soonSection}` };
-}
-
-function comingSoonHtml(tool: ToolInfo): string {
-  const svg = (toolIcons[tool.icon]?.svg ?? '').replaceAll('width="24"', 'width="24"').replaceAll('height="24"', 'height="24"');
-  const relatedIds = tool.relatedWorkingTools ?? [];
-  const related = relatedIds
-    .map((id) => toolById(id))
-    .filter((t): t is ToolInfo => Boolean(t && (t.status === 'ready' || t.status === 'beta')))
-    .slice(0, 3);
-  const relatedHtml = related.length
-    ? `<div class="coming-soon-related"><h2 class="related-title">Working alternatives you can use right now:</h2><div class="related-tools-grid">${related.map((alt) => {
-        const altSvg = (toolIcons[alt.icon]?.svg ?? '').replaceAll('width="24"', 'width="16"').replaceAll('height="24"', 'height="16"');
-        return `<a class="btn outline related-tool-btn" href="${hrefFor(alt.id)}">${altSvg}<span>${escapeHtml(alt.name)}</span></a>`;
-      }).join('')}</div></div>`
-    : '';
-
-  return `<div class="coming-soon-panel"><div class="coming-soon-top"><span class="tool-icon" data-cat="${escapeHtml(tool.category)}">${svg}</span><span class="badge badge-neutral">Coming soon</span></div><h1>${escapeHtml(tool.name)}</h1><p class="tool-intro">${escapeHtml(tool.description)}</p><div class="coming-soon-card"><p class="coming-soon-lead">We're building a privacy-first, on-device version of this tool. No files will ever leave your browser.</p><p class="coming-soon-sub">${escapeHtml(tool.limit ?? 'This feature is currently in active development.')}</p></div>${relatedHtml}</div>`;
+  return { popular, catalog: categorySections };
 }
 
 function footer(): string {
   const extras: string[] = [];
   if (brand.repoUrl) extras.push(`<a href="${escapeHtml(brand.repoUrl)}" target="_blank" rel="noopener">GitHub</a>`);
   if (brand.social.instagram) extras.push(`<a href="${escapeHtml(brand.social.instagram)}" target="_blank" rel="noopener">Instagram</a>`);
-  if (brand.supportUrl) extras.push(`<a href="${escapeHtml(brand.supportUrl)}" target="_blank" rel="noopener">Support ${escapeHtml(brandName())}</a>`);
   const extra = extras.length ? `<p class="foot-extra">${extras.join(' · ')}</p>` : '';
-  return `<div class="wrap foot-inner"><div class="foot-brand-block"><p class="foot-brand-name"><strong>${escapeHtml(brandName())}</strong></p><p class="foot-tag">${escapeHtml(brand.tagline)}</p>${extra}</div><nav class="foot-nav" aria-label="Footer tools"><h2>Tools</h2><a href="/compress-pdf">Compress PDF</a><a href="/merge-pdf">Merge PDF</a><a href="/split-pdf">Split PDF</a><a href="/tools">All tools</a></nav><nav class="foot-nav" aria-label="Convert"><h2>Convert</h2><a href="/jpg-to-pdf">JPG to PDF</a><a href="/png-to-pdf">PNG to PDF</a><a href="/pdf-to-jpg">PDF to JPG</a><a href="/heic-to-jpg">HEIC to JPG</a></nav><nav class="foot-nav" aria-label="Company"><h2>Company</h2><a href="/about">About</a><a href="/guides">Guides</a><a href="/brand">Brand</a><a href="/press">Press</a><a href="${escapeHtml(brand.repoUrl)}" target="_blank" rel="noopener">GitHub</a><a href="${escapeHtml(brand.social.instagram)}" target="_blank" rel="noopener">Instagram</a></nav><nav class="foot-nav" aria-label="Legal"><h2>Legal</h2><a href="/privacy">Privacy</a><a href="/sitemap">Sitemap</a></nav></div><div class="wrap foot-bar"><p>© 2026 ${escapeHtml(brandName())}. Processed on your device.</p><p>English</p></div>`;
+  return `<div class="wrap foot-inner"><div class="foot-brand-block"><p class="foot-brand-name"><strong>${escapeHtml(brandName())}</strong></p><p class="foot-tag">${escapeHtml(brand.tagline)}</p>${extra}</div><nav class="foot-nav" aria-label="Footer tools"><h2>Tools</h2><a href="/compress-pdf">Compress PDF</a><a href="/compress-image">Compress image</a><a href="/signature-resizer">Signature resizer</a><a href="/id-photo">ID photo</a><a href="/tools">All tools</a></nav><nav class="foot-nav" aria-label="Convert"><h2>Convert</h2><a href="/jpg-to-pdf">JPG to PDF</a><a href="/pdf-to-jpg">PDF to JPG</a><a href="/heic-to-jpg">HEIC to JPG</a><a href="/png-to-jpg">PNG to JPG</a></nav><nav class="foot-nav" aria-label="Company"><h2>Company</h2><a href="/about">About</a><a href="/guides">Guides</a><a href="/brand">Brand</a><a href="/press">Press</a><a href="${escapeHtml(brand.repoUrl)}" target="_blank" rel="noopener">GitHub</a><a href="${escapeHtml(brand.social.instagram)}" target="_blank" rel="noopener">Instagram</a></nav><nav class="foot-nav" aria-label="Legal"><h2>Legal</h2><a href="/privacy">Privacy</a><a href="/sitemap">Sitemap</a></nav></div><div class="wrap foot-bar"><p>© 2026 ${escapeHtml(brandName())}. Processed on your device.</p><p>English</p></div>`;
 }
 
 function paint(pagePath: string): string {
@@ -108,7 +80,7 @@ function paint(pagePath: string): string {
   const altXDefault = page.noindex ? '' : `<link rel="alternate" hreflang="x-default" href="${brandOrigin()}/${page.path}" />`;
   html = html.replace('</head>', `${robotsTag}${preload}${verify}${links}${altXDefault}${json}</head>`);
   const shell = catalogShell();
-  html = html.replace(/<a class="wordmark"[^>]*>[\s\S]*?<\/a>/, `<a class="wordmark" href="/" aria-label="${escapeHtml(brandName())} home">${lockupHorizontal}</a>`);
+  html = html.replace(/<a class="wordmark"[^>]*>[\s\S]*?<\/a>/, `<a class="wordmark" href="/" aria-label="${escapeHtml(brandName())} home" title="${escapeHtml(brandName())} home">${lockupHorizontal}</a>`);
   if (page.path) {
     // Tool and landing pages must contain only their own content, never the home page sections
     html = html.replace(/<section class="view wrap" id="view-home">[\s\S]*?<\/section>\s*(?=<section class="view wrap" id="view-tools")/i, '<section class="view wrap" id="view-home" hidden></section>\n              ');
@@ -126,11 +98,6 @@ function paint(pagePath: string): string {
     html = html.replace('<div id="home-seo"></div>', `<div id="home-seo">${rest}</div>`);
     html = html.replace('<div id="popular"></div>', `<div id="popular">${shell.popular}</div>`);
     html = html.replace('<div id="catalog"></div>', `<div id="catalog">${shell.catalog}</div>`);
-  }
-  const soonTool = page.toolId ? toolById(page.toolId) : undefined;
-  if (soonTool && soonTool.status === 'coming-soon') {
-    html = html.replace('<div class="panel" id="panel-extra" tabindex="0"></div>', `<div class="panel" id="panel-extra" tabindex="0">${comingSoonHtml(soonTool)}</div>`);
-    html = html.replace(/(<div id="landing-rest"[^>]*>)[\s\S]*?(<\/div>)/, '$1$2');
   }
   if (page.path) {
     html = html.replace(/(<div id="landing-head"[^>]*>)(<\/div>)/, `$1${head}$2`);
@@ -167,7 +134,7 @@ for (const page of pages) {
   }
 }
 
-const missing = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>Page not found — ${brandName()}</title><meta name="robots" content="noindex"></head><body><h1>Page not found</h1><p>That address is not a page on this site.</p><p><a href="/compress-pdf">Compress PDF</a> <a href="/merge-pdf">Merge PDF</a> <a href="/">Home</a></p></body></html>`;
+const missing = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>Page not found — ${brandName()}</title><meta name="robots" content="noindex"></head><body><h1>Page not found</h1><p>That address is not a page on this site.</p><p><a href="/compress-image">Compress image</a> <a href="/compress-pdf">Compress PDF</a> <a href="/signature-resizer">Signature resizer</a> <a href="/tools">All tools</a> <a href="/">Home</a></p></body></html>`;
 writeFileSync(join(dist, '404.html'), missing);
 
 const lastmod = UPDATED;
@@ -194,9 +161,18 @@ writeFileSync(join(root, 'seo', 'keywords.csv'), `${csv.join('\n')}\n`);
 const unreviewed = LOCALES.map((locale) => `${locale.code} (${locale.label}) reviewed: false`).join('\n');
 writeFileSync(join(root, 'seo', 'unreviewed-translations.txt'), `${unreviewed}\n\nAwaiting official sources:\n${AWAITING_OFFICIAL_SOURCES.join('\n')}\n`);
 
+function writeToolsRedirect(pagePath: string): void {
+  const html = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>Tools — ${escapeHtml(brandName())}</title><meta http-equiv="refresh" content="0;url=/tools"><link rel="canonical" href="${brandOrigin()}/tools"><meta name="robots" content="noindex"><script>location.replace('/tools')</script></head><body><p><a href="/tools">Continue to tools</a></p></body></html>\n`;
+  writePage(pagePath, html);
+}
+
 function writeHomeRedirect(pagePath: string): void {
   const html = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>Moved — ${escapeHtml(brandName())}</title><meta http-equiv="refresh" content="0;url=/"><link rel="canonical" href="${brandOrigin()}/"><meta name="robots" content="noindex"><script>location.replace('/')</script></head><body><p><a href="/">Continue to home</a></p></body></html>\n`;
   writePage(pagePath, html);
+}
+
+for (const slug of REMOVED_TOOL_SLUGS) {
+  writeToolsRedirect(slug);
 }
 
 for (const slug of ['pro', 'pricing']) {
@@ -208,4 +184,4 @@ const counts = new Map();
 for (const page of pages) counts.set(page.kind, (counts.get(page.kind) ?? 0) + 1);
 console.log(`Prerendered ${pages.length} indexable pages`);
 console.log([...counts.entries()].map(([kind, count]) => `${kind} ${count}`).join(', '));
-console.log('Redirects: /pro, /pricing, and language variants → /');
+console.log(`Redirects: ${REMOVED_TOOL_SLUGS.length} removed tools → /tools; /pro, /pricing → /`);

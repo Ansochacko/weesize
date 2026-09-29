@@ -79,7 +79,7 @@ export const GUIDES: GuideSeed[] = [
       'After any redaction done elsewhere, search for the secret. A hit means you are not done.',
       'You can read the warning offline. The refusal to fake redaction does not need a network.',
     ],
-    related: ['redact-pdf', 'crop-pdf', 'compress-pdf'],
+    related: ['crop-pdf', 'compress-pdf', 'privacy'],
   },
   {
     slug: 'why-black-boxes-fail-at-redaction',
@@ -96,7 +96,7 @@ export const GUIDES: GuideSeed[] = [
       'Select the boxed area. If the caret still finds letters, the box failed.',
       'The explanation holds offline. The underlying text does not disappear when you disconnect.',
     ],
-    related: ['redact-pdf', 'edit-pdf', 'compress-pdf'],
+    related: ['crop-pdf', 'compress-pdf', 'privacy'],
   },
   {
     slug: 'make-a-scanned-pdf-searchable',
@@ -113,7 +113,7 @@ export const GUIDES: GuideSeed[] = [
       'Select text after any OCR you do elsewhere. Correct the names that matter.',
       'Offline, this page still will not fabricate a transcript.',
     ],
-    related: ['ocr-pdf', 'pdf-to-word', 'scan-to-pdf'],
+    related: ['compress-pdf', 'pdf-to-jpg', 'jpg-to-pdf'],
   },
   {
     slug: 'pdf-vs-pdfa',
@@ -130,7 +130,7 @@ export const GUIDES: GuideSeed[] = [
       'A validator’s report is the check. This page does not produce that report.',
       'You can read the distinction offline. Validation is not silently sent away.',
     ],
-    related: ['pdf-to-pdfa', 'repair-pdf', 'compress-pdf'],
+    related: ['repair-pdf', 'compress-pdf', 'privacy'],
   },
   {
     slug: 'sign-a-pdf-without-printing',
@@ -147,7 +147,7 @@ export const GUIDES: GuideSeed[] = [
       'Open the signed file in a reader that shows signature panels, if a certificate was used. A missing panel means there is no certificate.',
       'The distinction is the same offline. A fake stamp does not start working when the network returns.',
     ],
-    related: ['sign-pdf', 'pdf-forms', 'scan-to-pdf'],
+    related: ['signature-resizer', 'compress-pdf', 'privacy'],
   },
   {
     slug: 'compress-a-pdf-on-iphone',
@@ -164,7 +164,7 @@ export const GUIDES: GuideSeed[] = [
       'Read a page on the phone after download, at the size you will send.',
       'Turn on airplane mode after the ready state and compress a second file. It should finish.',
     ],
-    related: ['compress-pdf-on-iphone', 'compress-pdf', 'scan-to-pdf'],
+    related: ['compress-pdf-on-iphone', 'compress-pdf', 'compress-image'],
   },
   {
     slug: 'best-image-format-for-the-web',

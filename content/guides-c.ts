@@ -16,7 +16,7 @@ export const GUIDES_C: GuideSeed[] = [
       'Open both PDFs at the first change and read the clause.',
       'The comparison still runs offline after load.',
     ],
-    related: ['compare-pdf', 'pdf-to-word', 'redact-pdf'],
+    related: ['split-pdf', 'merge-pdf', 'privacy'],
   },
   {
     slug: 'pdf-to-word-what-you-keep',
@@ -33,7 +33,7 @@ export const GUIDES_C: GuideSeed[] = [
       'Search the document for a sentence you selected in the PDF.',
       'Extraction works offline after the app has loaded.',
     ],
-    related: ['pdf-to-word', 'pdf-to-markdown', 'ocr-pdf'],
+    related: ['pdf-to-jpg', 'jpg-to-pdf', 'compress-pdf'],
   },
   {
     slug: 'word-to-pdf-what-changes',
@@ -50,7 +50,7 @@ export const GUIDES_C: GuideSeed[] = [
       'Compare the PDF with Word on a page that has a table or a header.',
       'Once loaded, the conversion does not need the network, and it will not open one to fetch missing art.',
     ],
-    related: ['word-to-pdf', 'html-to-pdf', 'pdf-to-word'],
+    related: ['jpg-to-pdf', 'compress-pdf', 'merge-pdf'],
   },
   {
     slug: 'html-to-pdf-without-fetching-the-web',
@@ -67,7 +67,7 @@ export const GUIDES_C: GuideSeed[] = [
       'If a picture is missing, view the source. Its address was not contacted.',
       'Pasted HTML still converts with Wi-Fi off, which is the proof no site was called.',
     ],
-    related: ['html-to-pdf', 'word-to-pdf', 'pdf-to-markdown'],
+    related: ['jpg-to-pdf', 'compress-pdf', 'privacy'],
   },
   {
     slug: 'what-a-browser-pdf-tool-can-and-cannot-do',
@@ -84,7 +84,7 @@ export const GUIDES_C: GuideSeed[] = [
       'Every active tool operates completely offline once loaded.',
       'No files are ever transmitted to any external server.',
     ],
-    related: ['tools', 'edit-pdf', 'privacy'],
+    related: ['tools', 'compress-pdf', 'privacy'],
   },
   {
     slug: 'compress-images-for-email',

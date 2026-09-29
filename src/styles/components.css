@@ -396,3 +396,94 @@
   display: flex;
   justify-content: space-between;
 }
+
+/* Popular Sizes Grid */
+.home-sizes {
+  margin: 48px 0 24px;
+}
+
+.home-sizes h2 {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: var(--ink);
+}
+
+.popular-sizes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 12px;
+}
+
+.popular-size-card {
+  display: flex;
+  flex-direction: column;
+  padding: 14px;
+  background: var(--paper);
+  border: 1px solid var(--rule-2);
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+  transition: border-color var(--dur) var(--ease), background-color var(--dur) var(--ease);
+}
+
+.popular-size-card:hover {
+  border-color: var(--primary);
+  background: var(--paper-2);
+}
+
+.popular-size-card .size-target {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--primary);
+  font-family: var(--font-mono, monospace);
+  letter-spacing: -0.02em;
+}
+
+.popular-size-card .size-type {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--ink);
+  margin-top: 4px;
+  letter-spacing: 0.04em;
+}
+
+.popular-size-card .size-hint {
+  font-size: 12px;
+  color: var(--ink-2);
+  margin-top: 2px;
+  line-height: 1.3;
+}
+
+/* Presets Banner */
+.home-presets-banner {
+  margin: 32px 0 40px;
+}
+
+.presets-banner-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  padding: 24px;
+  background: var(--paper-2);
+  border: 1px solid var(--rule-2);
+  border-radius: var(--radius-md);
+  flex-wrap: wrap;
+}
+
+.presets-banner-copy h2 {
+  margin: 0 0 6px 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.presets-banner-copy p {
+  margin: 0;
+  color: var(--ink-2);
+  font-size: 14px;
+  max-width: 600px;
+  line-height: 1.5;
+}
+

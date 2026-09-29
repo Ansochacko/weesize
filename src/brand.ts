@@ -6,8 +6,8 @@
 export const brand = {
   name: 'Weesize',
   domain: 'weesize.com',
-  tagline: 'Get any file to the size you need. Privately.',
-  description: 'Weesize is a free, open-source tool that compresses PDFs and photos to an exact file size in your browser, without uploading files.',
+  tagline: 'Get any photo, signature or PDF to the exact size a form needs.',
+  description: 'Weesize is a free, open-source tool that compresses photos, signatures and PDFs to an exact file size in your browser, without uploading files.',
   colors: {
     accent: '#2340C9',
     accentDeep: '#1A2FA6',

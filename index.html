@@ -105,11 +105,12 @@
                   <div class="hero-grid">
                     <div class="hero-copy">
                       <p class="eyebrow"><span id="hero-lock"></span> Free · Open source · No upload</p>
-                      <h1>Get any file to the exact size you need.</h1>
-                      <p class="lede">Compress, convert and sign PDFs and photos in your browser. Your files are never uploaded.</p>
+                      <h1>Get any photo, signature or PDF to the exact size a form needs.</h1>
+                      <p class="lede">Free, private and fast. Pick a size, drop your file, done. Nothing is uploaded.</p>
                       <div class="hero-actions">
-                        <a class="btn primary" href="#/compress-pdf">Compress a PDF</a>
-                        <a class="btn quiet" href="#/compress-image">Compress an image</a>
+                        <a class="btn primary" href="#/compress-image">Resize a photo</a>
+                        <a class="btn quiet" href="#/signature-resizer">Clean signature</a>
+                        <a class="btn quiet" href="#/compress-pdf">Compress a PDF</a>
                       </div>
                       <div id="suggestions"></div>
                     </div>
@@ -119,16 +120,26 @@
                         <span class="target-label" id="target-size-label">Target size</span>
                         <div class="target-switch" role="tablist" aria-labelledby="target-size-label">
                           <button type="button" role="tab" class="target-tab is-active" id="tab-target-photo" aria-selected="true" aria-controls="chips-photo" data-type="photo">Photo</button>
+                          <button type="button" role="tab" class="target-tab" id="tab-target-signature" aria-selected="false" aria-controls="chips-signature" data-type="signature">Signature</button>
                           <button type="button" role="tab" class="target-tab" id="tab-target-pdf" aria-selected="false" aria-controls="chips-pdf" data-type="pdf">PDF</button>
                         </div>
                       </div>
                       <div class="size-chips-wrap">
                         <div class="size-chips" id="chips-photo" role="tabpanel" aria-labelledby="tab-target-photo">
+                          <a class="chip" href="#/compress-image-to-10kb">10 KB</a>
                           <a class="chip" href="#/compress-image-to-20kb">20 KB</a>
                           <a class="chip is-on" href="#/compress-image-to-50kb">50 KB</a>
                           <a class="chip" href="#/compress-image-to-100kb">100 KB</a>
                           <a class="chip" href="#/compress-image-to-200kb">200 KB</a>
                           <a class="chip" href="#/compress-image">Custom</a>
+                        </div>
+                        <div class="size-chips" id="chips-signature" role="tabpanel" aria-labelledby="tab-target-signature" hidden>
+                          <a class="chip" href="#/resize-signature-to-10kb">10 KB</a>
+                          <a class="chip is-on" href="#/resize-signature-to-20kb">20 KB</a>
+                          <a class="chip" href="#/resize-signature-to-50kb">50 KB</a>
+                          <a class="chip" href="#/resize-signature-to-100kb">100 KB</a>
+                          <a class="chip" href="#/resize-signature-to-200kb">200 KB</a>
+                          <a class="chip" href="#/signature-resizer">Custom</a>
                         </div>
                         <div class="size-chips" id="chips-pdf" role="tabpanel" aria-labelledby="tab-target-pdf" hidden>
                           <a class="chip" href="#/compress-pdf-to-100kb">100 KB</a>
@@ -161,16 +172,68 @@
                   </div>
                 </section>
 
+                <section class="home-sizes" id="home-sizes" aria-labelledby="popular-sizes-title">
+                  <h2 id="popular-sizes-title">Popular sizes for forms</h2>
+                  <div class="popular-sizes-grid">
+                    <a class="popular-size-card" href="#/compress-image-to-20kb">
+                      <span class="size-target">20 KB</span>
+                      <span class="size-type">Photo</span>
+                      <span class="size-hint">Exam & portal photos</span>
+                    </a>
+                    <a class="popular-size-card" href="#/compress-image-to-50kb">
+                      <span class="size-target">50 KB</span>
+                      <span class="size-type">Photo</span>
+                      <span class="size-hint">Passport & visa uploads</span>
+                    </a>
+                    <a class="popular-size-card" href="#/resize-signature-to-20kb">
+                      <span class="size-target">20 KB</span>
+                      <span class="size-type">Signature</span>
+                      <span class="size-hint">Clean white background</span>
+                    </a>
+                    <a class="popular-size-card" href="#/resize-signature-to-50kb">
+                      <span class="size-target">50 KB</span>
+                      <span class="size-type">Signature</span>
+                      <span class="size-hint">Dark ink & crop</span>
+                    </a>
+                    <a class="popular-size-card" href="#/compress-pdf-to-100kb">
+                      <span class="size-target">100 KB</span>
+                      <span class="size-type">PDF</span>
+                      <span class="size-hint">Strict form limits</span>
+                    </a>
+                    <a class="popular-size-card" href="#/compress-pdf-to-200kb">
+                      <span class="size-target">200 KB</span>
+                      <span class="size-type">PDF</span>
+                      <span class="size-hint">Government applications</span>
+                    </a>
+                    <a class="popular-size-card" href="#/compress-pdf-to-500kb">
+                      <span class="size-target">500 KB</span>
+                      <span class="size-type">PDF</span>
+                      <span class="size-hint">Certificates & transcripts</span>
+                    </a>
+                    <a class="popular-size-card" href="#/compress-pdf-to-1mb">
+                      <span class="size-target">1 MB</span>
+                      <span class="size-type">PDF</span>
+                      <span class="size-hint">Job portals & ATS</span>
+                    </a>
+                  </div>
+                </section>
+
+                <section class="home-presets-banner" aria-labelledby="presets-banner-title">
+                  <div class="presets-banner-card">
+                    <div class="presets-banner-copy">
+                      <h2 id="presets-banner-title">Get it accepted</h2>
+                      <p>Check your file against official specifications for JEE, UPSC, US Visa, Schengen, Passport photos, or type any custom form rule.</p>
+                    </div>
+                    <a class="btn primary" href="#/get-it-accepted">Open Presets & Checker →</a>
+                  </div>
+                </section>
+
                 <section class="home-tools" id="home-tools">
-                  <h2>Popular tools</h2>
+                  <h2>More PDF tools</h2>
                   <div id="popular"></div>
                   <div class="popular-more-wrap">
-                    <a href="#/tools" class="popular-more-link">View all 31 tools →</a>
+                    <a href="#/tools" class="popular-more-link">View all tools →</a>
                   </div>
-                  <details class="all-tools" id="all-tools">
-                    <summary>All tools</summary>
-                    <div id="catalog"></div>
-                  </details>
                 </section>
 
                 <section class="why" aria-labelledby="how-title">

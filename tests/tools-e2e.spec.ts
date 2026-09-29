@@ -55,16 +55,7 @@ test.describe('Tools E2E and Privacy Verification', () => {
     const limitedTools = [
       { slug: 'excel-to-pdf', name: 'Excel to PDF' },
       { slug: 'powerpoint-to-pdf', name: 'PowerPoint to PDF' },
-      { slug: 'pdf-to-excel', name: 'PDF to Excel' },
-      { slug: 'pdf-to-powerpoint', name: 'PDF to PowerPoint' },
       { slug: 'pdf-to-pdfa', name: 'PDF to PDF/A' },
-      { slug: 'edit-pdf', name: 'Edit PDF' },
-      { slug: 'sign-pdf', name: 'Sign & fill' },
-      { slug: 'pdf-forms', name: 'PDF forms' },
-      { slug: 'protect-pdf', name: 'Protect PDF' },
-      { slug: 'unlock-pdf', name: 'Unlock PDF' },
-      { slug: 'redact-pdf', name: 'Redact PDF' },
-      { slug: 'ocr-pdf', name: 'Make searchable' },
     ];
 
     for (const tool of limitedTools) {
@@ -75,6 +66,28 @@ test.describe('Tools E2E and Privacy Verification', () => {
       await expect(status).toBeVisible();
       const text = await status.textContent();
       expect(text?.length).toBeGreaterThan(10);
+    }
+  });
+
+  test('1b. Activated client-side tools mount with drop zone and controls', async ({ page }) => {
+    const activatedTools = [
+      { slug: 'sign-pdf', name: 'Sign & fill' },
+      { slug: 'unlock-pdf', name: 'Unlock PDF' },
+      { slug: 'redact-pdf', name: 'Redact PDF' },
+      { slug: 'pdf-forms', name: 'PDF forms' },
+      { slug: 'edit-pdf', name: 'Edit PDF' },
+      { slug: 'pdf-to-excel', name: 'PDF to Excel' },
+      { slug: 'protect-pdf', name: 'Protect PDF' },
+      { slug: 'ocr-pdf', name: 'Make searchable' },
+      { slug: 'pdf-to-powerpoint', name: 'PDF to PowerPoint' },
+    ];
+
+    for (const tool of activatedTools) {
+      await page.goto(`/${tool.slug}`, { waitUntil: 'domcontentloaded' });
+      const heading = page.locator('#panel-extra h2');
+      await expect(heading).toHaveText(tool.name);
+      const drop = page.locator('#panel-extra .drop');
+      await expect(drop).toBeVisible();
     }
   });
 

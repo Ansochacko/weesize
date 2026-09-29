@@ -1,104 +1,35 @@
 import { actionButton, dropZone, el, partitionFiles, rejectedMessage, statusLine, toolIntro } from '../lib/dom';
 import { downloadBytes, downloadZip, fileBase } from '../lib/download';
-import { iconElement } from '../lib/icons';
-import { docxToLines, htmlToLines, paragraphsToDocx } from '../lib/office';
 import {
   describePdfError,
   editPdf,
   exportPageJpegs,
-  imagesToPdf,
-  openPdf,
-  pageText,
-  PdfReadError,
-  prepareImageFile,
   readFileBytes,
-  releaseDocument,
 } from '../lib/pdf';
-import { isImageFile, isPdfFile } from '../lib/detect';
+import { isImageFile } from '../lib/detect';
 import type { PdfEdit } from '../workers/protocol';
-import { loadPrefs, savePrefs } from '../lib/prefs';
 import { armCancel } from '../lib/progress';
 import { compressedName } from '../lib/names';
 import { dismissResult, showResult } from './result';
 import { toolById, type ToolInfo } from './registry';
-import { brandName } from '../brand';
 import { toolPreset } from '../seo/preset';
 import { mountNext } from './next';
 import { mountSignature } from './signature';
-import { hrefFor } from '../router';
 
 export function mountExtra(panel: HTMLElement, id: string, incoming?: File[]): void {
   const tool = toolById(id);
   panel.replaceChildren();
   if (!tool) return;
-  if (tool.status === 'coming-soon' || tool.state === 'limited') {
-    mountComingSoon(panel, tool);
-  } else if (id === 'summarize' || id === 'translate') {
-    mountAi(panel, tool);
-  } else if (id === 'workflows') {
-    mountWorkflows(panel);
-  } else if (id === 'scan') {
-    mountScan(panel);
-  } else if (id === 'html') {
-    mountHtml(panel);
-  } else if (id === 'compare') {
-    mountCompare(panel);
-  } else if (id === 'signature-resizer') {
+
+  if (id === 'signature-resizer') {
     mountSignature(panel, incoming);
   } else if (id === 'compress-images') {
     mountImageCompress(panel, incoming);
-  } else if (id === 'presets' || id === 'id-photo' || id === 'share-check' || id === 'commands' || id === 'accessible' || id === 'genuine' || id === 'chat' || id === 'hot-folders' || id === 'lite') {
+  } else if (id === 'presets' || id === 'id-photo' || id === 'share-check') {
     mountNext(panel, tool, incoming);
   } else {
     mountPdfJob(panel, tool, incoming);
   }
-}
-
-function mountComingSoon(panel: HTMLElement, tool: ToolInfo): void {
-  const top = el('div', { class: 'coming-soon-top' }, [
-    el('span', { class: 'tool-icon', 'data-cat': tool.category }, [iconElement(tool.icon, { size: 24 })]),
-    el('span', { class: 'badge badge-neutral' }, ['Coming soon']),
-  ]);
-  const head = el('h2', undefined, [tool.name]);
-  const intro = toolIntro(tool.description);
-  const explainer = el('div', { class: 'coming-soon-card' }, [
-    el('p', { class: 'coming-soon-lead' }, [
-      "We're building a privacy-first, on-device version of this tool. No files will ever leave your browser.",
-    ]),
-    el('p', { class: 'coming-soon-sub status', 'data-tone': 'bad', role: 'status' }, [
-      tool.limit ?? 'This feature is currently in active development.',
-    ]),
-  ]);
-
-  const relatedIds = tool.relatedWorkingTools ?? [];
-  const related = relatedIds
-    .map((id) => toolById(id))
-    .filter((t): t is ToolInfo => Boolean(t && (t.status === 'ready' || t.status === 'beta')))
-    .slice(0, 3);
-
-  const relatedSection = el('div', { class: 'coming-soon-related' }, [
-    el('h3', { class: 'related-title' }, ['Working alternatives you can use right now:']),
-    el(
-      'div',
-      { class: 'related-tools-grid' },
-      related.map((alt) =>
-        el('a', { class: 'btn outline related-tool-btn', href: hrefFor(alt.id) }, [
-          iconElement(alt.icon, { size: 16 }),
-          el('span', undefined, [alt.name]),
-        ]),
-      ),
-    ),
-  ]);
-
-  panel.append(
-    el('div', { class: 'coming-soon-panel' }, [
-      top,
-      head,
-      intro,
-      explainer,
-      ...(related.length ? [relatedSection] : []),
-    ]),
-  );
 }
 
 function mountPdfJob(panel: HTMLElement, tool: ToolInfo, incoming?: File[]): void {
@@ -107,9 +38,9 @@ function mountPdfJob(panel: HTMLElement, tool: ToolInfo, incoming?: File[]): voi
   const drop = dropZone({
     title: 'Drop a PDF here',
     detail: 'or choose one file.',
-    accept: tool.id === 'word' ? '.docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document' : 'application/pdf,.pdf',
+    accept: 'application/pdf,.pdf',
     multiple: false,
-    buttonLabel: tool.id === 'word' ? 'Choose a Word file' : 'Choose a PDF',
+    buttonLabel: 'Choose a PDF',
     onFiles: (files) => {
       const chosen = files[0];
       if (!chosen) return;
@@ -129,13 +60,13 @@ function mountPdfJob(panel: HTMLElement, tool: ToolInfo, incoming?: File[]): voi
   if (tool.id === 'watermark') options.append(el('label', { class: 'choice' }, ['Watermark text ', watermark]));
   if (tool.id === 'crop') options.append(el('label', { class: 'choice' }, ['Trim each edge by this many points ', crop]));
   if (tool.id === 'numbers') options.append(el('label', { class: 'choice' }, ['Start at ', start]), el('label', { class: 'choice' }, [skip, ' Skip the first page']));
-  if (tool.id === 'word') options.append(el('p', { class: 'note' }, [`Complex layouts may shift. ${brandName()} keeps the words.`]));
-  if (tool.id === 'pdf-word') options.append(el('p', { class: 'note' }, ['Scanned pages without a text layer stay blank. Pictures are not copied.']));
+
   const action = actionButton(verb(tool.id));
   const status = statusLine();
   const row = el('div', { class: 'action-row' }, [action.el, status.el]);
   panel.append(el('h2', undefined, [tool.name]), toolIntro(tool.description), drop.el, options, row);
   action.idle(verb(tool.id), false);
+
   const seeded = incoming?.[0];
   if (seeded) {
     file = seeded;
@@ -145,6 +76,7 @@ function mountPdfJob(panel: HTMLElement, tool: ToolInfo, incoming?: File[]): voi
       action.idle(verb(tool.id), true);
     });
   }
+
   action.el.addEventListener('click', () => {
     void run();
   });
@@ -156,38 +88,6 @@ function mountPdfJob(panel: HTMLElement, tool: ToolInfo, incoming?: File[]): voi
     status.clear();
     const stop = armCancel(row, () => undefined);
     try {
-      if (tool.id === 'word') {
-        const lines = await docxToLines(bytes);
-        if (lines.length === 0) throw new PdfReadError('empty');
-        const pdf = await editPdf(bytes, { kind: 'textpdf', lines }, (done, total) => action.busy('Creating…', total ? done / total : 0.5));
-        showResult(panel, {
-          source: 'images',
-          files: [{ name: `${fileBase(file.name)}.pdf`, bytes: pdf }],
-          onStartOver: reset,
-        });
-        return;
-      }
-      if (tool.id === 'pdf-md' || tool.id === 'pdf-word') {
-        const id = `text-${file.name}`;
-        await openPdf(id, bytes);
-        try {
-          const pages = await pageText(id);
-          if (tool.id === 'pdf-md') {
-            const md = pages.map((page, index) => `## Page ${index + 1}\n\n${page}`).join('\n\n');
-            downloadBytes(new TextEncoder().encode(md), `${fileBase(file.name)}.md`, 'text/markdown');
-            status.set('The Markdown file is downloading.', 'neutral');
-            action.idle(verb(tool.id), true);
-            return;
-          }
-          const docx = await paragraphsToDocx(pages.flatMap((page) => page.split(/(?<=[.!?])\s+/)));
-          downloadBytes(docx, `${fileBase(file.name)}.docx`, 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
-          status.set('The Word file is downloading.', 'neutral');
-          action.idle(verb(tool.id), true);
-        } finally {
-          releaseDocument(id);
-        }
-        return;
-      }
       if (tool.id === 'pdf-images') {
         const images = await exportPageJpegs(bytes, (done, total) => action.busy(`Saving page ${Math.max(done, 1)} of ${total}`, total ? done / total : 0));
         const named = images.map((data, index) => ({ name: `${fileBase(file?.name ?? 'page')}-page-${index + 1}.jpg`, bytes: data }));
@@ -235,9 +135,6 @@ function verb(id: string): string {
   if (id === 'watermark') return 'Add watermark';
   if (id === 'numbers') return 'Add page numbers';
   if (id === 'repair') return 'Repair PDF';
-  if (id === 'word') return 'Create PDF';
-  if (id === 'pdf-word') return 'Create Word file';
-  if (id === 'pdf-md') return 'Create Markdown';
   if (id === 'pdf-images') return 'Save images';
   return 'Save PDF';
 }
@@ -267,7 +164,7 @@ function mountImageCompress(panel: HTMLElement, incoming?: File[]): void {
   const targetInput = el('input', { type: 'number', min: '5', max: '20000', value: String(targetKb ?? 50), 'aria-label': 'Target size in KB', style: 'width:90px;padding:6px 10px;border-radius:var(--radius-sm);border:1px solid var(--rule);background:var(--paper);color:var(--ink);' });
 
   const presetsWrap = el('div', { style: 'display:flex;gap:6px;flex-wrap:wrap;' });
-  const quickSizes = [20, 50, 100, 200, 500];
+  const quickSizes = [10, 20, 50, 100, 200];
   quickSizes.forEach((kb) => {
     const btn = el('button', { class: 'btn quiet', type: 'button', style: 'font-size:12px;padding:4px 8px;' }, [`${kb} KB`]);
     btn.addEventListener('click', () => {
@@ -298,25 +195,25 @@ function mountImageCompress(panel: HTMLElement, incoming?: File[]): void {
   );
 
   const drop = dropZone({
-    title: 'Drop images here',
-    detail: 'JPG, PNG, WebP, GIF, or HEIC phone camera photos.',
+    title: 'Drop photos, signatures, or scans here',
+    detail: 'Supports JPG, PNG, WebP, AVIF, and HEIC phone photos.',
     accept: 'image/jpeg,image/png,image/webp,image/gif,image/heic,image/avif,.jpg,.jpeg,.png,.webp,.gif,.heic,.avif',
     multiple: true,
-    buttonLabel: 'Choose images',
+    buttonLabel: 'Choose image',
     onFiles: (picked) => {
       const { accepted, rejected } = partitionFiles(picked, isImageFile);
       files = accepted;
-      status.set(rejected.length ? rejectedMessage(rejected, "isn't an image this page can read.") : `${accepted.length} images ready.`, rejected.length ? 'bad' : 'neutral');
-      action.idle('Compress images', accepted.length > 0);
+      status.set(rejected.length ? rejectedMessage(rejected, "isn't an image this page can read.") : `${accepted.length} image${accepted.length === 1 ? '' : 's'} ready.`, rejected.length ? 'bad' : 'neutral');
+      action.idle('Compress to target', accepted.length > 0);
     },
   });
 
-  const action = actionButton('Compress images to target');
+  const action = actionButton('Compress to target');
   const status = statusLine();
   const row = el('div', { class: 'action-row', style: 'margin-top:16px;' }, [action.el, status.el]);
-  panel.append(el('h2', undefined, ['Compress images to exact size']), toolIntro('Shrink photos and screenshots to an exact file size in KB. Processed 100% on your device.'), targetBox, drop.el, row);
-  action.idle('Compress images to target', files.length > 0);
-  if (files.length) status.set(`${files.length} images ready.`, 'neutral');
+  panel.append(el('h2', undefined, ['Compress image to exact size']), toolIntro('Shrink photos, signatures, and scans to an exact KB file size. Processed 100% on your device.'), targetBox, drop.el, row);
+  action.idle('Compress to target', files.length > 0);
+  if (files.length) status.set(`${files.length} image${files.length === 1 ? '' : 's'} ready.`, 'neutral');
 
   action.el.addEventListener('click', () => {
     void (async () => {
@@ -340,7 +237,7 @@ function mountImageCompress(panel: HTMLElement, incoming?: File[]): void {
         await downloadZip(outputs, 'images-compressed.zip');
         status.set('The compressed images zip is downloading.', 'good');
       }
-      action.idle('Compress images to target', true);
+      action.idle('Compress to target', true);
     })();
   });
 }
@@ -368,16 +265,16 @@ async function shrinkImage(file: File, mime: string, targetBytes: number | null)
   let maxEdge = 1920;
   let best = originalBytes;
 
-  for (let edgePass = 0; edgePass < 5; edgePass++) {
+  for (let edgePass = 0; edgePass < 6; edgePass++) {
     const scale = Math.min(1, maxEdge / Math.max(bitmap.width, bitmap.height));
     const canvas = document.createElement('canvas');
     canvas.width = Math.max(1, Math.round(bitmap.width * scale));
     canvas.height = Math.max(1, Math.round(bitmap.height * scale));
     canvas.getContext('2d')?.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
 
-    let minQ = 0.15;
+    let minQ = 0.10;
     let maxQ = 0.95;
-    for (let qPass = 0; qPass < 6; qPass++) {
+    for (let qPass = 0; qPass < 7; qPass++) {
       const q = (minQ + maxQ) / 2;
       const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, mime, q));
       if (!blob) break;
@@ -394,7 +291,7 @@ async function shrinkImage(file: File, mime: string, targetBytes: number | null)
       }
     }
 
-    if (best.byteLength <= targetBytes || (mime === 'image/png' && maxEdge <= 400)) {
+    if (best.byteLength <= targetBytes || (mime === 'image/png' && maxEdge <= 300)) {
       break;
     }
     maxEdge = Math.round(maxEdge * 0.7);
@@ -402,247 +299,4 @@ async function shrinkImage(file: File, mime: string, targetBytes: number | null)
 
   bitmap.close();
   return best;
-}
-
-function mountHtml(panel: HTMLElement): void {
-  const area = el('textarea', { id: 'html-source', rows: '8' });
-  area.placeholder = `Paste HTML. ${brandName()} does not open web addresses.`;
-  const fileInput = el('input', { class: 'file-input', type: 'file', accept: '.html,text/html' });
-  fileInput.addEventListener('change', () => {
-    const file = fileInput.files?.[0];
-    if (!file) return;
-    void file.text().then((text) => {
-      area.value = text;
-    });
-  });
-  const choose = el('button', { class: 'btn quiet', type: 'button' }, ['Choose an HTML file']);
-  choose.addEventListener('click', () => fileInput.click());
-  const action = actionButton('Create PDF');
-  const status = statusLine();
-  const row = el('div', { class: 'action-row' }, [action.el, status.el]);
-  panel.append(
-    el('h2', undefined, ['HTML to PDF']),
-    toolIntro(`Paste HTML or choose a file. ${brandName()} does not fetch websites, because that would leave this device.`),
-    area,
-    choose,
-    fileInput,
-    row,
-  );
-  action.el.addEventListener('click', () => {
-    void (async () => {
-      const lines = htmlToLines(area.value);
-      if (lines.length === 0) {
-        status.set('Paste some HTML first.', 'bad');
-        return;
-      }
-      action.busy('Creating…', 0.2);
-      const pdf = await editPdf(new Uint8Array([0x25, 0x50, 0x44, 0x46]), { kind: 'textpdf', lines });
-      showResult(panel, { source: 'images', files: [{ name: 'page.pdf', bytes: pdf }], onStartOver: () => undefined });
-    })().catch((error: unknown) => status.set(describePdfError(error), 'bad'));
-  });
-}
-
-function mountCompare(panel: HTMLElement): void {
-  let left: Uint8Array | null = null;
-  let right: Uint8Array | null = null;
-  const read = (label: string, assign: (bytes: Uint8Array) => void) => {
-    const input = el('input', { class: 'file-input', type: 'file', accept: 'application/pdf,.pdf' });
-    const button = el('button', { class: 'btn quiet', type: 'button' }, [label]);
-    button.addEventListener('click', () => input.click());
-    input.addEventListener('change', () => {
-      const file = input.files?.[0];
-      if (!file || !isPdfFile(file)) return;
-      void readFileBytes(file).then((bytes) => {
-        assign(bytes);
-        button.textContent = file.name;
-      });
-    });
-    return el('div', undefined, [button, input]);
-  };
-  const out = el('div', { class: 'compare-list' });
-  const action = actionButton('Compare PDFs');
-  const status = statusLine();
-  panel.append(
-    el('h2', undefined, ['Compare PDFs']),
-    toolIntro(`${brandName()} compares the words. Pictures are not part of this check.`),
-    read('Choose the first PDF', (bytes) => {
-      left = bytes;
-    }),
-    read('Choose the second PDF', (bytes) => {
-      right = bytes;
-    }),
-    el('div', { class: 'action-row' }, [action.el, status.el]),
-    out,
-  );
-  action.el.addEventListener('click', () => {
-    if (!left || !right) {
-      status.set('Choose two PDFs.', 'bad');
-      return;
-    }
-    void (async () => {
-      action.busy('Comparing…', 0.2);
-      const a = await textOf(left);
-      const b = await textOf(right);
-      const changes = diffPages(a, b);
-      out.replaceChildren();
-      status.set(changes.summary, 'neutral');
-      for (const row of changes.rows) out.append(el('p', undefined, [row]));
-      action.idle('Compare PDFs', true);
-    })().catch((error: unknown) => status.set(describePdfError(error), 'bad'));
-  });
-}
-
-async function textOf(bytes: Uint8Array): Promise<string[]> {
-  const id = `cmp-${Math.random().toString(36).slice(2)}`;
-  await openPdf(id, bytes);
-  try {
-    return await pageText(id);
-  } finally {
-    releaseDocument(id);
-  }
-}
-
-function diffPages(left: string[], right: string[]): { summary: string; rows: string[] } {
-  const total = Math.max(left.length, right.length);
-  const rows: string[] = [];
-  let changed = 0;
-  for (let index = 0; index < total; index += 1) {
-    const a = new Set((left[index] ?? '').split(' ').filter(Boolean));
-    const b = new Set((right[index] ?? '').split(' ').filter(Boolean));
-    const added = [...b].filter((word) => !a.has(word));
-    const removed = [...a].filter((word) => !b.has(word));
-    if (added.length === 0 && removed.length === 0) continue;
-    changed += 1;
-    rows.push(`Page ${index + 1}: added ${added.slice(0, 8).join(', ') || 'nothing'}; removed ${removed.slice(0, 8).join(', ') || 'nothing'}.`);
-  }
-  return { summary: changed === 0 ? 'No word changes.' : `${changed} changed pages out of ${total}.`, rows: rows.slice(0, 12) };
-}
-
-function mountScan(panel: HTMLElement): void {
-  const shots: File[] = [];
-  const video = document.createElement('video');
-  video.autoplay = true;
-  video.playsInline = true;
-  video.muted = true;
-  video.className = 'scan-video';
-  const list = el('p', { class: 'note' }, ['No pages captured yet.']);
-  const start = el('button', { class: 'btn quiet', type: 'button' }, [iconElement('camera', { size: 16, className: 'icon-inline' }), ' Open camera']);
-  const snap = el('button', { class: 'btn quiet', type: 'button' }, [iconElement('camera', { size: 16, className: 'icon-inline' }), ' Capture page']);
-  snap.disabled = true;
-  const action = actionButton('Create PDF');
-  const status = statusLine();
-  let stream: MediaStream | null = null;
-  start.addEventListener('click', () => {
-    void navigator.mediaDevices
-      .getUserMedia({ video: { facingMode: 'environment' }, audio: false })
-      .then((next) => {
-        stream = next;
-        video.srcObject = next;
-        snap.disabled = false;
-        status.set('Frame the page, then capture it. Nothing is recorded.', 'neutral');
-      })
-      .catch(() => status.set('This browser did not open the camera. You can still use Images to PDF.', 'bad'));
-  });
-  snap.addEventListener('click', () => {
-    const canvas = document.createElement('canvas');
-    canvas.width = video.videoWidth || 1280;
-    canvas.height = video.videoHeight || 720;
-    canvas.getContext('2d')?.drawImage(video, 0, 0);
-    canvas.toBlob((blob) => {
-      if (!blob) return;
-      shots.push(new File([blob], `page-${shots.length + 1}.jpg`, { type: 'image/jpeg' }));
-      list.textContent = `${shots.length} pages captured.`;
-      action.idle('Create PDF', true);
-    }, 'image/jpeg', 0.85);
-  });
-  panel.append(el('h2', undefined, ['Scan to PDF']), toolIntro('Place your document on a contrasting background for automatic edge detection.'), video, start, snap, list, el('div', { class: 'action-row' }, [action.el, status.el]));
-  action.idle('Create PDF', false);
-  action.el.addEventListener('click', () => {
-    void (async () => {
-      action.busy('Creating…', 0.1);
-      const prepared = [];
-      for (const shot of shots) prepared.push(await prepareImageFile(shot));
-      const pdf = await imagesToPdf(prepared, { pageSize: 'a4', orientation: 'portrait', margin: 'small' }, (done, total) =>
-        action.busy('Creating…', total ? done / total : 0.5),
-      );
-      stream?.getTracks().forEach((track) => track.stop());
-      showResult(panel, { source: 'images', files: [{ name: 'scan.pdf', bytes: pdf }], onStartOver: () => undefined });
-    })().catch((error: unknown) => status.set(describePdfError(error), 'bad'));
-  });
-}
-
-function mountAi(panel: HTMLElement, tool: ToolInfo): void {
-  const supported = tool.id === 'summarize' ? 'Summarizer' in globalThis : 'Translator' in globalThis && 'LanguageDetector' in globalThis;
-  const note = supported
-    ? `This uses the browser’s own on-device model. ${brandName()} does not send the file anywhere.`
-    : `This browser does not include on-device summarising or translation. ${brandName()} will not send the file to a cloud service.`;
-  const button = el('button', { class: 'btn primary', type: 'button' }, [tool.id === 'summarize' ? 'Summarize PDF' : 'Translate PDF']);
-  button.disabled = !supported;
-  panel.append(el('h2', undefined, [tool.name]), toolIntro(tool.description), el('p', { class: 'status' }, [note]), button);
-}
-
-function mountWorkflows(panel: HTMLElement): void {
-  const name = el('input', { type: 'text', value: 'Prepare a packet' });
-  const status = statusLine();
-  const list = el('div');
-  let bytes: Uint8Array | null = null;
-  let fileName = 'packet.pdf';
-  const fileInput = el('input', { class: 'file-input', type: 'file', accept: 'application/pdf,.pdf' });
-  const choose = el('button', { class: 'btn quiet', type: 'button' }, ['Choose a PDF']);
-  choose.addEventListener('click', () => fileInput.click());
-  fileInput.addEventListener('change', () => {
-    const file = fileInput.files?.[0];
-    if (!file || !isPdfFile(file)) return;
-    fileName = file.name;
-    void readFileBytes(file).then((data) => {
-      bytes = data;
-      status.set(`${file.name} is ready.`, 'neutral');
-    });
-  });
-  const run = el('button', { class: 'btn primary', type: 'button' }, ['Run workflow']);
-  run.addEventListener('click', () => {
-    if (!bytes) {
-      status.set('Choose a PDF first.', 'bad');
-      return;
-    }
-    const source = bytes;
-    void (async () => {
-      let current = await editPdf(source, { kind: 'rotate', turns: 1 });
-      current = await editPdf(current, { kind: 'watermark', text: 'Draft' });
-      current = await editPdf(current, { kind: 'numbers', start: 1, skipFirst: false });
-      showResult(panel, {
-        source: 'organize',
-        files: [{ name: `${fileBase(fileName)}-prepared.pdf`, bytes: current }],
-        onStartOver: () => undefined,
-      });
-    })().catch((error: unknown) => status.set(describePdfError(error), 'bad'));
-  });
-  const save = el('button', { class: 'btn quiet', type: 'button' }, ['Save workflow']);
-  save.addEventListener('click', () => {
-    void loadPrefs().then((prefs) => {
-      const workflows = [...(prefs.workflows ?? []), { name: name.value.trim() || 'Workflow', steps: ['rotate', 'watermark', 'numbers'] }];
-      return savePrefs({ workflows });
-    }).then(() => {
-      status.set('Saved on this device. The recipe is the steps only, never your files.', 'neutral');
-      return paint();
-    });
-  });
-  const erase = el('button', { class: 'btn quiet', type: 'button' }, ['Erase saved workflows']);
-  erase.addEventListener('click', () => {
-    void savePrefs({ workflows: [] }).then(() => {
-      status.set('Saved workflows were erased.', 'neutral');
-      return paint();
-    });
-  });
-  panel.append(el('h2', undefined, ['Workflows']), toolIntro('Run rotate, then a Draft watermark, then page numbers. Saving keeps the steps only.'), choose, fileInput, name, run, save, erase, status.el, list);
-
-  function paint(): Promise<void> {
-    return loadPrefs().then((prefs) => {
-      list.replaceChildren();
-      for (const flow of prefs.workflows ?? []) {
-        list.append(el('p', undefined, [`${flow.name}: ${flow.steps.join(' → ')}`]));
-      }
-    });
-  }
-  void paint();
 }

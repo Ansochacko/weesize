@@ -2,14 +2,12 @@ import { el } from '../lib/dom';
 import { iconElement } from '../lib/icons';
 import { loadPrefs, savePrefs } from '../lib/prefs';
 import { hrefFor, navigate } from '../router';
-import { parseCommand, planLines, setPendingCommand } from '../lib/commands';
 import {
   CATEGORIES,
   searchTools,
   TOOLS,
   popularTools,
   toolsIn,
-  comingSoonTools,
   activeToolsCount,
   type ToolInfo,
 } from '../tools/registry';
@@ -26,28 +24,16 @@ export function noteRecent(id: string): void {
   void savePrefs({ recent });
 }
 
-export function toolCard(tool: ToolInfo, isComingSoon = false): HTMLElement {
+export function toolCard(tool: ToolInfo): HTMLElement {
   const mark = el('span', { class: 'tool-icon', 'data-cat': tool.category }, [iconElement(tool.icon, { size: 18 })]);
   const top = el('span', { class: 'tool-top' }, [mark]);
-  const isSoon = isComingSoon || tool.status === 'coming-soon';
-  if (isSoon) {
-    top.append(el('span', { class: 'badge badge-neutral' }, ['Coming soon']));
-  } else if (tool.status === 'beta' || tool.badges?.includes('Beta')) {
+  if (tool.status === 'beta' || tool.badges?.includes('Beta')) {
     top.append(el('span', { class: 'badge badge-ok' }, ['Beta']));
   }
   const body = el('span', { class: 'tool-copy' }, [
     el('span', { class: 'tool-name' }, [tool.name]),
     el('span', { class: 'tool-desc' }, [tool.description]),
   ]);
-
-  if (isSoon) {
-    return el('div', {
-      class: 'tool-card tool-card-muted',
-      'data-tool': tool.id,
-      'data-cat': tool.category,
-      'aria-label': `${tool.name} – Coming soon`,
-    }, [top, body]);
-  }
 
   return el('a', {
     class: 'tool-card',
@@ -75,37 +61,20 @@ export function mountCatalog(popularHost: HTMLElement | null, catalogHost: HTMLE
   });
 
   const fill = (host: HTMLElement) => {
-    CATEGORIES.forEach((category, index) => {
+    CATEGORIES.forEach((category) => {
       const tools = toolsIn(category.id);
       if (!tools.length) return;
       const grid = el('div', { class: 'tool-grid' });
       for (const tool of tools) grid.append(toolCard(tool));
-      const num = String(index + 1).padStart(2, '0');
       host.append(
         el('section', { class: 'tool-section' }, [
           el('header', { class: 'tool-section-head' }, [
-            el('h2', undefined, [`${num} // ${category.label}`]),
-            el('span', { class: 'tool-section-tag' }, [category.id.replace('-', ' ')]),
+            el('h2', undefined, [category.label]),
           ]),
           el('div', { class: 'tool-grid-wrap' }, [grid]),
         ]),
       );
     });
-
-    const soon = comingSoonTools();
-    if (soon.length) {
-      const soonGrid = el('div', { class: 'tool-grid tool-grid-soon' });
-      for (const tool of soon) soonGrid.append(toolCard(tool, true));
-      host.append(
-        el('section', { class: 'tool-section tool-section-soon' }, [
-          el('header', { class: 'tool-section-head' }, [
-            el('h2', undefined, ['Coming soon']),
-            el('span', { class: 'tool-section-tag' }, ['in development']),
-          ]),
-          el('div', { class: 'tool-grid-wrap' }, [soonGrid]),
-        ]),
-      );
-    }
   };
   if (catalogHost && !catalogHost.querySelector('.tool-section')) fill(catalogHost);
 
@@ -169,18 +138,6 @@ export function mountCatalog(popularHost: HTMLElement | null, catalogHost: HTMLE
             ]),
           ]);
           results.append(section);
-        }
-        const soon = comingSoonTools();
-        if (soon.length) {
-          const soonSection = el('section', { class: 'tool-category-section tool-section-soon' }, [
-            el('header', { class: 'tool-category-head' }, [
-              el('h2', undefined, ['Coming soon']),
-            ]),
-            el('div', { class: 'tool-grid-wrap' }, [
-              el('div', { class: 'tool-grid tool-grid-soon' }, soon.map((t) => toolCard(t, true))),
-            ]),
-          ]);
-          results.append(soonSection);
         }
       } else {
         const matched = searchTools(query).filter((tool) => category === 'all' || tool.category === category);
@@ -320,28 +277,10 @@ export function mountPalette(dialog: HTMLElement, input: HTMLInputElement, list:
     const ordered = query
       ? hits
       : [
-          ...recent.map((id) => TOOLS.find((tool) => tool.id === id)).filter((tool): tool is ToolInfo => Boolean(tool && tool.status !== 'coming-soon')),
+          ...recent.map((id) => TOOLS.find((tool) => tool.id === id)).filter((tool): tool is ToolInfo => Boolean(tool)),
           ...hits.filter((tool) => !recent.includes(tool.id)),
         ];
     list.replaceChildren();
-    if (query) {
-      const parsed = parseCommand(query);
-      if (parsed) {
-        const plan = el('div', { class: 'palette-plan' });
-        const summaryText = parsed.map((step) => step.label).join(' → ');
-        plan.append(el('p', { class: 'plan-head' }, ['Command recipe: ', el('strong', undefined, [summaryText])]));
-        const lines = planLines(parsed);
-        for (const line of lines) plan.append(el('p', { class: 'plan-step' }, [line]));
-        const run = el('button', { class: 'btn primary plan-run', type: 'button' }, ['Set up this command →']);
-        run.addEventListener('click', () => {
-          setPendingCommand(parsed);
-          close();
-          navigate('commands');
-        });
-        plan.append(run);
-        list.append(plan);
-      }
-    }
     for (const tool of ordered) {
       const row = el('button', { class: 'palette-item', type: 'button', 'data-tool': tool.id }, [
         iconElement(tool.icon, { size: 16 }),

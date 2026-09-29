@@ -54,6 +54,8 @@ async function run(job: Exclude<RenderJob, { type: 'cancel' }>): Promise<void> {
     else if (job.type === 'boxes') await boxes(job);
     else if (job.type === 'render') await render(job);
     else if (job.type === 'text') await text(job);
+    else if (job.type === 'tables') await tables(job);
+    else if (job.type === 'textPositions') await textPositions(job);
     else await close(job);
   } catch (error) {
     fail(job.id, error);
@@ -195,6 +197,97 @@ async function text(job: Extract<RenderJob, { type: 'text' }>): Promise<void> {
     page.cleanup();
   }
   const message: RenderOut = { id: job.id, type: 'text', pages };
+  worker.postMessage(message);
+}
+
+async function tables(job: Extract<RenderJob, { type: 'tables' }>): Promise<void> {
+  const doc = docs.get(job.docId);
+  if (!doc) throw new Error('missing');
+  const pages: Array<string[][]> = [];
+  for (let pageNumber = 1; pageNumber <= doc.proxy.numPages; pageNumber += 1) {
+    const page = await doc.proxy.getPage(pageNumber);
+    const content = await page.getTextContent();
+    const items: Array<{ str: string; x: number; y: number; width: number; height: number }> = [];
+    for (const item of content.items) {
+      if ('str' in item && typeof item.str === 'string' && item.str.trim().length > 0) {
+        items.push({
+          str: item.str,
+          x: item.transform[4],
+          y: item.transform[5],
+          width: item.width,
+          height: item.height,
+        });
+      }
+    }
+
+    const rowBuckets: Array<{ y: number; items: typeof items }> = [];
+    for (const item of items) {
+      const bucket = rowBuckets.find((b) => Math.abs(b.y - item.y) <= 4);
+      if (bucket) {
+        bucket.items.push(item);
+      } else {
+        rowBuckets.push({ y: item.y, items: [item] });
+      }
+    }
+
+    rowBuckets.sort((a, b) => b.y - a.y);
+
+    const rows: string[][] = [];
+    for (const bucket of rowBuckets) {
+      bucket.items.sort((a, b) => a.x - b.x);
+
+      const cells: string[] = [];
+      let currentCell = '';
+      let lastRight = -1;
+
+      for (const it of bucket.items) {
+        if (lastRight >= 0 && it.x - lastRight > 14) {
+          if (currentCell.trim()) cells.push(currentCell.trim());
+          currentCell = it.str;
+        } else {
+          currentCell = currentCell ? `${currentCell} ${it.str}` : it.str;
+        }
+        lastRight = it.x + (it.width || 0);
+      }
+      if (currentCell.trim()) cells.push(currentCell.trim());
+      if (cells.length > 0) rows.push(cells);
+    }
+
+    pages.push(rows);
+    page.cleanup();
+  }
+  const message: RenderOut = { id: job.id, type: 'tables', pages };
+  worker.postMessage(message);
+}
+
+async function textPositions(job: Extract<RenderJob, { type: 'textPositions' }>): Promise<void> {
+  const doc = docs.get(job.docId);
+  if (!doc) throw new Error('missing');
+  const pages: Array<Array<{ str: string; x: number; y: number; width: number; height: number; fontSize: number }>> = [];
+  for (let pageNumber = 1; pageNumber <= doc.proxy.numPages; pageNumber += 1) {
+    const page = await doc.proxy.getPage(pageNumber);
+    const content = await page.getTextContent();
+    const items: Array<{ str: string; x: number; y: number; width: number; height: number; fontSize: number }> = [];
+    for (const item of content.items) {
+      if ('str' in item && typeof item.str === 'string' && item.str.trim().length > 0) {
+        // item.transform = [scaleX, skewX, skewY, scaleY, tx, ty]
+        const scaleX = Math.abs(item.transform[0]);
+        const scaleY = Math.abs(item.transform[3]);
+        const fontSize = Math.max(scaleX, scaleY);
+        items.push({
+          str: item.str,
+          x: item.transform[4],
+          y: item.transform[5],
+          width: item.width,
+          height: item.height,
+          fontSize,
+        });
+      }
+    }
+    pages.push(items);
+    page.cleanup();
+  }
+  const message: RenderOut = { id: job.id, type: 'textPositions', pages };
   worker.postMessage(message);
 }
 

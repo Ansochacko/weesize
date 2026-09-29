@@ -84,7 +84,7 @@ export const GUIDES_B: GuideSeed[] = [
       'Scroll the PDF. A sideways photo can be fixed by rotating the page or retaking the shot.',
       'After load, airplane mode still builds the PDF from pictures already on the device.',
     ],
-    related: ['jpg-to-pdf', 'scan-to-pdf', 'compress-image'],
+    related: ['jpg-to-pdf', 'compress-image', 'compress-pdf'],
   },
   {
     slug: 'password-protect-a-pdf',
@@ -101,7 +101,7 @@ export const GUIDES_B: GuideSeed[] = [
       'The test is a password prompt in a different program. No prompt means no encryption.',
       'Offline or not, this version still will not claim a new lock.',
     ],
-    related: ['protect-pdf', 'unlock-pdf', 'watermark-pdf'],
+    related: ['watermark-pdf', 'repair-pdf', 'privacy'],
   },
   {
     slug: 'remove-a-pdf-password-you-know',
@@ -118,7 +118,7 @@ export const GUIDES_B: GuideSeed[] = [
       'A truly unlocked file opens in a second viewer with no prompt.',
       'The refusal is identical offline. No password list is fetched.',
     ],
-    related: ['unlock-pdf', 'protect-pdf', 'repair-pdf'],
+    related: ['repair-pdf', 'watermark-pdf', 'privacy'],
   },
   {
     slug: 'add-page-numbers',
@@ -152,7 +152,7 @@ export const GUIDES_B: GuideSeed[] = [
       'The mark should be readable, and so should the clause under it.',
       'You can stamp offline after load. Check that you meant to.',
     ],
-    related: ['watermark-pdf', 'pdf-workflows', 'redact-pdf'],
+    related: ['watermark-pdf', 'organize-pdf', 'privacy'],
   },
   {
     slug: 'repair-a-damaged-pdf',
@@ -169,6 +169,6 @@ export const GUIDES_B: GuideSeed[] = [
       'Open the result in the viewer that failed. If it opens, the rebuild was enough.',
       'The attempt does not need Wi-Fi after the app has loaded.',
     ],
-    related: ['repair-pdf', 'unlock-pdf', 'compress-pdf'],
+    related: ['repair-pdf', 'compress-pdf', 'privacy'],
   },
 ];

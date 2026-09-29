@@ -28,10 +28,10 @@ describe('free and open product', () => {
 
   it('keeps ready tools available without a license gate', () => {
     const ready = TOOLS.filter((tool) => tool.state === 'ready');
-    expect(ready.some((tool) => tool.id === 'compare')).toBe(true);
-    expect(ready.some((tool) => tool.id === 'workflows')).toBe(true);
-    expect(ready.some((tool) => tool.id === 'hot-folders')).toBe(true);
-    expect(ready.some((tool) => tool.id === 'word')).toBe(true);
+    expect(ready.some((tool) => tool.id === 'compress')).toBe(true);
+    expect(ready.some((tool) => tool.id === 'compress-images')).toBe(true);
+    expect(ready.some((tool) => tool.id === 'signature-resizer')).toBe(true);
+    expect(ready.some((tool) => tool.id === 'id-photo')).toBe(true);
   });
 
   it('exposes optional support and repo URLs', () => {

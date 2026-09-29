@@ -49,11 +49,22 @@ export type PdfOut =
   | { id: number; type: 'released' }
   | { id: number; type: 'error'; kind: 'encrypted' | 'damaged' | 'cancelled' | 'empty' };
 
+export interface TextPosition {
+  str: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  fontSize: number;
+}
+
 export type RenderJob =
   | { id: number; type: 'open'; docId: string; bytes: ArrayBuffer }
   | { id: number; type: 'boxes'; docId: string }
   | { id: number; type: 'render'; docId: string; pageIndex: number; cssWidth: number; gen: number }
   | { id: number; type: 'text'; docId: string }
+  | { id: number; type: 'tables'; docId: string }
+  | { id: number; type: 'textPositions'; docId: string }
   | { id: number; type: 'close'; docId: string }
   | { type: 'cancel'; docId: string; pageIndex: number; gen: number };
 
@@ -64,6 +75,8 @@ export type RenderOut =
   | { id: number; type: 'boxes'; boxes: Array<{ width: number; height: number }> }
   | { id: number; type: 'thumb'; bytes: ArrayBuffer | null }
   | { id: number; type: 'text'; pages: string[] }
+  | { id: number; type: 'tables'; pages: Array<string[][]> }
+  | { id: number; type: 'textPositions'; pages: Array<TextPosition[]> }
   | { id: number; type: 'closed' }
   | { id: number; type: 'error'; kind: 'encrypted' | 'damaged' | 'empty' };
 

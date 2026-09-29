@@ -6,14 +6,12 @@ import {
   toolById,
   activeTools,
   popularTools,
-  toolsIn,
   activeToolsCount,
 } from './registry';
-import { toPage } from '../../content/factory';
 
 describe('tool registry', () => {
-  it('lists the 30 core tools plus the browser-AI and workflow pages', () => {
-    expect(TOOLS.length).toBeGreaterThanOrEqual(30);
+  it('lists the refocused core and extra tools with unique IDs', () => {
+    expect(TOOLS.length).toBeGreaterThanOrEqual(15);
     const ids = TOOLS.map((tool) => tool.id);
     expect(new Set(ids).size).toBe(ids.length);
   });
@@ -27,15 +25,13 @@ describe('tool registry', () => {
     expect(searchTools('shrink')[0]?.id).toBe('compress');
   });
 
-  it('does not offer password guessing', () => {
-    expect(toolById('unlock')?.state).toBe('limited');
-    expect(toolById('protect')?.state).toBe('limited');
-    expect(toolById('redact')?.state).toBe('limited');
+  it('finds signature resizer from the word signature', () => {
+    expect(searchTools('signature')[0]?.id).toBe('signature-resizer');
   });
 
-  it('enforces status on every tool and strictly 8 ready tools in popular', () => {
+  it('enforces ready or beta status on all active tools and strictly 8 ready tools in popular', () => {
     for (const tool of TOOLS) {
-      expect(['ready', 'beta', 'coming-soon']).toContain(tool.status);
+      expect(['ready', 'beta']).toContain(tool.status);
     }
     const popular = popularTools();
     expect(popular).toHaveLength(8);
@@ -43,54 +39,14 @@ describe('tool registry', () => {
       expect(tool.status).toBe('ready');
     }
     expect(popular.some((t) => t.id === 'compress-images')).toBe(true);
-    expect(popular.some((t) => t.id === 'sign')).toBe(false);
+    expect(popular.some((t) => t.id === 'signature-resizer')).toBe(true);
+    expect(popular.some((t) => t.id === 'id-photo')).toBe(true);
+    expect(popular.some((t) => t.id === 'compress')).toBe(true);
   });
 
   it('accurately counts active tools as ready plus beta', () => {
     const readyAndBeta = TOOLS.filter((t) => t.status === 'ready' || t.status === 'beta');
     expect(activeToolsCount()).toBe(readyAndBeta.length);
     expect(activeTools().length).toBe(readyAndBeta.length);
-  });
-
-  it('automatically promotes a tool to active, category, search, and sitemap when status is changed from coming-soon to ready', () => {
-    const editTool = toolById('edit')!;
-    expect(editTool.status).toBe('coming-soon');
-    expect(activeTools().some((t) => t.id === 'edit')).toBe(false);
-    expect(toolsIn('edit').some((t) => t.id === 'edit')).toBe(false);
-    expect(searchTools('Edit PDF').some((t) => t.id === 'edit')).toBe(false);
-
-    // Promote to ready
-    const originalStatus = editTool.status;
-    (editTool as any).status = 'ready';
-
-    try {
-      expect(activeTools().some((t) => t.id === 'edit')).toBe(true);
-      expect(toolsIn('edit').some((t) => t.id === 'edit')).toBe(true);
-      expect(searchTools('Edit PDF').some((t) => t.id === 'edit')).toBe(true);
-
-      const page = toPage({
-        path: 'edit-pdf',
-        kind: 'tool',
-        h1: 'Edit PDF',
-        keyword: 'edit pdf',
-        description: 'Edit PDF in your browser.',
-        toolId: 'edit',
-        essay: 'Edit PDF test.',
-        steps: ['1', '2', '3'],
-        points: ['1', '2', '3'],
-        facts: ['1', '2', '3', '4', '5'],
-        related: ['organize-pdf'],
-        intent: 'transactional',
-        priority: 1,
-        keywords: ['edit pdf'],
-      });
-      expect(page.noindex).toBe(false);
-    } finally {
-      (editTool as any).status = originalStatus;
-    }
-
-    // Verify restored
-    expect(editTool.status).toBe('coming-soon');
-    expect(activeTools().some((t) => t.id === 'edit')).toBe(false);
   });
 });

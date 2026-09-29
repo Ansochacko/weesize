@@ -14,7 +14,11 @@
     "indexnow": "node --experimental-strip-types scripts/indexnow.ts",
     "preview": "vite preview",
     "test": "vitest run",
-    "qa": "playwright test"
+    "test:e2e": "playwright test",
+    "qa": "playwright test",
+    "lighthouse": "node --experimental-strip-types scripts/lighthouse.ts",
+    "deploy": "node --experimental-strip-types scripts/deploy.ts",
+    "verify:live": "node --experimental-strip-types scripts/verify-live.ts"
   },
   "dependencies": {
     "@fontsource-variable/schibsted-grotesk": "^5.3.0",

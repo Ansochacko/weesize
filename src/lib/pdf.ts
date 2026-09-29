@@ -329,6 +329,36 @@ export async function pageText(id: string): Promise<string[]> {
   }
 }
 
+export async function pageTables(id: string): Promise<Array<string[][]>> {
+  const mod = await loadPool();
+  try {
+    const data = await mod.askRender({ type: 'tables', docId: id } as never, []);
+    if (data.type !== 'tables') throw new PdfReadError('failed');
+    return data.pages;
+  } catch (error) {
+    throw mapError(error, mod);
+  }
+}
+
+export async function pageTextWithPositions(
+  id: string,
+): Promise<Array<Array<{ str: string; x: number; y: number; width: number; height: number; fontSize: number }>>> {
+  const mod = await loadPool();
+  try {
+    const data = await mod.askRender({ type: 'textPositions', docId: id } as never, []);
+    if (data.type !== 'textPositions') throw new PdfReadError('failed');
+    return data.pages;
+  } catch (error) {
+    throw mapError(error, mod);
+  }
+}
+
+export async function renderPageImage(id: string, pageIndex: number, cssWidth: number): Promise<ArrayBuffer | null> {
+  const gen = thumbSerial;
+  thumbSerial += 1;
+  return renderThumb(id, pageIndex, cssWidth, gen);
+}
+
 export async function exportPageJpegs(
   bytes: Uint8Array,
   onProgress: (done: number, total: number) => void,

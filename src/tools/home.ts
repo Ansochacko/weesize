@@ -87,48 +87,54 @@ export function mountHome(options: {
 }
 
 function mountTargetSwitch(): void {
-  const tabPhoto = document.querySelector<HTMLButtonElement>('#tab-target-photo');
-  const tabPdf = document.querySelector<HTMLButtonElement>('#tab-target-pdf');
-  const chipsPhoto = document.querySelector<HTMLElement>('#chips-photo');
-  const chipsPdf = document.querySelector<HTMLElement>('#chips-pdf');
-  if (!tabPhoto || !tabPdf || !chipsPhoto || !chipsPdf) return;
+  const tabs = {
+    photo: document.querySelector<HTMLButtonElement>('#tab-target-photo'),
+    signature: document.querySelector<HTMLButtonElement>('#tab-target-signature'),
+    pdf: document.querySelector<HTMLButtonElement>('#tab-target-pdf'),
+  };
+  const panels = {
+    photo: document.querySelector<HTMLElement>('#chips-photo'),
+    signature: document.querySelector<HTMLElement>('#chips-signature'),
+    pdf: document.querySelector<HTMLElement>('#chips-pdf'),
+  };
+  if (!tabs.photo || !tabs.signature || !tabs.pdf || !panels.photo || !panels.signature || !panels.pdf) return;
 
-  const setTargetType = (type: 'photo' | 'pdf') => {
-    const isPhoto = type === 'photo';
-    tabPhoto.classList.toggle('is-active', isPhoto);
-    tabPhoto.setAttribute('aria-selected', isPhoto ? 'true' : 'false');
-    chipsPhoto.hidden = !isPhoto;
-
-    tabPdf.classList.toggle('is-active', !isPhoto);
-    tabPdf.setAttribute('aria-selected', !isPhoto ? 'true' : 'false');
-    chipsPdf.hidden = isPhoto;
+  const setTargetType = (type: 'photo' | 'signature' | 'pdf') => {
+    (['photo', 'signature', 'pdf'] as const).forEach((t) => {
+      const active = t === type;
+      tabs[t]?.classList.toggle('is-active', active);
+      tabs[t]?.setAttribute('aria-selected', active ? 'true' : 'false');
+      if (panels[t]) panels[t]!.hidden = !active;
+    });
 
     try {
       localStorage.setItem('weesize-target-type', type);
     } catch {}
   };
 
-  tabPhoto.addEventListener('click', () => setTargetType('photo'));
-  tabPdf.addEventListener('click', () => setTargetType('pdf'));
-
-  tabPhoto.addEventListener('keydown', (e) => {
-    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
-      tabPdf.focus();
-      setTargetType('pdf');
-    }
-  });
-  tabPdf.addEventListener('keydown', (e) => {
-    if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
-      tabPhoto.focus();
-      setTargetType('photo');
-    }
+  const keys: Array<'photo' | 'signature' | 'pdf'> = ['photo', 'signature', 'pdf'];
+  keys.forEach((key, idx) => {
+    const btn = tabs[key];
+    if (!btn) return;
+    btn.addEventListener('click', () => setTargetType(key));
+    btn.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+        const next = keys[(idx + 1) % keys.length]!;
+        tabs[next]?.focus();
+        setTargetType(next);
+      } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+        const prev = keys[(idx - 1 + keys.length) % keys.length]!;
+        tabs[prev]?.focus();
+        setTargetType(prev);
+      }
+    });
   });
 
   let saved = 'photo';
   try {
     saved = localStorage.getItem('weesize-target-type') || 'photo';
   } catch {}
-  setTargetType(saved === 'pdf' ? 'pdf' : 'photo');
+  setTargetType((['photo', 'signature', 'pdf'] as const).includes(saved as any) ? (saved as any) : 'photo');
 }
 
 function mountDemo(host: HTMLElement): void {

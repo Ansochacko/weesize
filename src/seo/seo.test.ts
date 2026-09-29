@@ -85,7 +85,7 @@ describe('seo pages', () => {
         expect(org?.name).toBe('Weesize');
         expect(org?.url).toBe('https://weesize.com');
         expect(String(org?.logo)).toBe('https://weesize.com/brand/mark-color.svg');
-        expect(org?.description).toBe('Weesize is a free, open-source tool that compresses PDFs and photos to an exact file size in your browser, without uploading files.');
+        expect(org?.description).toBe('Weesize is a free, open-source tool that compresses photos, signatures and PDFs to an exact file size in your browser, without uploading files.');
         expect(org?.sameAs).toEqual([
           'https://github.com/Ansochacko/weesize',
           'https://www.instagram.com/weesize',
@@ -96,7 +96,7 @@ describe('seo pages', () => {
         expect(site?.name).toBe('Weesize');
         expect(site?.url).toBe('https://weesize.com');
         expect(String(site?.logo)).toBe('https://weesize.com/brand/mark-color.svg');
-        expect(site?.description).toBe('Weesize is a free, open-source tool that compresses PDFs and photos to an exact file size in your browser, without uploading files.');
+        expect(site?.description).toBe('Weesize is a free, open-source tool that compresses photos, signatures and PDFs to an exact file size in your browser, without uploading files.');
         expect(site?.sameAs).toEqual([
           'https://github.com/Ansochacko/weesize',
           'https://www.instagram.com/weesize',
@@ -105,7 +105,7 @@ describe('seo pages', () => {
       }
       if (page.path === 'about') {
         const paragraphs = page.essay.split(/\n+/).filter(Boolean);
-        expect(paragraphs[0]).toBe('Weesize is a free, open-source tool that compresses PDFs and photos to an exact file size in your browser, without uploading files.');
+        expect(paragraphs[0]).toBe('Weesize is a free, open-source tool that compresses photos, signatures and PDFs to an exact file size in your browser, without uploading files.');
         expect(paragraphs[1]).toContain('students and job applicants resizing photos, signatures and PDFs for online forms');
         expect(paragraphs[1]).toContain('private file compression');
         expect(page.essay).toContain('https://github.com/Ansochacko/weesize');
@@ -142,7 +142,7 @@ describe('seo pages', () => {
     expect(hrefFor('compress')).toBe('/compress-pdf');
     expect(targetFromPath('/compress-pdf-to-100kb')?.pdfTargetKb).toBe(100);
     expect(targetFromPath('/jpg-to-png')?.imageMime).toBe('image/png');
-    expect(Object.keys(TOOL_SLUG).length).toBeGreaterThanOrEqual(30);
+    expect(Object.keys(TOOL_SLUG).length).toBeGreaterThanOrEqual(15);
     const drafts = allPages().filter((page) => !page.reviewed);
     expect(drafts.length).toBeGreaterThan(0);
     expect(drafts.every((page) => page.noindex)).toBe(true);

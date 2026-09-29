@@ -20,8 +20,8 @@ describe('product name', () => {
   it('reads Weesize from the brand file', () => {
     expect(brand.name).toBe('Weesize');
     expect(brand.domain).toBe('weesize.com');
-    expect(brand.tagline).toBe('Get any file to the size you need. Privately.');
-    expect(brand.description).toBe('Weesize is a free, open-source tool that compresses PDFs and photos to an exact file size in your browser, without uploading files.');
+    expect(brand.tagline).toBe('Get any photo, signature or PDF to the exact size a form needs.');
+    expect(brand.description).toBe('Weesize is a free, open-source tool that compresses photos, signatures and PDFs to an exact file size in your browser, without uploading files.');
   });
 
   it('does not keep the previous names in source', () => {

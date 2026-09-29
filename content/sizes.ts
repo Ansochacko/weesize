@@ -384,6 +384,18 @@ const IMAGE: Record<string, { h1: string; kb?: number; mime?: Seed['presetMime']
     keyword: 'resize image to 100kb',
     essay: 'Resizing toward 100 KB suits a content image that should stay recognizable at a column width. A dense screenshot may stop above the goal because the pixels are the content. That stop is more useful than a blurry file that technically matched.',
   },
+  'resize-signature-to-20kb': {
+    h1: 'Resize signature to 20 KB',
+    kb: 20,
+    keyword: 'resize signature to 20kb',
+    essay: 'Resize your photographed or scanned signature to under 20 KB. Automatically crops around ink, whitens paper background, darkens pen strokes, and hits exact form specifications on-device.',
+  },
+  'resize-signature-to-50kb': {
+    h1: 'Resize signature to 50 KB',
+    kb: 50,
+    keyword: 'resize signature to 50kb',
+    essay: 'Resize signature to under 50 KB for online application forms. Enhances ink contrast and cleans backgrounds with zero file uploads.',
+  },
   'compress-png': {
     h1: 'Compress PNG',
     mime: 'image/png',

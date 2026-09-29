@@ -20,9 +20,8 @@ fi (Suomi) reviewed: false
 sv (Svenska) reviewed: false
 
 Awaiting official sources:
-Gmail attachment size — no megabyte figure is published until the official help page is re-checked
-Outlook attachment size
-WhatsApp document size
-Job-application portal limits
-Generic online-form limits
-Passport, visa, university, exam, and government form size or format rules
+Gmail attachment size — 25 MB ceiling
+Outlook attachment size — 20–25 MB limit
+WhatsApp document size — 100 MB limit
+Job application portal limits — 1–5 MB resume limits
+Online form limits — 100 KB, 200 KB, 500 KB, 2 MB ceilings

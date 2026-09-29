@@ -94,7 +94,17 @@ const wordmarkHtml = `<span class="lockup-full">${horizontalFlat}</span><span cl
 writeFileSync(join(root, 'src', 'assets', 'brand', 'lockup.ts'), `export const lockupHorizontal = ${JSON.stringify(wordmarkHtml)};\n`);
 
 function pngFile(name: string, rgba: Uint8Array, width: number, height: number): void {
-  writeFileSync(name, encodePng(width, height, rgba));
+  const data = encodePng(width, height, rgba);
+  for (let attempt = 0; attempt < 5; attempt++) {
+    try {
+      writeFileSync(name, data);
+      return;
+    } catch (err) {
+      if (attempt === 4) throw err;
+      const end = Date.now() + 100;
+      while (Date.now() < end) {}
+    }
+  }
 }
 
 const iconDir = join(root, 'public', 'icons');
