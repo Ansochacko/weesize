@@ -134,7 +134,7 @@ for (const page of pages) {
   }
 }
 
-const missing = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>Page not found — ${brandName()}</title><meta name="robots" content="noindex"></head><body><h1>Page not found</h1><p>That address is not a page on this site.</p><p><a href="/compress-image">Compress image</a> <a href="/compress-pdf">Compress PDF</a> <a href="/signature-resizer">Signature resizer</a> <a href="/tools">All tools</a> <a href="/">Home</a></p></body></html>`;
+const missing = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="google-adsense-account" content="ca-pub-2263759722928231"><title>Page not found — ${brandName()}</title><meta name="robots" content="noindex"></head><body><h1>Page not found</h1><p>That address is not a page on this site.</p><p><a href="/compress-image">Compress image</a> <a href="/compress-pdf">Compress PDF</a> <a href="/signature-resizer">Signature resizer</a> <a href="/tools">All tools</a> <a href="/">Home</a></p></body></html>`;
 writeFileSync(join(dist, '404.html'), missing);
 
 const lastmod = UPDATED;
@@ -162,12 +162,12 @@ const unreviewed = LOCALES.map((locale) => `${locale.code} (${locale.label}) rev
 writeFileSync(join(root, 'seo', 'unreviewed-translations.txt'), `${unreviewed}\n\nAwaiting official sources:\n${AWAITING_OFFICIAL_SOURCES.join('\n')}\n`);
 
 function writeToolsRedirect(pagePath: string): void {
-  const html = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>Tools — ${escapeHtml(brandName())}</title><meta http-equiv="refresh" content="0;url=/tools"><link rel="canonical" href="${brandOrigin()}/tools"><meta name="robots" content="noindex"><script>location.replace('/tools')</script></head><body><p><a href="/tools">Continue to tools</a></p></body></html>\n`;
+  const html = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="google-adsense-account" content="ca-pub-2263759722928231"><title>Tools — ${escapeHtml(brandName())}</title><meta http-equiv="refresh" content="0;url=/tools"><link rel="canonical" href="${brandOrigin()}/tools"><meta name="robots" content="noindex"><script>location.replace('/tools')</script></head><body><p><a href="/tools">Continue to tools</a></p></body></html>\n`;
   writePage(pagePath, html);
 }
 
 function writeHomeRedirect(pagePath: string): void {
-  const html = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>Moved — ${escapeHtml(brandName())}</title><meta http-equiv="refresh" content="0;url=/"><link rel="canonical" href="${brandOrigin()}/"><meta name="robots" content="noindex"><script>location.replace('/')</script></head><body><p><a href="/">Continue to home</a></p></body></html>\n`;
+  const html = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="google-adsense-account" content="ca-pub-2263759722928231"><title>Moved — ${escapeHtml(brandName())}</title><meta http-equiv="refresh" content="0;url=/"><link rel="canonical" href="${brandOrigin()}/"><meta name="robots" content="noindex"><script>location.replace('/')</script></head><body><p><a href="/">Continue to home</a></p></body></html>\n`;
   writePage(pagePath, html);
 }
 
