@@ -33,6 +33,7 @@ export const CORE: ToolInfo[] = [
   // Core Focus Tools
   { id: 'compress', icon: 'compress-pdf', name: 'Compress PDF', description: 'Compress PDFs to exact KB target or reduction level without losing clarity.', category: 'optimize', synonyms: ['shrink', 'smaller', 'reduce', 'compress pdf to size'], popular: true, status: 'ready', state: 'ready' },
   { id: 'compress-images', icon: 'compress-images', name: 'Compress image', description: 'Make photos, signatures and scans smaller to exact KB size.', category: 'optimize', synonyms: ['jpg', 'jpeg', 'photo', 'png', 'webp', 'compress image', 'reduce photo size'], popular: true, status: 'ready', state: 'ready' },
+  { id: 'resize-pixels', icon: 'compress-images', name: 'Resize image pixels', description: 'Change dimensions in pixels, cm, or mm with exact DPI and aspect ratio.', category: 'optimize', synonyms: ['resize image in pixels', 'resize image in cm', 'change image dimensions', 'resize dimensions', 'crop image'], status: 'ready', state: 'ready' },
   { id: 'signature-resizer', icon: 'sign-fill', name: 'Signature resizer', description: 'Clean background to white, darken ink, and resize to exact KB and pixels.', category: 'optimize', synonyms: ['signature', 'resize signature', 'sign', 'darken signature', 'jee signature', 'neet signature'], popular: true, status: 'ready', state: 'ready' },
   { id: 'id-photo', icon: 'id-photo', name: 'ID & passport photo', description: 'Crop photos to exact passport dimensions in px, mm, or inches with plain background.', category: 'optimize', synonyms: ['passport photo', 'headshot', 'visa photo', 'id photo'], popular: true, status: 'ready', state: 'ready' },
   { id: 'presets', icon: 'get-accepted', name: 'Get it accepted', description: 'Check a file against verified upload rules or apply a custom requirement.', category: 'optimize', synonyms: ['passport', 'visa', 'photo rules', 'accepted', 'requirements', 'custom rule'], status: 'ready', state: 'ready' },
@@ -46,14 +47,16 @@ export const CORE: ToolInfo[] = [
   { id: 'crop', icon: 'crop-pdf', name: 'Crop PDF', description: 'Trim margins from all pages evenly.', category: 'organize', synonyms: ['trim', 'margin', 'cut'], status: 'ready', state: 'ready' },
 
   // Convert
-  { id: 'images', icon: 'images-to-pdf', name: 'Images to PDF', description: 'Turn JPG, PNG, and WebP photos into a PDF document.', category: 'to-pdf', synonyms: ['jpg', 'png', 'photos to pdf', 'image to pdf'], popular: true, status: 'ready', state: 'ready' },
-  { id: 'pdf-images', icon: 'pdf-to-images', name: 'PDF to images', description: 'Extract each page as a high-quality JPEG image.', category: 'from-pdf', synonyms: ['jpg', 'png', 'export images', 'pdf to jpg'], status: 'ready', state: 'ready' },
+  { id: 'images', icon: 'images-to-pdf', name: 'Images to PDF', description: 'Turn JPG, PNG, and WebP photos into a PDF document.', category: 'to-pdf', synonyms: ['jpg', 'png', 'photos to pdf', 'image to pdf', 'image-to-pdf'], popular: true, status: 'ready', state: 'ready' },
+  { id: 'heic', icon: 'compress-images', name: 'HEIC to JPG', description: 'Convert Apple iPhone HEIC and HEIF photos to standard JPG or PNG format.', category: 'to-pdf', synonyms: ['heic to jpg', 'heif to jpg', 'convert heic', 'iphone photo to jpg'], status: 'ready', state: 'ready' },
+  { id: 'pdf-images', icon: 'pdf-to-images', name: 'PDF to images', description: 'Extract each page as a high-quality JPG or PNG image.', category: 'from-pdf', synonyms: ['jpg', 'png', 'export images', 'pdf to jpg', 'pdf to image'], status: 'ready', state: 'ready' },
 
   // Page edits & stamps
   { id: 'numbers', icon: 'page-numbers', name: 'Page numbers', description: 'Add page numbers to the header or footer of each page.', category: 'edit', synonyms: ['paginate', 'footer', 'number'], status: 'ready', state: 'ready' },
   { id: 'watermark', icon: 'watermark', name: 'Watermark', description: 'Stamp text or confidentiality notices across every page.', category: 'edit', synonyms: ['stamp', 'draft', 'confidential'], status: 'ready', state: 'ready' },
 
   // Security & privacy
+  { id: 'redact', icon: 'redact-pdf', name: 'Redact photo or PDF', description: 'Permanently black out ID numbers, addresses or signatures with zero text layer.', category: 'security', synonyms: ['redact', 'blackout', 'hide text', 'redact pdf', 'redact photo', 'black out text'], status: 'ready', state: 'ready' },
   { id: 'share-check', icon: 'safe-share', name: 'Safe to share', description: 'Inspect and remove hidden metadata, location, and edit history.', category: 'security', synonyms: ['metadata', 'hidden text', 'before sending', 'exif', 'sanitize'], status: 'ready', state: 'ready' },
 ];
 

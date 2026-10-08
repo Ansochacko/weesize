@@ -3,6 +3,7 @@
 export const TOOL_SLUG: Record<string, string> = {
   compress: 'compress-pdf',
   'compress-images': 'compress-image',
+  'resize-pixels': 'resize-image-pixels',
   'signature-resizer': 'signature-resizer',
   'id-photo': 'id-photo',
   presets: 'get-it-accepted',
@@ -12,10 +13,12 @@ export const TOOL_SLUG: Record<string, string> = {
   organize: 'organize-pdf',
   rotate: 'rotate-pdf',
   crop: 'crop-pdf',
-  images: 'jpg-to-pdf',
-  'pdf-images': 'pdf-to-jpg',
+  images: 'image-to-pdf',
+  heic: 'heic-to-jpg',
+  'pdf-images': 'pdf-to-image',
   numbers: 'add-page-numbers-to-pdf',
   watermark: 'watermark-pdf',
+  redact: 'redact',
   'share-check': 'check-pdf-before-sending',
 };
 
@@ -25,7 +28,6 @@ export const TOOL_SLUG: Record<string, string> = {
 export const REMOVED_TOOL_SLUGS = [
   'sign-pdf',
   'edit-pdf',
-  'redact-pdf',
   'ocr-pdf',
   'protect-pdf',
   'unlock-pdf',
@@ -104,6 +106,9 @@ export function legacyTarget(path: string): string | null {
   if (REMOVED_TOOL_SLUGS.includes(clean)) return '/tools';
   if (clean === 'compare/ilovepdf-alternative') return '/alternatives/ilovepdf';
   if (clean === 'compare/smallpdf-alternative') return '/alternatives/smallpdf';
+  if (clean === 'jpg-to-pdf' || clean === 'images-to-pdf') return '/image-to-pdf';
+  if (clean === 'pdf-to-jpg' || clean === 'pdf-to-images') return '/pdf-to-image';
+  if (clean === 'redact-pdf') return '/redact';
   return null;
 }
 
@@ -111,6 +116,21 @@ export function targetFromPath(path: string): ToolTarget | null {
   const clean = path.replace(/^\/+|\/+$/g, '');
   const tool = SLUG_TO_TOOL[clean];
   if (tool) return { toolId: tool };
+
+  // Redact tool
+  if (clean === 'redact' || clean === 'redact-pdf') return { toolId: 'redact' };
+
+  // Resize image pixels tool
+  if (clean === 'resize-image-pixels' || clean === 'resize-pixels') return { toolId: 'resize-pixels' };
+
+  // HEIC to JPG tool
+  if (clean === 'heic-to-jpg' || clean === 'heic') return { toolId: 'heic' };
+
+  // Image to PDF aliases
+  if (clean === 'image-to-pdf' || clean === 'jpg-to-pdf' || clean === 'images-to-pdf') return { toolId: 'images' };
+
+  // PDF to image aliases
+  if (clean === 'pdf-to-image' || clean === 'pdf-to-jpg' || clean === 'pdf-to-images' || clean === 'pdf-to-png') return { toolId: 'pdf-images' };
 
   // Signature resizer targets
   const sigMatch = /^resize-signature-to-(\d+(?:kb|mb))$/.exec(clean);
@@ -140,7 +160,6 @@ export function targetFromPath(path: string): ToolTarget | null {
   if (clean === 'compress-png' || clean === 'reduce-photo-size' || clean === 'reduce-photo-size-for-online-application') return { toolId: 'compress-images', imageMime: 'image/jpeg' };
 
   const convert: Record<string, ToolTarget['imageMime']> = {
-    'heic-to-jpg': 'image/jpeg',
     'webp-to-jpg': 'image/jpeg',
     'png-to-jpg': 'image/jpeg',
     'avif-to-jpg': 'image/jpeg',

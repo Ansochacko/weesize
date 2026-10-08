@@ -140,6 +140,50 @@ const CUSTOM_SIZE_FAQS: Record<string, Faq[]> = {
       a: 'Yes. Weesize is built with responsive client-side WebAssembly that works smoothly in mobile Safari, Chrome, and Firefox on iOS and Android devices.',
     },
   ],
+  'compress-pdf-to-150kb': [
+    {
+      q: 'How do I compress a PDF to 150 KB for an application?',
+      a: 'Add your PDF file to the Weesize compressor. The tool sets a 150 KB target ceiling and optimizes embedded images and objects in your browser while keeping vector text sharp and readable.',
+    },
+    {
+      q: 'Will compressing to 150 KB blur my document text or signature?',
+      a: 'No. Vector text streams and font glyphs are preserved losslessly. Only embedded photographic scans are downsampled to fit the 150 KB budget.',
+    },
+    {
+      q: 'Is it safe to compress confidential legal documents to 150 KB here?',
+      a: 'Yes. All compression operations run locally inside your browser WebAssembly sandbox with zero data transmission to external servers.',
+    },
+    {
+      q: 'What if my PDF cannot reach 150 KB while staying legible?',
+      a: 'Weesize stops compression at a safe readability floor to prevent blurry or illegible pages, returning the smallest readable copy.',
+    },
+    {
+      q: 'Can I compress a PDF to 150 KB offline without an internet connection?',
+      a: 'Yes. Once the page is loaded, the PDF compression engine runs entirely client-side, allowing you to compress files with Wi-Fi switched off.',
+    },
+  ],
+  'compress-jpg-to-50kb': [
+    {
+      q: 'How do I compress a JPG image to 50 KB?',
+      a: 'Select or drop your JPG photo into the compressor. Weesize automatically sets the 50 KB target, scales pixel dimensions if needed, and applies balanced JPEG encoding locally on your device.',
+    },
+    {
+      q: 'Does compressing to 50 KB remove camera EXIF and location metadata?',
+      a: 'Yes. When Weesize re-encodes the JPG, sensitive metadata including GPS coordinates, camera model, and timestamp are automatically stripped.',
+    },
+    {
+      q: 'Why do job and visa portals require 50 KB JPG files?',
+      a: 'Many government and exam portals enforce a strict 50 KB upload cap to save server bandwidth. Weesize ensures your photo meets this exact limit while keeping faces clear.',
+    },
+    {
+      q: 'Is there any watermark or sign-up needed for 50 KB compression?',
+      a: 'No sign-up, no account, and no watermarks. Weesize is 100% free and open-source.',
+    },
+    {
+      q: 'Can I compress multiple JPG photos to 50 KB in batch?',
+      a: 'Yes. You can select multiple JPG images and each photo will be compressed to 50 KB quickly on your device.',
+    },
+  ],
   'compress-image-to-20kb': [
     {
       q: 'How do I compress an image to under 20 KB?',
@@ -236,20 +280,24 @@ export const pdfSizeSeeds: Seed[] = PDF_SIZE_SLUGS.map((slug) => {
   const customTitle =
     slug === 'compress-pdf-to-100kb'
       ? 'Compress PDF to 100 KB – Free, No Upload | Weesize'
-      : slug === 'compress-pdf-to-200kb'
-        ? 'Compress PDF to 200 KB – Free, No Upload | Weesize'
-        : slug === 'compress-pdf-to-500kb'
-          ? 'Compress PDF to 500 KB – Free, No Upload | Weesize'
-          : slug === 'compress-pdf-to-1mb'
-            ? 'Compress PDF to 1 MB – Free, No Upload | Weesize'
-            : slug === 'compress-pdf-to-2mb'
-              ? 'Compress PDF to 2 MB – Free, No Upload | Weesize'
-              : `Compress PDF to ${name} – Free, No Upload | Weesize`;
+      : slug === 'compress-pdf-to-150kb'
+        ? 'Compress PDF to 150 KB – Free & Private | Weesize'
+        : slug === 'compress-pdf-to-200kb'
+          ? 'Compress PDF to 200 KB – Free, No Upload | Weesize'
+          : slug === 'compress-pdf-to-500kb'
+            ? 'Compress PDF to 500 KB – Free, No Upload | Weesize'
+            : slug === 'compress-pdf-to-1mb'
+              ? 'Compress PDF to 1 MB – Free, No Upload | Weesize'
+              : slug === 'compress-pdf-to-2mb'
+                ? 'Compress PDF to 2 MB – Free, No Upload | Weesize'
+                : `Compress PDF to ${name} – Free, No Upload | Weesize`;
   const customDesc =
     slug === 'compress-pdf-to-100kb'
       ? 'Compress PDF to 100 KB or less in seconds. Free, unlimited, and 100% private: files stay on your device with no upload. Select your file to shrink.'
-      : slug === 'compress-pdf-to-200kb'
-        ? 'Compress PDF to 200 KB for job and visa applications. Free, instant, and private: files stay on your device with no upload. Drop your PDF to start.'
+      : slug === 'compress-pdf-to-150kb'
+        ? 'Compress PDF to 150 KB or less in seconds. Free, unlimited, and 100% private: files stay on your device with no upload. Select your file now.'
+        : slug === 'compress-pdf-to-200kb'
+          ? 'Compress PDF to 200 KB for job and visa applications. Free, instant, and private: files stay on your device with no upload. Drop your PDF to start.'
         : slug === 'compress-pdf-to-500kb'
           ? 'Compress PDF to 500 KB while keeping text and diagrams crisp. Free, no limits, and 100% private with no upload. Drop your document to compress.'
           : slug === 'compress-pdf-to-1mb'
@@ -414,24 +462,28 @@ export const imageSizeSeeds: Seed[] = IMAGE_SIZE_SLUGS.map((slug) => {
   if (!copy) throw new Error(slug);
   const customTitle =
     slug === 'compress-image-to-20kb'
-      ? 'Compress Image to 20 KB – Free, No Upload | Weesize'
-      : slug === 'compress-image-to-50kb'
-        ? 'Compress Image to 50 KB – Free, No Upload | Weesize'
-        : slug === 'compress-image-to-100kb'
-          ? 'Compress Image to 100 KB – Free, No Upload | Weesize'
-          : slug === 'compress-image-to-200kb'
-            ? 'Compress Image to 200 KB – Free, No Upload | Weesize'
-            : undefined;
+      ? 'Resize Image to 20 KB – Exact File Size | Weesize'
+      : slug === 'compress-jpg-to-50kb'
+        ? 'JPG Size 50 KB – Compress Photo to 50 KB | Weesize'
+        : slug === 'compress-image-to-50kb'
+          ? 'Compress Image to 50 KB – Free, No Upload | Weesize'
+          : slug === 'compress-image-to-100kb'
+            ? 'Compress Image to 100 KB – Free, No Upload | Weesize'
+            : slug === 'compress-image-to-200kb'
+              ? 'Compress Image to 200 KB – Free, No Upload | Weesize'
+              : undefined;
   const customDesc =
     slug === 'compress-image-to-20kb'
-      ? 'Compress photos and pictures to under 20 KB for online applications and profile avatars. Free, private, processed on your device.'
-      : slug === 'compress-image-to-50kb'
-        ? 'Resize photos to under 50 KB for online applications and forms. JPG, PNG, WebP. Free, instant, processed on your device.'
-        : slug === 'compress-image-to-100kb'
-          ? 'Compress images to under 100 KB with sharp clarity. Free, unlimited, and 100% private: runs in your browser with no upload.'
-          : slug === 'compress-image-to-200kb'
-            ? 'Reduce image size to 200 KB for websites and email attachments. Free, high quality, and 100% private with no upload.'
-            : `${copy.h1} in the browser. No upload. You get the size the picture can actually reach on this device.`;
+      ? 'Compress and resize photos to under 20 KB for online application forms. 100% private, free, and processed entirely on your device with no upload.'
+      : slug === 'compress-jpg-to-50kb'
+        ? 'Reduce JPG photo size to 50 KB or less for government and job portal uploads. Free, instant, and 100% private: processed on your device.'
+        : slug === 'compress-image-to-50kb'
+          ? 'Resize photos to under 50 KB for online applications and forms. JPG, PNG, WebP. Free, instant, processed on your device.'
+          : slug === 'compress-image-to-100kb'
+            ? 'Compress images to under 100 KB with sharp clarity. Free, unlimited, and 100% private: runs in your browser with no upload.'
+            : slug === 'compress-image-to-200kb'
+              ? 'Reduce image size to 200 KB for websites and email attachments. Free, high quality, and 100% private with no upload.'
+              : `${copy.h1} in the browser. No upload. You get the size the picture can actually reach on this device.`;
   return {
     path: slug,
     kind: 'size',

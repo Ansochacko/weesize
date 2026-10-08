@@ -21,7 +21,15 @@ export function mountExtra(panel: HTMLElement, id: string, incoming?: File[]): v
   panel.replaceChildren();
   if (!tool) return;
 
-  if (id === 'signature-resizer') {
+  if (id === 'redact') {
+    void import('./redact').then((m) => m.mountRedact(panel, incoming));
+  } else if (id === 'resize-pixels') {
+    void import('./resize-pixels').then((m) => m.mountResizePixels(panel, incoming));
+  } else if (id === 'heic') {
+    void import('./heic').then((m) => m.mountHeic(panel, incoming));
+  } else if (id === 'pdf-images') {
+    void import('./pdf-to-image').then((m) => m.mountPdfToImage(panel, incoming));
+  } else if (id === 'signature-resizer') {
     mountSignature(panel, incoming);
   } else if (id === 'compress-images') {
     mountImageCompress(panel, incoming);
