@@ -182,6 +182,11 @@ test.describe('Redact safety and layout', () => {
     await expect(page.getByText('Nothing is blacked out yet')).toBeVisible();
     await page.waitForTimeout(1500);
     expect(downloaded).toBe(false);
+
+    // After drawing a box, the same button must work again.
+    await drawBox(page, 0.05, 0.05, 0.95, 0.3);
+    const out = await download(page);
+    expect((await extractPdf(out)).text).toBe('');
   });
 
   test('the whole page preview fits on screen and the drawing layer lines up', async ({ page }) => {

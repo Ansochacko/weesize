@@ -696,9 +696,15 @@ export function mountRedact(panel: HTMLElement, incoming?: File[]): void {
   }
 
   async function executeRedaction(): Promise<void> {
-    if (!currentFile || !pages.length) return;
+    // The action button ignores clicks until idle() re-arms it, so every early
+    // return below must call idle(), or the button stops responding for good.
+    if (!currentFile || !pages.length) {
+      action.idle('Download Redacted File', false);
+      return;
+    }
     if (totalBoxes() === 0) {
       // Never hand back an unredacted copy that looks like a finished redaction.
+      action.idle('Download Redacted File', true);
       status.set('Nothing is blacked out yet. Press and drag across the text you want to hide, then download.', 'bad');
       canvasContainer.scrollIntoView({ block: 'center', behavior: 'smooth' });
       return;
