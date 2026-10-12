@@ -5,6 +5,7 @@ import { isPdfFile } from '../lib/detect';
 import { parsePageRanges } from '../lib/pdf';
 import { stageBytes } from '../lib/session';
 import { navigate } from '../router';
+import { loadPdfJs } from '../lib/pdfjs';
 
 export function mountPdfToImage(panel: HTMLElement, incoming?: File[]): void {
   panel.replaceChildren();
@@ -119,9 +120,7 @@ export function mountPdfToImage(panel: HTMLElement, incoming?: File[]): void {
     status.clear();
 
     try {
-      const pdfjsLib = await import('pdfjs-dist');
-      const pdfWorkerModule = await import('pdfjs-dist/build/pdf.worker.min.mjs?worker');
-      pdfjsLib.GlobalWorkerOptions.workerPort = new pdfWorkerModule.default();
+      const pdfjsLib = await loadPdfJs();
 
       const loadingTask = pdfjsLib.getDocument({ data: pdfBytes });
       const pdfDoc = await loadingTask.promise;

@@ -2,8 +2,11 @@ import { actionButton, dropZone, el, formatBytes, statusLine } from '../lib/dom'
 import { downloadBytes, downloadZip, fileBase } from '../lib/download';
 import { iconElement } from '../lib/icons';
 import { isPdfFile, isImageFile } from '../lib/detect';
+import { isPasswordError, loadPdfJs } from '../lib/pdfjs';
 import { stageBytes } from '../lib/session';
 import { navigate } from '../router';
+
+type PdfDocument = import('pdfjs-dist/legacy/build/pdf.mjs').PDFDocumentProxy;
 
 export interface RedactBox {
   id: string;
@@ -15,16 +18,19 @@ export interface RedactBox {
 
 interface PageData {
   pageNumber: number;
-  width: number; // natural pixel width
-  height: number; // natural pixel height
+  width: number; // rendered pixel width
+  height: number; // rendered pixel height
   ptWidth: number; // PDF points width (or image points)
   ptHeight: number; // PDF points height
-  canvas: HTMLCanvasElement;
+  scale: number; // PDF render scale (1 for images)
+  image: HTMLCanvasElement | null; // photos only; PDF pages are rendered when shown or exported
   boxes: RedactBox[];
 }
 
 const MAX_FILE_SIZE = 25 * 1024 * 1024; // 25 MB
 const MAX_PDF_PAGES = 30;
+const MAX_RENDER_SIDE = 2400; // px on the long side of a rendered PDF page
+const MAX_IMAGE_PIXELS = 16_000_000; // stay under phone canvas limits
 
 export function mountRedact(panel: HTMLElement, incoming?: File[]): void {
   panel.replaceChildren();
@@ -33,7 +39,10 @@ export function mountRedact(panel: HTMLElement, incoming?: File[]): void {
   let pages: PageData[] = [];
   let currentPageIndex = 0;
   let selectedBoxId: string | null = null;
-
+  let pdfDoc: PdfDocument | null = null;
+  let pdfTask: { destroy(): Promise<void> } | null = null; // closing the task frees the document
+  let loadGen = 0; // bumps on every new file, so a slow old load can't overwrite a newer one
+  let renderGen = 0;
   // Output selection: 'pdf' | 'jpg' | 'png'
   let outputFormat: 'pdf' | 'jpg' | 'png' = 'pdf';
 
@@ -87,7 +96,8 @@ export function mountRedact(panel: HTMLElement, incoming?: File[]): void {
   ]);
   const deleteBtn = el('button', { class: 'btn quiet', type: 'button', style: 'padding:4px 10px;font-size:13px;', disabled: 'true' }, ['Delete box']);
   const clearBtn = el('button', { class: 'btn quiet', type: 'button', style: 'padding:4px 10px;font-size:13px;' }, ['Clear page']);
-  actionsWrap.append(undoBtn, deleteBtn, clearBtn);
+  const newFileBtn = el('button', { class: 'btn quiet', type: 'button', style: 'padding:4px 10px;font-size:13px;' }, ['Choose another file']);
+  actionsWrap.append(undoBtn, deleteBtn, clearBtn, newFileBtn);
 
   toolBar.append(pageNav, actionsWrap);
 
@@ -155,12 +165,9 @@ export function mountRedact(panel: HTMLElement, incoming?: File[]): void {
   const postActions = el('div', { style: 'display:none;margin-top:20px;padding:16px;background:var(--paper-2);border:1px solid var(--rule);border-radius:var(--radius-md);' });
 
   editorHost.append(toolBar, canvasContainer, hintBar, formatOptionsBox, actionRow, postActions);
-  panel.append(intro, noticeBox, drop.el, editorHost);
-
-  // Set initial state
-  if (incoming?.[0]) {
-    void loadFile(incoming[0]);
-  }
+  // Shown under the drop zone when a file can't be opened.
+  const pickerStatus = statusLine();
+  panel.append(intro, noticeBox, drop.el, pickerStatus.el, editorHost);
 
   // Format radio change listeners
   [pdfRadio, jpgRadio, pngRadio].forEach((radio) => {
@@ -173,17 +180,11 @@ export function mountRedact(panel: HTMLElement, incoming?: File[]): void {
 
   // Page navigation listeners
   prevPageBtn.addEventListener('click', () => {
-    if (currentPageIndex > 0) {
-      currentPageIndex--;
-      renderCurrentPage();
-    }
+    void showPage(currentPageIndex - 1);
   });
 
   nextPageBtn.addEventListener('click', () => {
-    if (currentPageIndex < pages.length - 1) {
-      currentPageIndex++;
-      renderCurrentPage();
-    }
+    void showPage(currentPageIndex + 1);
   });
 
   // Undo button listener
@@ -217,103 +218,117 @@ export function mountRedact(panel: HTMLElement, incoming?: File[]): void {
     renderOverlay();
   });
 
-  // Keyboard listener for Delete key
-  window.addEventListener('keydown', (e) => {
-    if (e.key === 'Delete' || e.key === 'Backspace') {
-      if (selectedBoxId && document.activeElement?.tagName !== 'INPUT') {
-        const page = pages[currentPageIndex];
-        if (page) {
-          page.boxes = page.boxes.filter((b) => b.id !== selectedBoxId);
-          selectedBoxId = null;
-          deleteBtn.disabled = true;
-          renderOverlay();
-        }
-      }
+  // Keyboard: Delete / Backspace removes the selected box.
+  // Ignored while typing in a field, and removed once this tool is gone from the page
+  // (the panel is reused by other tools, so a window listener would otherwise leak).
+  const onKeyDown = (e: KeyboardEvent): void => {
+    if (!editorHost.isConnected) {
+      window.removeEventListener('keydown', onKeyDown);
+      return;
     }
-  });
+    if (e.key !== 'Delete' && e.key !== 'Backspace') return;
+    if (!selectedBoxId || editorHost.style.display === 'none') return;
+    const active = document.activeElement as HTMLElement | null;
+    if (active && (active.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(active.tagName))) return;
+    const page = pages[currentPageIndex];
+    if (!page) return;
+    e.preventDefault();
+    page.boxes = page.boxes.filter((b) => b.id !== selectedBoxId);
+    selectedBoxId = null;
+    deleteBtn.disabled = true;
+    renderOverlay();
+  };
+  window.addEventListener('keydown', onKeyDown);
 
   // ==========================================
-  // Mouse and Touch Interaction for Drawing
+  // Drawing with mouse, finger or pen (Pointer Events)
   // ==========================================
-  let isDrawing = false;
+  let drawingPointer: number | null = null;
   let startX = 0;
   let startY = 0;
   let activeDrawingRect: SVGRectElement | null = null;
 
-  function getNormalizedPos(e: MouseEvent | Touch): { x: number; y: number } {
+  function getNormalizedPos(e: PointerEvent): { x: number; y: number } {
     const rect = svgOverlay.getBoundingClientRect();
-    const clientX = e.clientX;
-    const clientY = e.clientY;
-    const x = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
-    const y = Math.max(0, Math.min(1, (clientY - rect.top) / rect.height));
+    if (!rect.width || !rect.height) return { x: 0, y: 0 };
+    const x = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+    const y = Math.max(0, Math.min(1, (e.clientY - rect.top) / rect.height));
     return { x, y };
   }
 
-  function getTouchOrEvent(e: MouseEvent | TouchEvent): MouseEvent | Touch | null {
-    if ('changedTouches' in e && e.changedTouches.length > 0) return e.changedTouches[0] ?? null;
-    if ('touches' in e && e.touches.length > 0) return e.touches[0] ?? null;
-    return e as MouseEvent;
+  function setRectAttrs(rect: SVGRectElement, x: number, y: number, w: number, h: number): void {
+    rect.setAttribute('x', `${x * 100}%`);
+    rect.setAttribute('y', `${y * 100}%`);
+    rect.setAttribute('width', `${w * 100}%`);
+    rect.setAttribute('height', `${h * 100}%`);
   }
 
-  function onPointerDown(e: MouseEvent | TouchEvent): void {
-    const touch = getTouchOrEvent(e);
-    if (!touch) return;
-    const target = e.target as Element;
-    if (target && target.tagName === 'rect' && target.getAttribute('data-box-id')) {
-      // Clicked an existing box -> Select it
-      selectedBoxId = target.getAttribute('data-box-id');
+  function endDrawing(): void {
+    drawingPointer = null;
+    if (activeDrawingRect) {
+      activeDrawingRect.remove();
+      activeDrawingRect = null;
+    }
+  }
+
+  svgOverlay.addEventListener('pointerdown', (e) => {
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    if (drawingPointer !== null) return; // ignore a second finger
+    if (!pages[currentPageIndex]) return;
+
+    const target = e.target as Element | null;
+    const hitId = target?.getAttribute?.('data-box-id');
+    if (hitId) {
+      // Tapped an existing box: select it.
+      e.preventDefault();
+      selectedBoxId = hitId;
       deleteBtn.disabled = false;
       renderOverlay();
       return;
     }
 
-    // Start drawing new solid black box
-    isDrawing = true;
+    e.preventDefault();
+    drawingPointer = e.pointerId;
+    try {
+      svgOverlay.setPointerCapture(e.pointerId);
+    } catch {
+      /* capture is best-effort */
+    }
     selectedBoxId = null;
     deleteBtn.disabled = true;
-    const pos = getNormalizedPos(touch);
+    renderOverlay();
+
+    const pos = getNormalizedPos(e);
     startX = pos.x;
     startY = pos.y;
+    activeDrawingRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    activeDrawingRect.setAttribute('fill', '#000000');
+    activeDrawingRect.setAttribute('fill-opacity', '0.85');
+    activeDrawingRect.setAttribute('stroke', '#3B82F6');
+    activeDrawingRect.setAttribute('stroke-width', '1.5');
+    activeDrawingRect.setAttribute('pointer-events', 'none');
+    setRectAttrs(activeDrawingRect, startX, startY, 0, 0);
+    svgOverlay.appendChild(activeDrawingRect);
+  });
 
-    if (!activeDrawingRect) {
-      activeDrawingRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-      activeDrawingRect.setAttribute('fill', '#000000');
-      activeDrawingRect.setAttribute('fill-opacity', '0.85');
-      activeDrawingRect.setAttribute('stroke', '#3B82F6');
-      activeDrawingRect.setAttribute('stroke-width', '1.5');
-      svgOverlay.appendChild(activeDrawingRect);
-    }
-  }
+  svgOverlay.addEventListener('pointermove', (e) => {
+    if (e.pointerId !== drawingPointer || !activeDrawingRect) return;
+    e.preventDefault();
+    const pos = getNormalizedPos(e);
+    setRectAttrs(
+      activeDrawingRect,
+      Math.min(startX, pos.x),
+      Math.min(startY, pos.y),
+      Math.abs(pos.x - startX),
+      Math.abs(pos.y - startY),
+    );
+  });
 
-  function onPointerMove(e: MouseEvent | TouchEvent): void {
-    if (!isDrawing || !activeDrawingRect) return;
-    const touch = getTouchOrEvent(e);
-    if (!touch) return;
-    if (e.cancelable) e.preventDefault();
+  svgOverlay.addEventListener('pointerup', (e) => {
+    if (e.pointerId !== drawingPointer) return;
+    const pos = getNormalizedPos(e);
+    endDrawing();
 
-    const pos = getNormalizedPos(touch);
-    const x = Math.min(startX, pos.x);
-    const y = Math.min(startY, pos.y);
-    const w = Math.abs(pos.x - startX);
-    const h = Math.abs(pos.y - startY);
-
-    activeDrawingRect.setAttribute('x', `${x * 100}%`);
-    activeDrawingRect.setAttribute('y', `${y * 100}%`);
-    activeDrawingRect.setAttribute('width', `${w * 100}%`);
-    activeDrawingRect.setAttribute('height', `${h * 100}%`);
-  }
-
-  function onPointerUp(e: MouseEvent | TouchEvent): void {
-    if (!isDrawing) return;
-    isDrawing = false;
-    if (activeDrawingRect) {
-      activeDrawingRect.remove();
-      activeDrawingRect = null;
-    }
-
-    const touch = getTouchOrEvent(e);
-    if (!touch) return;
-    const pos = getNormalizedPos(touch);
     const x = Math.min(startX, pos.x);
     const y = Math.min(startY, pos.y);
     const w = Math.abs(pos.x - startX);
@@ -333,148 +348,283 @@ export function mountRedact(panel: HTMLElement, incoming?: File[]): void {
         page.boxes.push(newBox);
         selectedBoxId = newBox.id;
         deleteBtn.disabled = false;
-        renderOverlay();
       }
     }
-  }
+    renderOverlay();
+  });
 
-  svgOverlay.addEventListener('mousedown', onPointerDown);
-  window.addEventListener('mousemove', onPointerMove);
-  window.addEventListener('mouseup', onPointerUp);
-
-  svgOverlay.addEventListener('touchstart', onPointerDown, { passive: false });
-  window.addEventListener('touchmove', onPointerMove, { passive: false });
-  window.addEventListener('touchend', onPointerUp);
+  svgOverlay.addEventListener('pointercancel', (e) => {
+    if (e.pointerId === drawingPointer) endDrawing();
+  });
 
   // ==========================================
   // File Ingestion and Page Rendering
   // ==========================================
+  newFileBtn.addEventListener('click', () => drop.open());
+
+  function resetToPicker(message: string): void {
+    pages = [];
+    currentFile = null;
+    selectedBoxId = null;
+    void closePdf();
+    editorHost.style.display = 'none';
+    postActions.style.display = 'none';
+    drop.hidden(false);
+    action.idle('Download Redacted File', false);
+    status.set(message, 'bad');
+    // The status line lives inside the hidden editor, so show it next to the drop zone too.
+    pickerStatus.set(message, 'bad');
+  }
+
+  async function closePdf(): Promise<void> {
+    const task = pdfTask;
+    pdfDoc = null;
+    pdfTask = null;
+    if (task) {
+      try {
+        await task.destroy();
+      } catch {
+        /* ignore */
+      }
+    }
+  }
+
   async function loadFile(file: File): Promise<void> {
+    const gen = ++loadGen;
+    pickerStatus.clear();
+
     if (file.size > MAX_FILE_SIZE) {
-      status.set(`File is too large (${formatBytes(file.size)}). Maximum allowed size is 25 MB.`, 'bad');
+      resetToPicker(`File is too large (${formatBytes(file.size)}). Maximum allowed size is 25 MB.`);
+      return;
+    }
+    const isPdf = isPdfFile(file);
+    const isImage = !isPdf && isImageFile(file);
+    if (!isPdf && !isImage) {
+      resetToPicker('Unsupported file format. Please choose a PDF, JPG, PNG, or WebP.');
       return;
     }
 
+    await closePdf();
     currentFile = file;
-    status.clear();
-    action.busy('Reading file…', 0.1);
-    drop.hidden(true);
-    editorHost.style.display = 'block';
     pages = [];
     currentPageIndex = 0;
     selectedBoxId = null;
+    deleteBtn.disabled = true;
+    status.clear();
+    postActions.style.display = 'none';
+    action.busy('Reading file…', 0.1);
+    drop.hidden(true);
+    editorHost.style.display = 'block';
+    svgOverlay.innerHTML = '';
+    displayCanvas.width = 0;
+    displayCanvas.height = 0;
 
-    if (isPdfFile(file)) {
-      pdfRadio.checked = true;
-      outputFormat = 'pdf';
-      pageNav.style.display = 'flex';
-      await loadPdfPages(file);
-    } else if (isImageFile(file)) {
-      jpgRadio.checked = true;
-      outputFormat = 'jpg';
-      pageNav.style.display = 'none';
-      await loadImagePage(file);
-    } else {
-      status.set('Unsupported file format. Please choose a PDF, JPG, PNG, or WebP.', 'bad');
-      action.idle('Download Redacted File', false);
-      return;
-    }
+    let note = '';
+    try {
+      if (isPdf) {
+        pdfRadio.checked = true;
+        outputFormat = 'pdf';
+        pageNav.style.display = 'flex';
+        note = await loadPdfPages(file, gen);
+      } else {
+        jpgRadio.checked = true;
+        outputFormat = 'jpg';
+        pageNav.style.display = 'none';
+        await loadImagePage(file, gen);
+      }
+      if (gen !== loadGen) return; // a newer file was picked meanwhile
 
-    if (pages.length === 0) {
-      status.set('No viewable pages could be extracted from this file.', 'bad');
-      action.idle('Download Redacted File', false);
-      return;
-    }
-
-    renderCurrentPage();
-    action.idle('Download Redacted File', true);
-    status.set(`${file.name} is ready for redaction. Drag to draw black boxes over sensitive content.`, 'good');
-  }
-
-  async function loadPdfPages(file: File): Promise<void> {
-    const bytes = new Uint8Array(await file.arrayBuffer());
-    const pdfjsLib = await import('pdfjs-dist');
-    const pdfWorkerModule = await import('pdfjs-dist/build/pdf.worker.min.mjs?worker');
-    pdfjsLib.GlobalWorkerOptions.workerPort = new pdfWorkerModule.default();
-
-    const loadingTask = pdfjsLib.getDocument({ data: bytes });
-    const pdfDoc = await loadingTask.promise;
-    const numPages = Math.min(pdfDoc.numPages, MAX_PDF_PAGES);
-
-    if (pdfDoc.numPages > MAX_PDF_PAGES) {
-      status.set(`Note: This PDF has ${pdfDoc.numPages} pages. Only the first ${MAX_PDF_PAGES} pages are loaded.`, 'neutral');
-    }
-
-    for (let i = 1; i <= numPages; i++) {
-      action.busy(`Rendering page ${i} of ${numPages}…`, i / numPages);
-      const page = await pdfDoc.getPage(i);
-      const scale = 2.0; // 2x high-resolution rendering
-      const viewport = page.getViewport({ scale });
-      const origViewport = page.getViewport({ scale: 1.0 });
-
-      const canvas = document.createElement('canvas');
-      canvas.width = viewport.width;
-      canvas.height = viewport.height;
-      const ctx = canvas.getContext('2d');
-      if (ctx) {
-        await page.render({ canvasContext: ctx, viewport, canvas } as any).promise;
+      if (pages.length === 0) {
+        resetToPicker('No viewable pages could be extracted from this file.');
+        return;
       }
 
-      pages.push({
+      action.busy('Rendering page 1…', 0.6);
+      await renderCurrentPage();
+      if (gen !== loadGen) return;
+    } catch (err) {
+      if (gen !== loadGen) return;
+      console.error('[redact] could not open file', err);
+      if (isPdf && isPasswordError(err)) {
+        resetToPicker('This PDF is password-protected. Remove the password first, then try again.');
+      } else if (isPdf) {
+        resetToPicker('This PDF couldn’t be opened. It may be damaged.');
+      } else {
+        resetToPicker('This image couldn’t be opened. Try a JPG or PNG.');
+      }
+      return;
+    }
+
+    action.idle('Download Redacted File', true);
+    status.set(`${note}${file.name} is ready for redaction. Drag to draw black boxes over sensitive content.`, 'good');
+  }
+
+  /** Opens the PDF and records each page's size. Pages are rendered only when shown or exported. */
+  async function loadPdfPages(file: File, gen: number): Promise<string> {
+    const bytes = new Uint8Array(await file.arrayBuffer());
+    const pdfjsLib = await loadPdfJs();
+    const task = pdfjsLib.getDocument({ data: bytes });
+    let doc: PdfDocument;
+    try {
+      doc = await task.promise;
+    } catch (err) {
+      void task.destroy();
+      throw err;
+    }
+    if (gen !== loadGen) {
+      void task.destroy();
+      return '';
+    }
+    pdfDoc = doc;
+    pdfTask = task;
+
+    const numPages = Math.min(doc.numPages, MAX_PDF_PAGES);
+    const loaded: PageData[] = [];
+    for (let i = 1; i <= numPages; i++) {
+      if (gen !== loadGen) return '';
+      action.busy(`Reading page ${i} of ${numPages}…`, (i / numPages) * 0.5);
+      const page = await doc.getPage(i);
+      const base = page.getViewport({ scale: 1 });
+      const scale = renderScale(base.width, base.height);
+      loaded.push({
         pageNumber: i,
-        width: viewport.width,
-        height: viewport.height,
-        ptWidth: origViewport.width,
-        ptHeight: origViewport.height,
-        canvas,
+        width: Math.max(1, Math.round(base.width * scale)),
+        height: Math.max(1, Math.round(base.height * scale)),
+        ptWidth: base.width,
+        ptHeight: base.height,
+        scale,
+        image: null,
         boxes: [],
       });
     }
+
+    if (gen !== loadGen) return '';
+    pages = loaded;
+
+    return doc.numPages > MAX_PDF_PAGES
+      ? `This PDF has ${doc.numPages} pages, so only the first ${MAX_PDF_PAGES} are loaded. `
+      : '';
   }
 
-  async function loadImagePage(file: File): Promise<void> {
-    const img = new Image();
+  async function loadImagePage(file: File, gen: number): Promise<void> {
     const url = URL.createObjectURL(file);
-    await new Promise<void>((resolve, reject) => {
-      img.onload = () => resolve();
-      img.onerror = () => reject(new Error('Failed to load image'));
-      img.src = url;
-    });
+    try {
+      const img = new Image();
+      await new Promise<void>((resolve, reject) => {
+        img.onload = () => resolve();
+        img.onerror = () => reject(new Error('Failed to load image'));
+        img.src = url;
+      });
 
-    const canvas = document.createElement('canvas');
-    canvas.width = img.naturalWidth || img.width;
-    canvas.height = img.naturalHeight || img.height;
-    const ctx = canvas.getContext('2d');
-    ctx?.drawImage(img, 0, 0);
-    URL.revokeObjectURL(url);
+      const natW = img.naturalWidth || img.width;
+      const natH = img.naturalHeight || img.height;
+      if (!natW || !natH) throw new Error('Image has no size');
 
-    pages.push({
-      pageNumber: 1,
-      width: canvas.width,
-      height: canvas.height,
-      ptWidth: (canvas.width * 72) / 96, // 72 pt scale
-      ptHeight: (canvas.height * 72) / 96,
-      canvas,
-      boxes: [],
-    });
+      // Very large photos can exceed the canvas limit on phones (about 16.7 MP on iPhone).
+      const shrink = Math.min(1, Math.sqrt(MAX_IMAGE_PIXELS / (natW * natH)));
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.max(1, Math.round(natW * shrink));
+      canvas.height = Math.max(1, Math.round(natH * shrink));
+      const ctx = canvas.getContext('2d');
+      if (!ctx) throw new Error('Canvas is not available');
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      if (gen !== loadGen) return;
+
+      pages = [{
+        pageNumber: 1,
+        width: canvas.width,
+        height: canvas.height,
+        ptWidth: (canvas.width * 72) / 96, // 72 pt scale
+        ptHeight: (canvas.height * 72) / 96,
+        scale: 1,
+        image: canvas,
+        boxes: [],
+      }];
+    } finally {
+      URL.revokeObjectURL(url);
+    }
   }
 
-  function renderCurrentPage(): void {
-    const page = pages[currentPageIndex];
-    if (!page) return;
+  /** Render scale for a PDF page: up to 2x, but never more than MAX_RENDER_SIDE px on the long side. */
+  function renderScale(ptWidth: number, ptHeight: number): number {
+    const longest = Math.max(ptWidth, ptHeight, 1);
+    return Math.min(2, MAX_RENDER_SIDE / longest);
+  }
 
-    pageLabel.textContent = `Page ${currentPageIndex + 1} of ${pages.length}`;
-    prevPageBtn.disabled = currentPageIndex === 0;
-    nextPageBtn.disabled = currentPageIndex === pages.length - 1;
+  /**
+   * Draws one page (without boxes) into `canvas`, resizing it to the page.
+   * PDF pages get a white background, so transparent pages never turn black.
+   */
+  async function drawPageInto(page: PageData, canvas: HTMLCanvasElement): Promise<void> {
+    canvas.width = page.width;
+    canvas.height = page.height;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) throw new Error('Canvas is not available');
 
-    displayCanvas.width = page.width;
-    displayCanvas.height = page.height;
-    const ctx = displayCanvas.getContext('2d');
-    if (ctx) {
-      ctx.drawImage(page.canvas, 0, 0);
+    if (page.image) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(page.image, 0, 0);
+      return;
     }
 
+    if (!pdfDoc) throw new Error('The PDF is no longer open.');
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    const pdfPage = await pdfDoc.getPage(page.pageNumber);
+    const viewport = pdfPage.getViewport({ scale: page.scale });
+    // The canvas is rounded to whole pixels, so stretch the render to fill it exactly.
+    const sx = canvas.width / viewport.width;
+    const sy = canvas.height / viewport.height;
+    await pdfPage.render({
+      canvas,
+      canvasContext: ctx,
+      viewport,
+      transform: sx !== 1 || sy !== 1 ? [sx, 0, 0, sy, 0, 0] : undefined,
+    } as Parameters<typeof pdfPage.render>[0]).promise;
+  }
+
+  async function renderCurrentPage(): Promise<void> {
+    const page = pages[currentPageIndex];
+    if (!page) return;
+    const myRender = ++renderGen;
+
+    pageLabel.textContent = `Page ${currentPageIndex + 1} of ${pages.length}`;
+    prevPageBtn.disabled = true;
+    nextPageBtn.disabled = true;
     renderOverlay();
+
+    try {
+      const off = document.createElement('canvas');
+      await drawPageInto(page, off);
+      if (myRender !== renderGen) return; // user moved to another page meanwhile
+      displayCanvas.width = off.width;
+      displayCanvas.height = off.height;
+      displayCanvas.getContext('2d')?.drawImage(off, 0, 0);
+      releaseCanvas(off);
+    } finally {
+      if (myRender === renderGen) {
+        prevPageBtn.disabled = currentPageIndex === 0;
+        nextPageBtn.disabled = currentPageIndex === pages.length - 1;
+      }
+    }
+  }
+
+  async function showPage(index: number): Promise<void> {
+    if (index < 0 || index >= pages.length || index === currentPageIndex) return;
+    currentPageIndex = index;
+    selectedBoxId = null;
+    deleteBtn.disabled = true;
+    try {
+      await renderCurrentPage();
+    } catch (err) {
+      console.error('[redact] page render failed', err);
+      status.set(`Page ${index + 1} couldn’t be shown. It may be damaged.`, 'bad');
+    }
+  }
+
+  function releaseCanvas(canvas: HTMLCanvasElement): void {
+    canvas.width = 0;
+    canvas.height = 0;
   }
 
   function renderOverlay(): void {
@@ -488,10 +638,7 @@ export function mountRedact(panel: HTMLElement, incoming?: File[]): void {
 
     page.boxes.forEach((box) => {
       const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-      rect.setAttribute('x', `${box.x * 100}%`);
-      rect.setAttribute('y', `${box.y * 100}%`);
-      rect.setAttribute('width', `${box.w * 100}%`);
-      rect.setAttribute('height', `${box.h * 100}%`);
+      setRectAttrs(rect, box.x, box.y, box.w, box.h);
       rect.setAttribute('fill', '#000000');
       rect.setAttribute('data-box-id', box.id);
       rect.setAttribute('cursor', 'pointer');
@@ -518,11 +665,13 @@ export function mountRedact(panel: HTMLElement, incoming?: File[]): void {
 
   async function executeRedaction(): Promise<void> {
     if (!currentFile || !pages.length) return;
+    const file = currentFile;
+    const gen = loadGen;
     action.busy('Generating redacted output…', 0.1);
     status.clear();
 
     try {
-      const base = fileBase(currentFile.name);
+      const base = fileBase(file.name);
 
       if (outputFormat === 'pdf') {
         // Build fresh PDF from flattened page images (Zero text layer, empty metadata)
@@ -533,16 +682,14 @@ export function mountRedact(panel: HTMLElement, incoming?: File[]): void {
         outPdf.setSubject('');
         outPdf.setKeywords([]);
         outPdf.setCreator('');
+        outPdf.setProducer('');
 
         for (let i = 0; i < pages.length; i++) {
           const page = pages[i];
           if (!page) continue;
           action.busy(`Flattening page ${i + 1} of ${pages.length}…`, (i + 1) / (pages.length + 1));
-          const flatCanvas = createFlattenedCanvas(page);
-          const blob = await new Promise<Blob | null>((resolve) => flatCanvas.toBlob(resolve, 'image/jpeg', 0.92));
-          if (!blob) throw new Error('Failed to encode page image.');
-
-          const imgBytes = new Uint8Array(await blob.arrayBuffer());
+          const imgBytes = await flattenPage(page, 'image/jpeg', true);
+          if (gen !== loadGen) return;
           const embeddedImg = await outPdf.embedJpg(imgBytes);
           const pdfPage = outPdf.addPage([page.ptWidth, page.ptHeight]);
           pdfPage.drawImage(embeddedImg, {
@@ -565,14 +712,12 @@ export function mountRedact(panel: HTMLElement, incoming?: File[]): void {
         // Export as JPG or PNG images (EXIF stripped via fresh canvas re-encode)
         const mime = outputFormat === 'png' ? 'image/png' : 'image/jpeg';
         const ext = outputFormat === 'png' ? 'png' : 'jpg';
+        // JPG has no transparency: put a white background behind transparent images.
+        const whiteBackground = outputFormat !== 'png';
 
         if (pages.length === 1 && pages[0]) {
-          const page = pages[0];
-          const flatCanvas = createFlattenedCanvas(page);
-          const blob = await new Promise<Blob | null>((resolve) => flatCanvas.toBlob(resolve, mime, 0.92));
-          if (!blob) throw new Error('Failed to encode image.');
-
-          const bytes = new Uint8Array(await blob.arrayBuffer());
+          const bytes = await flattenPage(pages[0], mime, whiteBackground);
+          if (gen !== loadGen) return;
           const outName = `${base}-redacted.${ext}`;
           downloadBytes(bytes, outName, mime);
 
@@ -586,10 +731,8 @@ export function mountRedact(panel: HTMLElement, incoming?: File[]): void {
             const page = pages[i];
             if (!page) continue;
             action.busy(`Encoding page ${i + 1} of ${pages.length}…`, (i + 1) / pages.length);
-            const flatCanvas = createFlattenedCanvas(page);
-            const blob = await new Promise<Blob | null>((resolve) => flatCanvas.toBlob(resolve, mime, 0.92));
-            if (!blob) continue;
-            const bytes = new Uint8Array(await blob.arrayBuffer());
+            const bytes = await flattenPage(page, mime, whiteBackground);
+            if (gen !== loadGen) return;
             zipFiles.push({ name: `${base}-redacted-page-${i + 1}.${ext}`, bytes });
           }
 
@@ -604,29 +747,55 @@ export function mountRedact(panel: HTMLElement, incoming?: File[]): void {
         }
       }
     } catch (err) {
+      console.error('[redact] export failed', err);
+      if (gen !== loadGen) return;
       status.set(`Redaction failed: ${err instanceof Error ? err.message : String(err)}`, 'bad');
       action.idle('Download Redacted File', true);
     }
   }
 
-  function createFlattenedCanvas(page: PageData): HTMLCanvasElement {
+  /** Renders one page, burns in the black boxes, encodes it, and frees the canvas. */
+  async function flattenPage(page: PageData, mime: string, whiteBackground: boolean): Promise<Uint8Array> {
+    const canvas = createFlattenedCanvas(page, whiteBackground, await renderPageCanvas(page));
+    try {
+      const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, mime, 0.92));
+      if (!blob) throw new Error(`Couldn’t encode page ${page.pageNumber}. Your device may be low on memory.`);
+      return new Uint8Array(await blob.arrayBuffer());
+    } finally {
+      releaseCanvas(canvas);
+    }
+  }
+
+  async function renderPageCanvas(page: PageData): Promise<HTMLCanvasElement> {
+    const canvas = document.createElement('canvas');
+    await drawPageInto(page, canvas);
+    return canvas;
+  }
+
+  function createFlattenedCanvas(page: PageData, whiteBackground: boolean, source: HTMLCanvasElement): HTMLCanvasElement {
     const canvas = document.createElement('canvas');
     canvas.width = page.width;
     canvas.height = page.height;
     const ctx = canvas.getContext('2d');
-    if (!ctx) return canvas;
+    if (!ctx) throw new Error('Canvas is not available');
+
+    if (whiteBackground) {
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
 
     // Draw background rendered page
-    ctx.drawImage(page.canvas, 0, 0);
+    ctx.drawImage(source, 0, 0);
+    releaseCanvas(source);
 
-    // Draw solid black rectangles
+    // Draw solid black rectangles (rounded outwards so no sliver of content survives)
     ctx.fillStyle = '#000000';
     page.boxes.forEach((box) => {
-      const bx = Math.round(box.x * page.width);
-      const by = Math.round(box.y * page.height);
-      const bw = Math.round(box.w * page.width);
-      const bh = Math.round(box.h * page.height);
-      ctx.fillRect(bx, by, bw, bh);
+      const x0 = Math.floor(box.x * page.width);
+      const y0 = Math.floor(box.y * page.height);
+      const x1 = Math.ceil((box.x + box.w) * page.width);
+      const y1 = Math.ceil((box.y + box.h) * page.height);
+      ctx.fillRect(x0, y0, x1 - x0, y1 - y0);
     });
 
     return canvas;
@@ -651,5 +820,10 @@ export function mountRedact(panel: HTMLElement, incoming?: File[]): void {
     });
 
     postActions.append(promptText, compressBtn);
+  }
+
+  // Load a file handed over from another tool
+  if (incoming?.[0]) {
+    void loadFile(incoming[0]);
   }
 }

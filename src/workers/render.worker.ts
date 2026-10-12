@@ -1,5 +1,6 @@
-import { getDocument, GlobalWorkerOptions, PasswordException } from 'pdfjs-dist';
-import PdfJsWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?worker';
+// Legacy build: polyfills newer JS features missing on many phones (see src/lib/pdfjs.ts).
+import { getDocument, GlobalWorkerOptions, PasswordException } from 'pdfjs-dist/legacy/build/pdf.mjs';
+import PdfJsWorker from 'pdfjs-dist/legacy/build/pdf.worker.min.mjs?worker';
 import type { RenderJob, RenderOut } from './protocol';
 
 interface WorkerScope {
@@ -8,7 +9,7 @@ interface WorkerScope {
 }
 
 interface OpenDoc {
-  proxy: import('pdfjs-dist').PDFDocumentProxy;
+  proxy: import('pdfjs-dist/legacy/build/pdf.mjs').PDFDocumentProxy;
 }
 
 const worker = globalThis as unknown as WorkerScope;
