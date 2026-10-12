@@ -114,7 +114,10 @@ export function mountRedact(panel: HTMLElement, incoming?: File[]): void {
 
   const displayCanvas = document.createElement('canvas');
   displayCanvas.style.display = 'block';
+  // Fit the whole page on screen, so people can see what to cover without scrolling.
   displayCanvas.style.maxWidth = '100%';
+  displayCanvas.style.maxHeight = '75vh';
+  displayCanvas.style.width = 'auto';
   displayCanvas.style.height = 'auto';
 
   // SVG Overlay for drawing and rendering interactive black boxes
@@ -128,7 +131,7 @@ export function mountRedact(panel: HTMLElement, incoming?: File[]): void {
   const hintBar = el('div', {
     style: 'padding:8px 14px;background:var(--paper);border:1px solid var(--rule);border-top:none;font-size:13px;color:var(--ink-2);display:flex;justify-content:space-between;align-items:center;',
   }, [
-    el('span', undefined, ['Drag with mouse or finger to draw solid black boxes. Click a box to select or delete it.']),
+    el('span', undefined, ['Press and drag across what you want to hide, with your mouse or finger. Tap a box to select or delete it.']),
     el('span', { class: 'redact-count', style: 'font-weight:600;color:var(--ink);' }, ['0 boxes']),
   ]);
 
@@ -335,6 +338,9 @@ export function mountRedact(panel: HTMLElement, incoming?: File[]): void {
     const h = Math.abs(pos.y - startY);
 
     // Minimum size threshold to avoid accidental micro-clicks
+    if (w <= 0.01 || h <= 0.01) {
+      status.set('To black something out, press and drag across it. A single click or tap doesn’t draw a box.', 'neutral');
+    }
     if (w > 0.01 && h > 0.01) {
       const page = pages[currentPageIndex];
       if (page) {
@@ -348,6 +354,7 @@ export function mountRedact(panel: HTMLElement, incoming?: File[]): void {
         page.boxes.push(newBox);
         selectedBoxId = newBox.id;
         deleteBtn.disabled = false;
+        if (status.el.dataset.tone !== 'good') status.clear();
       }
     }
     renderOverlay();
@@ -361,6 +368,21 @@ export function mountRedact(panel: HTMLElement, incoming?: File[]): void {
   // File Ingestion and Page Rendering
   // ==========================================
   newFileBtn.addEventListener('click', () => drop.open());
+
+  // Dropping a file anywhere on this tool opens it. (The site-wide drop handler
+  // doesn't pass files to this tool.) The panel is reused by other tools, so the
+  // listener removes itself once Redact is no longer on the page.
+  const onDrop = (e: DragEvent): void => {
+    if (!editorHost.isConnected) {
+      panel.removeEventListener('drop', onDrop);
+      return;
+    }
+    const file = e.dataTransfer?.files?.[0];
+    if (!file) return;
+    e.preventDefault();
+    void loadFile(file);
+  };
+  panel.addEventListener('drop', onDrop);
 
   function resetToPicker(message: string): void {
     pages = [];
@@ -456,6 +478,8 @@ export function mountRedact(panel: HTMLElement, incoming?: File[]): void {
     }
 
     action.idle('Download Redacted File', true);
+    // Bring the whole page preview into view, ready to draw on.
+    canvasContainer.scrollIntoView({ block: 'nearest' });
     status.set(`${note}${file.name} is ready for redaction. Drag to draw black boxes over sensitive content.`, 'good');
   }
 
@@ -634,7 +658,11 @@ export function mountRedact(panel: HTMLElement, incoming?: File[]): void {
     svgOverlay.innerHTML = '';
     const count = page.boxes.length;
     const countEl = hintBar.querySelector('.redact-count');
-    if (countEl) countEl.textContent = `${count} box${count === 1 ? '' : 'es'} on this page`;
+    if (countEl) {
+      const total = totalBoxes();
+      countEl.textContent =
+        `${count} box${count === 1 ? '' : 'es'} on this page` + (pages.length > 1 ? ` · ${total} in total` : '');
+    }
 
     page.boxes.forEach((box) => {
       const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
@@ -663,8 +691,18 @@ export function mountRedact(panel: HTMLElement, incoming?: File[]): void {
     void executeRedaction();
   });
 
+  function totalBoxes(): number {
+    return pages.reduce((sum, page) => sum + page.boxes.length, 0);
+  }
+
   async function executeRedaction(): Promise<void> {
     if (!currentFile || !pages.length) return;
+    if (totalBoxes() === 0) {
+      // Never hand back an unredacted copy that looks like a finished redaction.
+      status.set('Nothing is blacked out yet. Press and drag across the text you want to hide, then download.', 'bad');
+      canvasContainer.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      return;
+    }
     const file = currentFile;
     const gen = loadGen;
     action.busy('Generating redacted output…', 0.1);

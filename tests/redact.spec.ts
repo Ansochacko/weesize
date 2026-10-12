@@ -38,6 +38,7 @@ async function openRedact(page: Page, file: string): Promise<void> {
 /** Drags a box with the mouse; coordinates are fractions of the page preview. */
 async function drawBox(page: Page, x0: number, y0: number, x1: number, y1: number): Promise<void> {
   const svg = page.locator('.stage-wrapper svg');
+  await svg.scrollIntoViewIfNeeded();
   const box = await svg.boundingBox();
   if (!box) throw new Error('No preview to draw on');
   await page.mouse.move(box.x + box.width * x0, box.y + box.height * y0);
@@ -109,14 +110,14 @@ for (const olderBrowser of [false, true]) {
       await openRedact(page, FILES.normalText);
       await expect(page.locator('.redact-editor')).toContainText('Page 1 of 3');
       await drawBox(page, 0.05, 0.05, 0.95, 0.3);
-      await expect(page.locator('.redact-count')).toHaveText('1 box on this page');
+      await expect(page.locator('.redact-count')).toHaveText(/^1 box on this page/);
 
       // Page through so on-demand rendering is exercised.
       await page.getByRole('button', { name: 'Next →' }).click();
       await expect(page.locator('.redact-editor')).toContainText('Page 2 of 3');
-      await expect(page.locator('.redact-count')).toHaveText('0 boxes on this page');
+      await expect(page.locator('.redact-count')).toHaveText(/^0 boxes on this page · 1 in total/);
       await page.getByRole('button', { name: '← Prev' }).click();
-      await expect(page.locator('.redact-count')).toHaveText('1 box on this page');
+      await expect(page.locator('.redact-count')).toHaveText(/^1 box on this page/);
 
       const out = await download(page);
       const { pages, text } = await extractPdf(out);
@@ -135,6 +136,7 @@ for (const olderBrowser of [false, true]) {
 
     test('transparent PNG saved as JPG gets a white background', async ({ page }) => {
       await openRedact(page, FILES.transparentPng);
+      await drawBox(page, 0.6, 0.6, 0.9, 0.9); // a box is required; read a pixel outside it
       const out = await download(page); // defaults to JPG for images
       const [r, g, b] = await pixelAt(page, out, 'image/jpeg', 0, 0);
       expect(Math.min(r!, g!, b!)).toBeGreaterThan(235);
@@ -161,6 +163,59 @@ for (const olderBrowser of [false, true]) {
   });
 }
 
+test.describe('Redact safety and layout', () => {
+  test('refuses to download when nothing is blacked out', async ({ page }) => {
+    await openRedact(page, FILES.normalText);
+    // A click without dragging must not count as a box.
+    const svg = page.locator('.stage-wrapper svg');
+    await svg.scrollIntoViewIfNeeded();
+    const box = await svg.boundingBox();
+    if (!box) throw new Error('No preview');
+    await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+    await expect(page.getByText('A single click or tap doesn’t draw a box')).toBeVisible();
+
+    let downloaded = false;
+    page.on('download', () => {
+      downloaded = true;
+    });
+    await page.getByRole('button', { name: /Download Redacted File/ }).click();
+    await expect(page.getByText('Nothing is blacked out yet')).toBeVisible();
+    await page.waitForTimeout(1500);
+    expect(downloaded).toBe(false);
+  });
+
+  test('the whole page preview fits on screen and the drawing layer lines up', async ({ page }) => {
+    await page.setViewportSize({ width: 1366, height: 768 });
+    await openRedact(page, FILES.normalText);
+    const canvas = await page.locator('.stage-wrapper canvas').boundingBox();
+    const svg = await page.locator('.stage-wrapper svg').boundingBox();
+    if (!canvas || !svg) throw new Error('No preview');
+    expect(canvas.height).toBeLessThanOrEqual(768 * 0.75 + 1);
+    expect(Math.abs(svg.x - canvas.x)).toBeLessThan(2);
+    expect(Math.abs(svg.y - canvas.y)).toBeLessThan(2);
+    expect(Math.abs(svg.width - canvas.width)).toBeLessThan(2);
+    expect(Math.abs(svg.height - canvas.height)).toBeLessThan(2);
+  });
+
+  test('dropping a file onto the page opens it', async ({ page }) => {
+    await page.goto('/redact');
+    const bytes = fs.readFileSync(FILES.normalText).toString('base64');
+    const dataTransfer = await page.evaluateHandle((b64) => {
+      const raw = atob(b64);
+      const buf = new Uint8Array(raw.length);
+      for (let i = 0; i < raw.length; i++) buf[i] = raw.charCodeAt(i);
+      const dt = new DataTransfer();
+      dt.items.add(new File([buf], 'dropped.pdf', { type: 'application/pdf' }));
+      return dt;
+    }, bytes);
+    const zone = page.locator('main .drop').last();
+    await zone.dispatchEvent('dragenter', { dataTransfer });
+    await zone.dispatchEvent('dragover', { dataTransfer });
+    await zone.dispatchEvent('drop', { dataTransfer });
+    await expect(page.getByText('dropped.pdf is ready for redaction')).toBeVisible({ timeout: 20_000 });
+  });
+});
+
 test.describe('Redact on a phone (touch)', () => {
   test.use({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
 
@@ -179,7 +234,7 @@ test.describe('Redact on a phone (touch)', () => {
       await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x: x0 + i * 30, y: y0 + i * 12 }] });
     }
     await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
-    await expect(page.locator('.redact-count')).toHaveText('1 box on this page');
+    await expect(page.locator('.redact-count')).toHaveText(/^1 box on this page/);
 
     const out = await download(page);
     const { pages, text } = await extractPdf(out);
