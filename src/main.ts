@@ -7,6 +7,7 @@ import './styles/tokens.css';
 import './styles/base.css';
 import './styles/components.css';
 import './styles/atmosphere.css';
+import { injectSpeedInsights } from '@vercel/speed-insights';
 import { imagesFromClipboard, type ToolRoute } from './lib/detect';
 import { filesFromDataTransfer } from './lib/folders';
 import { savePrefs } from './lib/prefs';
@@ -624,3 +625,4 @@ function initI18n(): void {
 }
 
 initI18n();
+injectSpeedInsights();
